@@ -1,0 +1,4066 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d10">
+<title>SOUND SHAPES — 音のかたちを、耳で覚える</title>
+<style>
+  :root{
+    --bg:#0a0d10;
+    --ink:#e8edf1;                 /* 線と文字。設計図の白 */
+    --ink-dim:rgba(232,237,241,.52);
+    --ink-faint:rgba(232,237,241,.18);
+    --sig:#5ad1ff;                 /* 信号の色 */
+    --silk:#e6e1d3;
+    --silk-dim:rgba(230,225,211,.58);
+    --screw:#b9c2c7;
+    --case-top:#2a4658; --case-mid:#20374a; --case-bot:#152532;
+    --led:#4fc9ff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);}
+  body{
+    min-height:100%;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+    color:var(--ink);-webkit-user-select:none;user-select:none;
+    /* 方眼。設計図の地 */
+    background-image:
+      linear-gradient(rgba(232,237,241,.045) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(232,237,241,.045) 1px,transparent 1px);
+    background-size:26px 26px;
+  }
+
+  /* ══════ 表題 ══════ */
+  .head{
+    max-width:760px;margin:0 auto;padding:22px 18px 6px;
+    display:flex;align-items:baseline;gap:12px;
+  }
+  .head h1{
+    font-size:16px;font-weight:600;letter-spacing:.3em;margin:0;color:var(--ink);
+  }
+  .head .sub{font-size:10.5px;letter-spacing:.14em;color:var(--ink-dim);}
+  .head .count{margin-left:auto;font-size:10.5px;color:var(--ink-dim);
+    font-family:ui-monospace,Menlo,monospace;}
+
+  .board-note{
+    max-width:760px;margin:0 auto;padding:2px 18px 8px;
+    font-size:11px;line-height:1.7;color:var(--ink-dim);
+  }
+  .board-note b{color:var(--ink);font-weight:600;}
+
+  /* ══════ ボード ══════
+     横長の板に上下2段。繋ぐ順は右上から始まり、列ごとに上下へ、左へ進む。
+     実物の組み方に倣い、台と台は短いパッチケーブルで繋ぐ。 */
+  .board-wrap{
+    max-width:100%;overflow-x:auto;overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;padding:8px 18px 26px;
+  }
+  .board-wrap.dim{opacity:.2;filter:blur(1px);pointer-events:none;}
+  .board{
+    position:relative;display:inline-block;padding:26px 26px 30px;border-radius:6px;
+    /* 板。目の詰んだ面ファスナーを張った天板 */
+    background:
+      repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
+      repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 2px,transparent 2px 5px),
+      linear-gradient(180deg,#1b2126,#12171b);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.10),
+      inset 0 0 0 1px rgba(0,0,0,.6),
+      0 18px 34px rgba(0,0,0,.55);
+  }
+  /* 板の縁。アルミの押し出し材 */
+  .board::before,.board::after{
+    content:"";position:absolute;left:0;right:0;height:10px;
+    background:linear-gradient(180deg,#39424a,#222a30);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.5);
+  }
+  .board::before{top:0;border-radius:6px 6px 0 0;}
+  .board::after{bottom:0;border-radius:0 0 6px 6px;}
+
+  .rows{position:relative;z-index:2;display:flex;flex-direction:column;gap:44px;}
+  .row{display:flex;flex-direction:row-reverse;gap:30px;}   /* 右から左へ並べる */
+
+  .slot{
+    position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;
+    color:var(--ink);font-family:inherit;width:88px;flex:none;
+  }
+  .slot-open{
+    border:0;background:transparent;padding:0;cursor:pointer;
+  }
+  .slot-open:focus-visible{outline:1px solid var(--sig);outline-offset:4px;}
+  /* 踏みスイッチ。押すと音の道に挿さる */
+  .slot-sw{
+    display:flex;align-items:center;gap:5px;cursor:pointer;
+    border:1px solid var(--ink-faint);border-radius:11px;padding:3px 9px;
+    background:transparent;color:var(--ink-dim);font-family:inherit;font-size:10px;
+  }
+  .slot-sw .dot{
+    width:6px;height:6px;border-radius:50%;background:rgba(232,237,241,.22);
+  }
+  .slot-sw[aria-checked="true"]{
+    border-color:rgba(90,209,255,.55);color:var(--ink);
+    background:rgba(90,209,255,.08);
+  }
+  .slot-sw[aria-checked="true"] .dot{
+    background:var(--sig);box-shadow:0 0 7px var(--sig);
+  }
+  .slot-sw:focus-visible{outline:1px solid var(--sig);outline-offset:2px;}
+  .slot.on .mini{
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 0 0 1px rgba(90,209,255,.35),
+      0 2px 0 #0b1116,0 8px 16px rgba(0,0,0,.55);
+  }
+  .slot .name{opacity:.6;}
+  .slot.on .name{opacity:1;}
+  .slot .no{
+    font-family:ui-monospace,Menlo,monospace;font-size:9px;color:var(--ink-dim);
+  }
+  .slot .name{font-size:10.5px;letter-spacing:.04em;color:var(--ink-dim);text-align:center;}
+  /* ══ 挿し口 ══
+     実物と同じく、右がIN（入る）、左がOUT（出る）。
+     穴と、そこに挿さったプラグの頭を描く。
+     どの穴から出てどの穴へ入るかが見えれば、順序は線をたどらずとも読める。 */
+  .slot .jacks{position:absolute;inset:0;pointer-events:none;}
+  .slot .jk{
+    position:absolute;top:38%;width:13px;height:13px;border-radius:50%;margin-top:-6.5px;
+    background:radial-gradient(circle at 40% 35%,#4d585f,#0d1216 72%);
+    box-shadow:inset 0 0 0 2px #262f35,inset 0 1px 3px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.14);
+  }
+  .slot .jk.in{right:-7px;}
+  .slot .jk.out{left:-7px;}
+  /* 挿さったプラグの頭 */
+  .slot .jk::after{
+    content:"";position:absolute;top:50%;width:9px;height:7px;margin-top:-3.5px;border-radius:2px;
+    background:linear-gradient(180deg,#cfd6da,#7c868c);
+    box-shadow:0 1px 2px rgba(0,0,0,.6);
+  }
+  .slot .jk.in::after{left:9px;}
+  .slot .jk.out::after{right:9px;}
+  .slot .jk-lbl{
+    position:absolute;top:52%;font-size:6.5px;letter-spacing:.06em;color:rgba(232,237,241,.42);
+  }
+  .slot .jk-lbl.in{right:-6px;}
+  .slot .jk-lbl.out{left:-6px;}
+
+  .slot .mini{
+    width:74px;height:104px;border-radius:6px;position:relative;overflow:hidden;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.22),
+      0 2px 0 #0b1116,
+      0 8px 14px rgba(0,0,0,.55);
+    transition:transform .16s ease,box-shadow .16s ease;
+  }
+  .slot-open:active .mini{transform:translateY(1px);}
+  .slot.lit .mini{
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 0 0 1px rgba(90,209,255,.55),
+      0 2px 0 #0b1116,0 10px 20px rgba(0,0,0,.6);
+  }
+  .slot.lit .name{color:var(--ink);}
+
+  /* ══ 端子 ══
+     ギターとアンプは板の外の器物。板が設計図の趣なので、
+     塗らずに白い細線の輪郭だけで描く。挿し口の位置は、
+     台の穴と同じ高さに置き、線が素直に繋がるようにする。 */
+  .jack{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    width:78px;flex:none;color:var(--ink-dim);
+  }
+  .jack .lbl{font-size:10px;letter-spacing:.1em;color:var(--ink);}
+  .jack .sub{font-size:8.5px;color:var(--ink-dim);text-align:center;line-height:1.4;}
+  .jack svg{display:block;overflow:visible;}
+  .jack svg path,.jack svg line,.jack svg rect,.jack svg circle{
+    fill:none;stroke:rgba(232,237,241,.62);stroke-width:1.4;
+    stroke-linejoin:round;stroke-linecap:round;
+  }
+  .jack svg .thin{stroke:rgba(232,237,241,.34);stroke-width:1;}
+  .jack .jackpt{
+    position:absolute;width:9px;height:9px;border-radius:50%;
+    background:radial-gradient(circle at 40% 35%,#4d585f,#0d1216 72%);
+    box-shadow:inset 0 0 0 2px #262f35;
+  }
+  .fig{position:relative;}
+
+  /* パッチケーブル */
+  .cables{position:absolute;inset:0;z-index:1;pointer-events:none;}
+  .cables.live path{stroke:rgba(90,209,255,.55);}
+  .cables path{
+    fill:none;stroke:rgba(232,237,241,.34);stroke-width:2.4;
+    stroke-linecap:square;stroke-linejoin:miter;
+  }
+  .cables path.hi{stroke:rgba(90,209,255,.5);}
+  .cables circle.dot{fill:var(--sig);}
+
+  /* ══════ 迫り出した一台 ══════ */
+  .panel{
+    position:fixed;inset:0;z-index:20;display:none;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    background:linear-gradient(180deg,rgba(10,13,16,.86),rgba(10,13,16,.97));
+  }
+  .panel.on{display:block;}
+  .panel-inner{
+    max-width:520px;margin:0 auto;padding:18px 18px calc(28px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .panel-head{display:flex;align-items:center;gap:10px;}
+  .panel-head .no{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--ink-dim);}
+  .panel-head .name{font-size:15px;font-weight:600;letter-spacing:.08em;}
+  .panel-head .where{
+    margin-left:auto;font-size:10px;color:var(--ink-dim);
+    border:1px solid var(--ink-faint);border-radius:2px;padding:2px 7px;
+  }
+  .icon-btn{
+    border:1px solid var(--ink-faint);background:transparent;color:var(--ink-dim);
+    font-family:inherit;font-size:11px;letter-spacing:.08em;
+    border-radius:2px;padding:6px 10px;cursor:pointer;
+  }
+  .icon-btn:active{background:rgba(232,237,241,.06);}
+  .icon-btn:focus-visible{outline:1px solid var(--sig);outline-offset:2px;}
+  .icon-btn[disabled]{opacity:.32;cursor:default;}
+
+  .stage-wrap{display:flex;justify-content:center;}
+  /* 解説の面 */
+  .doc{display:none;font-size:13px;line-height:1.95;color:var(--ink);}
+  .doc.on{display:block;}
+  .doc .lead{font-weight:600;}
+  .doc .hn{
+    display:block;margin:14px 0 4px;
+    font-size:10.5px;font-weight:600;letter-spacing:.18em;color:var(--sig);
+  }
+  .doc b{font-weight:600;}
+  .doc-nav{display:flex;gap:8px;align-items:center;}
+  .doc-nav .pos{
+    margin-left:auto;font-size:10.5px;color:var(--ink-dim);
+    font-family:ui-monospace,Menlo,monospace;
+  }
+  .foot-nav{display:flex;gap:8px;align-items:center;padding-top:4px;}
+  .foot-nav .mid{
+    flex:1;text-align:center;font-size:10.5px;color:var(--ink-dim);
+  }
+
+  /* ══════ 鳴らす操作の帯 ══════
+     画面の下端に留め、板を見ながらでも、台を開いていても鳴らせるようにする。 */
+  .deckbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:linear-gradient(180deg,rgba(10,13,16,.86),rgba(10,13,16,.97));
+    border-top:1px solid var(--ink-faint);
+    padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+    backdrop-filter:blur(6px);
+  }
+  .deckbar-inner{
+    max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px;
+  }
+  .db-lbl{font-size:10px;letter-spacing:.14em;color:var(--ink-dim);flex:none;}
+  .db-ctl{display:flex;gap:6px;flex:1;min-width:0;}
+  .db-sel{
+    flex:1;min-width:0;border:1px solid var(--ink-faint);border-radius:3px;
+    background:transparent;color:var(--ink);font-family:inherit;cursor:pointer;
+    padding:5px 8px;text-align:left;
+  }
+  .db-sel:active{background:rgba(232,237,241,.06);}
+  .db-sel:focus-visible{outline:1px solid var(--sig);outline-offset:2px;}
+  .db-sel .k{display:block;font-size:9px;color:var(--ink-dim);letter-spacing:.08em;}
+  .db-sel .v{display:block;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .db-on{font-size:10px;color:var(--ink-dim);flex:none;white-space:nowrap;}
+  body{padding-bottom:74px;}
+
+  /* ══════ 試し弾き ══════ */
+  .tryout{
+    border:1px solid var(--ink-faint);border-radius:3px;padding:10px 10px 12px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .tryout h2{
+    display:none;
+  }
+  .tryout .deck{flex:1;display:flex;justify-content:space-around;gap:4px;}
+  .tryout .ctl{display:flex;flex-direction:column;align-items:center;gap:4px;width:auto;flex:1;}
+  .tryout .ctl-name{font-size:9px;color:var(--ink-dim);}
+  .tryout .ctl-val{font-size:10px;color:var(--ink);min-height:12px;text-align:center;}
+  .tryout .knob{
+    width:38px;height:38px;border-radius:50%;position:relative;cursor:ns-resize;touch-action:none;
+    background:radial-gradient(circle at 50% 18%,#5c6a73 0%,#39454d 45%,#1d262c 100%);
+    box-shadow:inset 0 2px 2px rgba(255,255,255,.24),inset 0 -3px 6px rgba(0,0,0,.6),
+      0 3px 7px rgba(0,0,0,.5);
+  }
+  .tryout .knob::after{
+    content:"";position:absolute;left:50%;top:5px;width:3px;height:11px;margin-left:-1.5px;
+    border-radius:2px;background:var(--silk);
+  }
+  .tryout .knob-ring,.tryout .scale{display:none;}
+  .play{
+    flex:none;width:92px;border:1px solid rgba(90,209,255,.5);border-radius:3px;
+    padding:12px 0;background:rgba(90,209,255,.08);color:var(--ink);
+    font-family:inherit;font-size:11.5px;letter-spacing:.06em;cursor:pointer;
+  }
+  .play:active{background:rgba(90,209,255,.18);}
+  .play:focus-visible{outline:1px solid var(--sig);outline-offset:2px;}
+  .tryout-note{font-size:10px;line-height:1.6;color:var(--ink-dim);margin-top:-6px;}
+
+  /* ══════ 筐体（各ペダルが使う共通の部品）══════ */
+  .case{
+    width:min(344px,100%);position:relative;border-radius:16px;padding-bottom:13px;
+    background:linear-gradient(180deg,#16242f 0%,#0e1920 60%,#0a1219 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.9),0 20px 38px rgba(0,0,0,.6);
+  }
+  .case::after{
+    content:"";position:absolute;left:8px;right:8px;bottom:3px;height:1px;border-radius:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);
+  }
+  .pedal{
+    width:100%;border-radius:14px;padding:18px 18px 22px;position:relative;
+    background:linear-gradient(178deg,var(--case-top) 0%,var(--case-mid) 45%,var(--case-bot) 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.06),
+      0 2px 2px rgba(0,0,0,.55),0 3px 0 #0d1a22;
+  }
+  .pedal::before,.pedal::after,.feet i{
+    content:"";position:absolute;width:9px;height:9px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#eef2f4,var(--screw) 60%,#6d787e);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);
+  }
+  .pedal::before{top:9px;left:9px;} .pedal::after{top:9px;right:9px;}
+  .feet{position:absolute;bottom:9px;left:9px;right:9px;height:9px;pointer-events:none;}
+  .feet i:first-child{left:0;bottom:0;} .feet i:last-child{right:0;bottom:0;}
+
+  .head-row{display:flex;align-items:flex-start;gap:8px;margin:2px 0 12px;}
+  .head-row .brand{flex:1;margin:0;text-align:center;padding-top:12px;
+    font-size:11px;letter-spacing:.2em;color:var(--silk-dim);}
+  .lever-cell{display:flex;flex-direction:column;align-items:center;gap:3px;width:44px;}
+  .lever-name{font-size:9px;letter-spacing:.08em;color:rgba(230,225,211,.42);margin-top:1px;min-height:11px;}
+  .lever{
+    width:32px;height:44px;border-radius:7px;border:0;padding:0;position:relative;cursor:pointer;
+    background:linear-gradient(180deg,#43525b 0%,#2b3840 44%,#141f27 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.34),inset 0 -2px 6px rgba(0,0,0,.66),
+      inset 0 0 0 1px rgba(0,0,0,.35),0 2px 5px rgba(0,0,0,.55);
+  }
+  .lever:focus-visible{outline:2px solid var(--led);outline-offset:3px;}
+  .lever::before{
+    content:"";position:absolute;left:50%;top:50%;width:21px;height:21px;margin:-10.5px 0 0 -10.5px;
+    border-radius:50%;
+    background:radial-gradient(circle at 50% 28%,#f6f9fa 0%,#ccd4d8 36%,#909a9f 62%,#586167 100%);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.55);
+  }
+  .lever::after{
+    content:"";position:absolute;left:50%;top:50%;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;
+    border-radius:50%;
+    background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(0,0,0,.28));
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.28);
+  }
+  .lever i{
+    position:absolute;left:50%;bottom:50%;width:9px;height:20px;margin-left:-4.5px;z-index:2;
+    border-radius:5px 5px 3px 3px;transform-origin:50% 100%;transform:rotate(180deg);
+    background:linear-gradient(90deg,#77828a 0%,#e9eff2 28%,#ffffff 44%,#c0c9cd 64%,#6b767c 100%);
+    box-shadow:0 1px 3px rgba(0,0,0,.55);transition:transform .13s cubic-bezier(.2,.8,.3,1);
+  }
+  .lever i::after{
+    content:"";position:absolute;left:50%;top:-5px;width:14px;height:14px;margin-left:-7px;
+    border-radius:50%;
+    background:radial-gradient(circle at 38% 28%,#ffffff 0%,#e2e9ec 38%,#9ba6ac 74%,#5b656a 100%);
+    box-shadow:0 1px 3px rgba(0,0,0,.5),inset 0 -2px 3px rgba(0,0,0,.2);
+  }
+  .lever[aria-checked="true"] i{transform:rotate(0deg);}
+  .lv-lbl{font-size:9.5px;letter-spacing:.1em;line-height:1;color:rgba(230,225,211,.32);
+    text-shadow:0 1px 0 rgba(255,255,255,.10),0 -1px 0 rgba(0,0,0,.6);}
+  .lv-lbl.on{color:var(--silk);text-shadow:0 0 7px rgba(79,201,255,.4),0 -1px 0 rgba(0,0,0,.55);}
+
+  .screen{
+    position:relative;border-radius:8px;padding:12px 14px 11px;overflow:hidden;cursor:pointer;
+    background:linear-gradient(180deg,#050d14,#02070b);
+    box-shadow:inset 0 3px 8px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.14);
+  }
+  .screen:focus-visible{outline:2px solid var(--led);outline-offset:2px;}
+  .screen-label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+    font-size:11px;letter-spacing:.08em;color:var(--led);opacity:.78;min-height:15px;}
+  .screen-sub{font-size:10.5px;opacity:.7;}
+  .digits{position:relative;text-align:right;margin-top:2px;
+    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    font-size:44px;line-height:1.05;font-weight:500;letter-spacing:.04em;}
+  .ghost{position:absolute;inset:0;color:var(--led);opacity:.07;pointer-events:none;}
+  .value{position:relative;color:var(--led);text-shadow:0 0 12px var(--led);}
+  .unit{font-size:15px;margin-left:4px;}
+  .screen-foot{display:flex;justify-content:space-between;align-items:center;margin-top:6px;
+    font-size:11px;color:var(--led);opacity:.6;min-height:15px;}
+  .dots{display:flex;gap:5px;}
+  .dots i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.25;}
+  .dots i.on{opacity:1;box-shadow:0 0 6px currentColor;}
+  #bpmInput{position:absolute;inset:0;width:100%;height:100%;padding:0 14px;border:0;background:#02070b;
+    font-family:ui-monospace,Menlo,monospace;font-size:42px;text-align:right;color:var(--led);
+    opacity:0;pointer-events:none;}
+  .screen.editing #bpmInput{opacity:1;pointer-events:auto;}
+  .screen.editing .digits,.screen.editing .screen-foot{opacity:0;}
+
+  .deck{display:flex;justify-content:space-around;align-items:flex-start;gap:10px;margin-top:18px;}
+  .deck.two{justify-content:center;gap:34px;}
+  .ctl{display:flex;flex-direction:column;align-items:center;gap:6px;width:88px;}
+  .ctl-name{font-size:10.5px;letter-spacing:.06em;color:var(--silk-dim);}
+  .ctl-val{font-size:11px;color:var(--led);min-height:14px;text-align:center;line-height:1.3;}
+  .knob-wrap{position:relative;display:inline-block;}
+  .knob{
+    width:62px;height:62px;border-radius:50%;position:relative;cursor:ns-resize;touch-action:none;
+    background:
+      repeating-conic-gradient(from 0deg,rgba(255,255,255,.10) 0deg 2.2deg,rgba(0,0,0,.34) 2.2deg 4.5deg),
+      radial-gradient(circle at 50% 18%,#5c6a73 0%,#39454d 45%,#1d262c 100%);
+    box-shadow:inset 0 2px 2px rgba(255,255,255,.26),inset 0 -3px 6px rgba(0,0,0,.62),
+      0 5px 10px rgba(0,0,0,.5);
+  }
+  .knob::before{
+    content:"";position:absolute;inset:8px;border-radius:50%;
+    background:radial-gradient(circle at 50% 22%,#5f6d76 0%,#3b474f 52%,#222c33 100%);
+    box-shadow:inset 0 2px 3px rgba(255,255,255,.22),inset 0 -2px 4px rgba(0,0,0,.5);
+  }
+  .knob::after{
+    content:"";position:absolute;left:50%;top:10px;width:5px;height:17px;margin-left:-2.5px;z-index:2;
+    background:linear-gradient(180deg,var(--silk),rgba(230,225,211,.75));
+    clip-path:polygon(50% 0%,100% 26%,100% 100%,0% 100%,0% 26%);
+    box-shadow:0 0 4px rgba(0,0,0,.55);
+  }
+  .knob.big{width:70px;height:70px;}
+  .knob.big::before{inset:9px;}
+  .knob:focus-visible{outline:2px solid var(--led);outline-offset:3px;}
+  .knob-ring{position:absolute;inset:-9px;border-radius:50%;
+    background:radial-gradient(circle at 50% 50%,transparent 47%,rgba(0,0,0,.28) 47.5%,transparent 49%);}
+  .scale{position:absolute;inset:-9px;pointer-events:none;}
+  .scale i{position:absolute;left:50%;top:50%;width:1px;height:50%;margin-left:-.5px;transform-origin:50% 0;}
+  .scale i::after{content:"";position:absolute;left:-1px;bottom:0;width:3px;height:3px;border-radius:50%;
+    background:rgba(230,225,211,.42);}
+  .scale i.edge::after{width:2px;height:6px;border-radius:1px;background:rgba(230,225,211,.6);}
+  .scale-txt{position:absolute;bottom:-2px;font-size:8px;letter-spacing:.06em;color:rgba(230,225,211,.38);}
+  .scale-txt.min{left:-4px;} .scale-txt.max{right:-4px;}
+
+  .stomps{display:flex;justify-content:space-around;align-items:flex-start;margin-top:18px;}
+  .stomp-cell{display:flex;flex-direction:column;align-items:center;gap:10px;width:120px;}
+  .indicator{width:11px;height:11px;border-radius:50%;background:rgba(0,0,0,.5);
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.8);}
+  .indicator.on{background:var(--led);box-shadow:0 0 10px var(--led),0 0 22px var(--led);}
+  .stomp{
+    width:76px;height:76px;border-radius:50%;border:0;cursor:pointer;position:relative;
+    touch-action:manipulation;
+    background:radial-gradient(circle at 50% 30%,#9aa6ad 0%,#6e7a82 40%,#39434a 100%);
+    box-shadow:inset 0 2px 3px rgba(255,255,255,.35),inset 0 -4px 8px rgba(0,0,0,.55),
+      0 7px 14px rgba(0,0,0,.55);
+  }
+  .stomp::after{content:"";position:absolute;inset:11px;border-radius:50%;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.22);}
+  .stomp:active{transform:translateY(2px);}
+  .stomp:focus-visible{outline:2px solid var(--led);outline-offset:4px;}
+  .stomp.small{width:62px;height:62px;}
+  .stomp-name{font-size:10.5px;color:var(--silk-dim);text-align:center;line-height:1.5;min-height:30px;}
+
+/* ══ リバーブの面 ══ */
+  .pedal.rvb{padding-top:22px;}
+  .rvb-plate{
+    text-align:center;margin:2px 0 6px;padding:8px 0 9px;border-radius:6px;
+    background:linear-gradient(180deg,rgba(0,0,0,.22),rgba(0,0,0,.05));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.35);
+  }
+  .rvb-name{
+    font-size:19px;font-weight:600;letter-spacing:.3em;color:var(--silk);
+    text-shadow:0 1px 0 rgba(0,0,0,.5),0 0 12px rgba(255,180,84,.18);
+  }
+  .rvb-sub{font-size:8.5px;letter-spacing:.24em;color:rgba(230,225,211,.42);margin-top:3px;}
+  .rvb-rule{height:1px;margin:16px 24px 2px;background:rgba(255,255,255,.07);}
+/* ══ コーラスの面 ══ */
+  .pedal.chs{padding-top:20px;}
+  .chs-head{text-align:center;margin-bottom:4px;}
+  .chs-name{
+    font-size:20px;font-weight:600;letter-spacing:.28em;color:var(--silk);
+    text-shadow:0 1px 0 rgba(0,0,0,.5),0 0 14px rgba(201,166,255,.25);
+  }
+  .chs-wave{display:flex;justify-content:center;gap:5px;margin-top:9px;height:7px;}
+  .chs-wave i{
+    width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.12);
+    transition:background .08s linear;
+  }
+  .chs-wave i.on{background:var(--led);box-shadow:0 0 8px var(--led);}
+  .chs-foot{display:flex;align-items:flex-start;justify-content:space-around;margin-top:20px;}
+  .chs-foot .stomp-cell{width:120px;}
+/* ══ 歪みの面 ══ */
+  .pedal.drv{padding-top:20px;overflow:hidden;}
+  .drv-stripe{
+    position:absolute;left:-20%;right:-20%;top:44px;height:26px;transform:rotate(-6deg);
+    background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(0,0,0,.16));
+    box-shadow:0 1px 0 rgba(255,255,255,.10),0 -1px 0 rgba(0,0,0,.25);
+    pointer-events:none;
+  }
+  .drv-head{text-align:center;margin:2px 0 14px;position:relative;z-index:1;}
+  .drv-name{
+    font-size:16px;font-weight:700;letter-spacing:.18em;color:var(--silk);
+    text-shadow:0 1px 0 rgba(0,0,0,.55);
+  }
+  .drv-sub{font-size:8.5px;letter-spacing:.26em;color:rgba(230,225,211,.45);margin-top:3px;}
+  .drv-rule{height:1px;margin:16px 24px 2px;background:rgba(255,255,255,.09);}
+  .pedal.drv .deck{position:relative;z-index:1;}
+/* ══ フランジャーの面 ══ */
+  .pedal.flg{padding-top:20px;}
+  .flg-head{text-align:center;margin:2px 0 10px;}
+  .flg-name{font-size:16px;font-weight:600;letter-spacing:.3em;color:#20282c;
+    text-shadow:0 1px 0 rgba(255,255,255,.35);}
+  .flg-sub{font-size:8.5px;letter-spacing:.24em;color:rgba(20,26,30,.5);margin-top:3px;}
+  .flg-comb{display:flex;align-items:flex-end;gap:4px;height:22px;justify-content:center;margin-bottom:2px;}
+  .flg-comb i{width:5px;border-radius:2px 2px 0 0;background:rgba(20,26,30,.28);}
+  .flg-comb i:nth-child(1){height:8px}  .flg-comb i:nth-child(2){height:16px}
+  .flg-comb i:nth-child(3){height:6px}  .flg-comb i:nth-child(4){height:20px}
+  .flg-comb i:nth-child(5){height:9px}  .flg-comb i:nth-child(6){height:18px}
+  .flg-comb i:nth-child(7){height:7px}  .flg-comb i:nth-child(8){height:14px}
+  .pedal.flg .ctl-name,.pedal.flg .stomp-name{color:rgba(20,26,30,.62);}
+  .pedal.flg .knob::after{background:linear-gradient(180deg,#1b2225,#39434a);}
+  .pedal.flg .scale i::after{background:rgba(20,26,30,.45);}
+  .pedal.flg .scale i.edge::after{background:rgba(20,26,30,.6);}
+  .pedal.flg .scale-txt{color:rgba(20,26,30,.45);}
+/* ══ フェイザーの面 ══ */
+  .pedal.phs{padding-top:20px;}
+  .phs-head{text-align:center;margin:2px 0 6px;}
+  .phs-name{font-size:17px;font-weight:600;letter-spacing:.32em;color:var(--silk);
+    text-shadow:0 1px 0 rgba(0,0,0,.5);}
+  .phs-sub{font-size:8.5px;letter-spacing:.24em;color:rgba(230,225,211,.42);margin-top:3px;}
+/* ══ トレモロの面 ══ */
+  .pedal.trm{padding-top:20px;}
+  .trm-head{text-align:center;margin:2px 0 10px;}
+  .trm-name{font-size:16px;font-weight:600;letter-spacing:.3em;color:var(--silk);
+    text-shadow:0 1px 0 rgba(0,0,0,.5);}
+  .trm-sub{font-size:8.5px;letter-spacing:.24em;color:rgba(230,225,211,.42);margin-top:3px;}
+  .trm-lamp{display:flex;justify-content:center;margin-bottom:2px;}
+  .trm-lamp i{
+    width:34px;height:12px;border-radius:6px;background:var(--led);
+    box-shadow:0 0 14px var(--led),0 0 30px var(--led);
+  }
+  .trm-rule{height:1px;margin:16px 24px 2px;background:rgba(255,255,255,.08);}
+/* ══ ワウ ══
+     この1台だけ箱型ではなく、踏み板が傾く姿にする。 */
+  .wah-wrap{width:min(344px,100%);}
+  .wah-base{
+    position:relative;height:186px;border-radius:14px 14px 10px 10px;
+    background:linear-gradient(180deg,#2b3035 0%,#1b1f23 60%,#101316 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 18px 34px rgba(0,0,0,.6);
+    overflow:hidden;
+  }
+  .wah-side{
+    position:absolute;left:0;right:0;bottom:0;height:52px;
+    background:linear-gradient(180deg,#20252a,#0d1013);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .wah-pedal{
+    position:absolute;left:26px;right:26px;top:34px;height:104px;
+    border-radius:9px;cursor:ns-resize;touch-action:none;
+    transform-origin:14% 92%;
+    background:linear-gradient(180deg,#4a5158 0%,#333940 55%,#1d2226 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.22),
+      inset 0 -3px 8px rgba(0,0,0,.55),
+      0 8px 16px rgba(0,0,0,.55);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  }
+  .wah-pedal:focus-visible{outline:2px solid var(--led);outline-offset:3px;}
+  /* 滑り止めの溝 */
+  .wah-tread{
+    width:78%;height:44px;border-radius:5px;
+    background:repeating-linear-gradient(180deg,
+      rgba(255,255,255,.10) 0 2px, rgba(0,0,0,.34) 2px 7px);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);
+  }
+  .wah-plate{
+    font-size:11px;letter-spacing:.34em;color:rgba(230,225,211,.62);
+    text-shadow:0 1px 0 rgba(0,0,0,.6);
+  }
+  .wah-toe,.wah-heel{
+    position:absolute;bottom:12px;font-size:9px;letter-spacing:.1em;color:rgba(230,225,211,.34);
+  }
+  .wah-toe{right:14px;} .wah-heel{left:14px;}
+  .wah-read{
+    display:flex;align-items:baseline;justify-content:center;gap:8px;
+    margin-top:12px;font-size:11px;color:var(--led);
+  }
+  .wah-read-n{
+    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    font-size:24px;text-shadow:0 0 12px var(--led);
+  }
+  .wah-read-s{color:rgba(230,225,211,.5);font-size:11px;margin-left:6px;}
+  .wah-row{display:flex;justify-content:space-around;margin-top:16px;}
+  .stomp.small{width:62px;height:62px;}
+  .mini .m-wah{
+    position:absolute;left:12px;right:12px;top:26px;height:44px;border-radius:5px;
+    transform:rotate(-9deg);
+    background:repeating-linear-gradient(180deg,
+      rgba(255,255,255,.12) 0 2px, rgba(0,0,0,.34) 2px 6px);
+    box-shadow:0 2px 4px rgba(0,0,0,.5);
+  }
+/* ══ ピッチシフターの面 ══ */
+  .pedal.pit{padding-top:20px;}
+  .pit-head{text-align:center;margin:2px 0 10px;}
+  .pit-name{font-size:14px;font-weight:600;letter-spacing:.22em;color:var(--silk);
+    text-shadow:0 1px 0 rgba(0,0,0,.5);}
+  .pit-sub{font-size:8.5px;letter-spacing:.26em;color:rgba(230,225,211,.42);margin-top:3px;}
+  .pit-win{
+    display:flex;align-items:baseline;justify-content:center;gap:6px;
+    border-radius:6px;padding:9px 10px;color:var(--led);
+    background:linear-gradient(180deg,#050b14,#02060b);
+    box-shadow:inset 0 3px 8px rgba(0,0,0,.85),0 1px 0 rgba(255,255,255,.12);
+  }
+  .pit-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+  .pit-row2{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:4px;}
+  .pit-deg{
+    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    font-size:19px;letter-spacing:.02em;text-shadow:0 0 12px var(--led);
+  }
+  .pit-ja{font-size:11px;opacity:.75;}
+  .pit-semi{
+    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    font-size:11px;opacity:.7;
+  }
+  .pit-fine{font-size:10px;opacity:.5;}
+  .pit-win{display:block;}
+/* ══ コンプレッサーの面 ══ */
+  .pedal.cmp{padding-top:20px;}
+  .cmp-head{text-align:center;margin:2px 0 10px;}
+  .cmp-name{font-size:14px;font-weight:600;letter-spacing:.24em;color:var(--silk);
+    text-shadow:0 1px 0 rgba(0,0,0,.5);}
+  .cmp-sub{font-size:8.5px;letter-spacing:.26em;color:rgba(230,225,211,.42);margin-top:3px;}
+  .cmp-meter{
+    border-radius:6px;padding:9px 10px 8px;
+    background:linear-gradient(180deg,#0a1012,#05090a);
+    box-shadow:inset 0 3px 8px rgba(0,0,0,.85),0 1px 0 rgba(255,255,255,.12);
+  }
+  .cmp-scale{display:flex;justify-content:space-between;margin-bottom:5px;}
+  .cmp-scale i{width:1px;height:5px;background:rgba(230,225,211,.28);}
+  .cmp-bar{
+    height:9px;border-radius:5px;overflow:hidden;
+    background:rgba(255,255,255,.07);box-shadow:inset 0 1px 2px rgba(0,0,0,.6);
+  }
+  .cmp-bar span{
+    display:block;height:100%;width:0%;border-radius:5px;background:var(--led);
+    box-shadow:0 0 10px var(--led);transition:width .06s linear;
+  }
+  .cmp-read{margin-top:6px;font-size:10.5px;color:var(--led);opacity:.75;text-align:right;}
+/* ══ EQの面 ══ */
+  .pedal.eq{padding-top:20px;}
+  .eq-head{text-align:center;margin:2px 0 10px;}
+  .eq-name{font-size:14px;font-weight:600;letter-spacing:.24em;color:var(--silk);
+    text-shadow:0 1px 0 rgba(0,0,0,.5);}
+  .eq-sub{font-size:8.5px;letter-spacing:.26em;color:rgba(230,225,211,.42);margin-top:3px;}
+  .eq-win{
+    height:68px;border-radius:6px;overflow:hidden;color:var(--led);
+    background:linear-gradient(180deg,#0b0e08,#060805);
+    box-shadow:inset 0 3px 8px rgba(0,0,0,.85),0 1px 0 rgba(255,255,255,.12);
+  }
+  .eq-win svg{display:block;width:100%;height:68px;}
+  .eq-faders{display:flex;justify-content:space-between;margin-top:14px;padding:0 4px;}
+  .eq-cell{display:flex;flex-direction:column;align-items:center;gap:5px;width:52px;}
+  .eq-slot{
+    position:relative;width:26px;height:96px;cursor:ns-resize;touch-action:none;
+    display:flex;justify-content:center;
+  }
+  .eq-slot:focus-visible{outline:2px solid var(--led);outline-offset:2px;border-radius:4px;}
+  .eq-track{
+    width:5px;height:100%;border-radius:3px;
+    background:linear-gradient(180deg,#0d1214,#1b2225);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.08);
+  }
+  .eq-cap{
+    position:absolute;left:50%;margin-left:-12px;margin-bottom:-7px;width:24px;height:14px;
+    border-radius:3px;
+    background:linear-gradient(180deg,#e9e4d6 0%,#b9b3a3 52%,#7d7869 100%);
+    box-shadow:0 2px 4px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .eq-cap::after{
+    content:"";position:absolute;left:2px;right:2px;top:6px;height:1px;background:rgba(0,0,0,.45);
+  }
+  .eq-hz{font-size:9px;color:rgba(230,225,211,.45);}
+  .eq-db{font-size:10px;color:var(--led);}
+  .eq-rule{height:1px;margin:14px 24px 2px;background:rgba(255,255,255,.08);}
+  .mini .m-fader{
+    position:absolute;top:34px;width:3px;height:26px;border-radius:2px;
+    background:rgba(0,0,0,.4);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+  }
+  .mini .m-fader::after{
+    content:"";position:absolute;left:-3px;top:9px;width:9px;height:5px;border-radius:2px;
+    background:#ddd7c7;box-shadow:0 1px 2px rgba(0,0,0,.5);
+  }
+
+
+  @media (prefers-reduced-motion:reduce){
+    .lever i,.stop .mini{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>SOUND SHAPES</h1>
+  <span class="sub">音のかたちを、耳で覚える</span>
+  <span class="count" id="count"></span>
+</div>
+
+<div class="board-note" id="boardNote"></div>
+
+<div class="board-wrap" id="map">
+  <div class="board" id="board">
+    <svg class="cables" id="wire" aria-hidden="true"></svg>
+    <div class="rows" id="mapBody"></div>
+  </div>
+</div>
+
+<!-- 鳴らす操作。画面の下端に留めておく -->
+<div class="deckbar" id="deckbar">
+  <div class="deckbar-inner">
+    <span class="db-lbl">試し弾き</span>
+    <div class="db-ctl">
+      <button class="db-sel" id="toneSel" type="button"><span class="k">音色</span><span class="v" id="toneVal">クランチ</span></button>
+      <button class="db-sel" id="artSel" type="button"><span class="k">弾き方</span><span class="v" id="artVal">長い音</span></button>
+      <button class="db-sel" id="phSel" type="button"><span class="k">フレーズ</span><span class="v" id="phVal">分散和音</span></button>
+    </div>
+    <span class="db-on" id="onCount"></span>
+    <button class="play" id="playBtn">鳴らす</button>
+  </div>
+</div>
+
+<!-- 迫り出した一台 -->
+<div class="panel" id="panel">
+  <div class="panel-inner">
+    <div class="panel-head">
+      <button class="icon-btn" id="closeBtn">← 図へ</button>
+      <span class="no" id="pNo"></span>
+      <span class="name" id="pName"></span>
+      <span class="where" id="pWhere"></span>
+    </div>
+
+    <div class="stage-wrap"><div id="stage"></div></div>
+
+    <div class="doc-nav">
+      <button class="icon-btn" id="docBtn">解説を読む</button>
+      <span class="pos" id="docPos"></span>
+    </div>
+
+    <div class="doc" id="doc"></div>
+
+    <div class="foot-nav">
+      <button class="icon-btn" id="prevBtn">← 前の一台</button>
+      <span class="mid" id="footMid"></span>
+      <button class="icon-btn" id="nextBtn">次の一台 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   エフェクター配線図
+   ギターからアンプまでの一本の道の上に、道具を順に並べる。
+   どこに置くかが音に効く道具であるから、置き場所ごと覚えられるようにした。
+   音源（弦の合成・歪み段・ブリッジミュート・ハーモニクス）は
+   ScoreLineTAB の実装を写している。
+   ══════════════════════════════════════════ */
+(function(){
+  "use strict";
+  var el=function(id){return document.getElementById(id);};
+
+  /* ScoreLineTAB の TONES から歪み系5種 */
+  var TONES=[
+    { id:'clean', label:'クリーン',
+      seed:0.75, t60:[6.0,9.4], lp:[18,2600,11000], swp:[1.4,60],
+      pick:[4200,1.2,0.006,0.16], trim:1.33 },
+    { id:'crunch', label:'クランチ',
+      seed:0.80, t60:[7.0,10.8], lp:[20,3000,12000], swp:[1.3,45],
+      pick:[4000,1.1,0.005,0.10], trim:0.156,
+      drive:[3,3.2,5200,900,4] },
+    { id:'drive', label:'ドライブ',
+      seed:0.86, t60:[8.5,13.0], lp:[22,3400,13000], swp:[1.2,35],
+      pick:[4400,1.1,0.004,0.06], trim:0.080,
+      drive:[6,9,4200,780,6] },
+    { id:'metal', label:'ハイゲイン',
+      seed:0.90, t60:[10.0,15.0], lp:[24,3600,13500], swp:[1.15,30],
+      pick:[4600,1.0,0.003,0.04], trim:0.099,
+      drive:[16,26,3300,640,-7,170,7] },
+    { id:'insane', label:'超ハイゲイン',
+      seed:0.92, t60:[12.0,17.0], lp:[26,3800,14000], swp:[1.1,26],
+      pick:[4800,1.0,0.0025,0.03], trim:0.086,
+      drive:[30,55,4000,700,-8,220,14,5200,3.4,0.30] }
+  ];
+  var ARTS=[
+    {id:'long', label:'長い音'},
+    {id:'short',label:'短い音'},
+    {id:'pm',   label:'ブリッジミュート'},
+    {id:'harm', label:'ハーモニクス'}
+  ];
+  var PM={t60:0.16, lp:0.45, pick:0.55, vol:0.72, cut:0.055};   /* 掌の締め */
+  /* ══ フレーズ ══
+     b＝拍の位置、m＝MIDIの音の高さ、s＝弦（0が6弦）。
+     同じ弦を弾き直すと前の音は止まるので、和音として重ねたい時は
+     弦をまたいで並べる。単音のソロは同じ弦が続いてかまわない。 */
+  var PHRASES=[
+    { id:'arp', label:'分散和音', beats:6,
+      /* 6弦から1弦へ1音ずつ上がるEm。6音が重なって伸びる */
+      notes:[
+        {b:0,   m:40,s:0},   /* 6弦 開放 E */
+        {b:0.5, m:47,s:1},   /* 5弦 2F   B */
+        {b:1,   m:52,s:2},   /* 4弦 2F   E */
+        {b:1.5, m:55,s:3},   /* 3弦 開放 G */
+        {b:2,   m:59,s:4},   /* 2弦 開放 B */
+        {b:2.5, m:64,s:5}    /* 1弦 開放 E */
+      ] },
+    /* ══ 単音のフレーズは mono ══
+       次の音が鳴ったら前の音は切る。切らないと、弦をまたいだ時だけ
+       前の音が残り、そこだけ長く伸びて聞こえる。 */
+    { id:'solo', label:'ソロ', beats:8, mono:true,
+      /* 音数を絞り、一音ずつ効果を聴き取れるようにする。
+         Emペンタトニックを8分音符で上げ、最後は全音チョーキングにビブラート。 */
+      notes:[
+        {b:0,   m:67,s:3},  /* 3弦12F ソ */
+        {b:0.5, m:69,s:3},  /* 3弦14F ラ */
+        {b:1,   m:71,s:4},  /* 2弦12F シ */
+        {b:1.5, m:74,s:4},  /* 2弦15F レ */
+        {b:2,   m:76,s:5},  /* 1弦12F ミ */
+        /* 決めの音。1弦15Fのソを全音上げてラにし、揺らして伸ばす */
+        {b:3,   m:79,s:5, bend:2, bendDelay:0.06, bendTime:0.18,
+         vib:{depth:38, rate:5.5, delay:0.45}}
+      ] },
+    { id:'zigzag', label:'ジグザグ', beats:10, mono:true,
+      /* ソ ミ ファ# レ ミ シ レ ラ シ ソ ラ ミ ソ レ ミ（最後を伸ばす）
+         3度ずつ降りる並び。8分音符。 */
+      notes:[
+        {b:0,   m:67,s:4},   /* 2弦8F ソ */
+        {b:0.5, m:64,s:4},   /* 2弦5F ミ */
+        {b:1,   m:66,s:4},   /* 2弦7F ファ# */
+        {b:1.5, m:62,s:3},   /* 3弦7F レ */
+        {b:2,   m:64,s:3},   /* 3弦9F ミ */
+        {b:2.5, m:59,s:3},   /* 3弦4F シ */
+        {b:3,   m:62,s:3},   /* 3弦7F レ */
+        {b:3.5, m:57,s:2},   /* 4弦7F ラ */
+        {b:4,   m:59,s:2},   /* 4弦9F シ */
+        {b:4.5, m:55,s:2},   /* 4弦5F ソ */
+        {b:5,   m:57,s:2},   /* 4弦7F ラ */
+        {b:5.5, m:52,s:2},   /* 4弦2F ミ */
+        {b:6,   m:55,s:2},   /* 4弦5F ソ */
+        {b:6.5, m:50,s:1},   /* 5弦5F レ */
+        {b:7,   m:52,s:1}    /* 5弦7F ミ（のばす） */
+      ] }
+  ];
+  function phraseOf(){
+    for(var i=0;i<PHRASES.length;i++) if(PHRASES[i].id===st.phrase) return PHRASES[i];
+    return PHRASES[0];
+  }
+  function phraseIdx(){
+    for(var i=0;i<PHRASES.length;i++) if(PHRASES[i].id===st.phrase) return i;
+    return 0;
+  }
+
+  /* ---- 状態 ---- */
+  var st={tone:'crunch', art:'long', phrase:'arp', pedal:null};
+  try{
+    var sv=JSON.parse(localStorage.getItem('efbook')||'null');
+    if(sv) for(var k in st) if(sv[k]!==undefined) st[k]=sv[k];
+  }catch(e){}
+  function save(){ try{ localStorage.setItem('efbook',JSON.stringify(st)); }catch(e){} }
+
+  function toneOf(){ for(var i=0;i<TONES.length;i++) if(TONES[i].id===st.tone) return TONES[i]; return TONES[1]; }
+  function toneIdx(){ for(var i=0;i<TONES.length;i++) if(TONES[i].id===st.tone) return i; return 1; }
+  function artIdx(){ for(var i=0;i<ARTS.length;i++) if(ARTS[i].id===st.art) return i; return 0; }
+
+  /* ══════ 音源 ══════ */
+  /* BUS＝弦の出口、AMPIN＝アンプの入口、FXIN＝アンプの出口。
+     歪みのようにアンプの前に置くペダルは BUS と AMPIN の間へ、
+     ディレイのように後ろに置くペダルは FXIN と出口の間へ入る。 */
+  /* BUS＝弦の出口、AMPIN＝アンプの入口、TRIM＝アンプの出口。
+     台は FXIN から受け取り FXOUT へ出す。この2つは台を挿すたびに枠が差し替える。
+     LIMIT＝出口の歯止め。台を重ねた時に音が飽和しないよう受け止める。 */
+  var AC=null,MASTER=null,BUS=null,AMPIN=null,TRIM=null,FXIN=null,FXOUT=null,LIMIT=null;
+  var RECT,HP,PRE,SHP,LP2,PRE2,SHP2,CAB,MID,DIRT,CLEAN;
+  var _shpK=null,_shpK2=null,_shpR=null,_busTone=null;
+
+  function rectCurve(r){
+    var n=2048,c=new Float32Array(n);
+    for(var i=0;i<n;i++){ var x=i*2/(n-1)-1; c[i]=(1-r)*x+r*(2*Math.abs(x)-1); }
+    return c;
+  }
+  /* ══ 返す音の歯止め（tanh）══
+     小さい音では**素通り（増幅1倍）**、大きい音だけを潰す。
+     以前は tanh(1.6) で割っていたため、小さい音が 1.74 倍に増幅されていた。
+     FEEDBACK を 0.6 にしても実際の戻りが 1.0 を越え、
+     **繰り返しがいつまでも減らなかった。** 傾きが 1 になるよう k で割る。 */
+  function satCurve(){
+    var n=1025,k=1.6,c=new Float32Array(n);   /* 奇数にして、真ん中を厳密に0にする */
+    for(var i=0;i<n;i++){ var x=i*2/(n-1)-1; c[i]=Math.tanh(k*x)/k; }
+    return c;
+  }
+  function driveCurve(k){
+    var n=2048,c=new Float32Array(n);
+    for(var i=0;i<n;i++){ var x=i*2/(n-1)-1; c[i]=(1+k)*x/(1+k*Math.abs(x)); }
+    return c;
+  }
+
+
+  function ensureAudio(){
+    if(AC){ if(AC.state==='suspended') AC.resume(); return AC; }
+    var Ctx=window.AudioContext||window.webkitAudioContext;
+    if(!Ctx) return null;
+    AC=new Ctx();
+    MASTER=AC.createGain(); MASTER.gain.value=0.9; MASTER.connect(AC.destination);
+    BUS=AC.createGain();
+    RECT=AC.createWaveShaper?AC.createWaveShaper():null; if(RECT) RECT.oversample='4x';
+    HP=AC.createBiquadFilter(); HP.type='highpass'; HP.Q.value=0.6; HP.frequency.value=10;
+    PRE=AC.createGain();
+    SHP=AC.createWaveShaper?AC.createWaveShaper():null; if(SHP) SHP.oversample='4x';
+    LP2=AC.createBiquadFilter(); LP2.type='lowpass'; LP2.Q.value=0.5; LP2.frequency.value=20000;
+    PRE2=AC.createGain();
+    SHP2=AC.createWaveShaper?AC.createWaveShaper():null; if(SHP2) SHP2.oversample='4x';
+    CAB=AC.createBiquadFilter(); CAB.type='lowpass'; CAB.Q.value=0.7; CAB.frequency.value=4000;
+    MID=AC.createBiquadFilter(); MID.type='peaking'; MID.Q.value=0.9;
+    DIRT=AC.createGain(); DIRT.gain.value=0;
+    CLEAN=AC.createGain(); CLEAN.gain.value=1;
+    TRIM=AC.createGain(); TRIM.gain.value=1;
+    AMPIN=AC.createGain();
+    BUS.connect(AMPIN);
+    if(RECT){ AMPIN.connect(RECT); RECT.connect(HP); } else AMPIN.connect(HP);
+    HP.connect(PRE);
+    var afterShp=SHP?(PRE.connect(SHP),SHP):PRE;
+    afterShp.connect(LP2); LP2.connect(PRE2);
+    if(SHP2){ PRE2.connect(SHP2); SHP2.connect(CAB); } else PRE2.connect(CAB);
+    CAB.connect(MID); MID.connect(DIRT); DIRT.connect(TRIM);
+    AMPIN.connect(CLEAN); CLEAN.connect(TRIM);
+    /* 出口の歯止め。踏んだ台が増えても、そこで受け止める */
+    LIMIT=AC.createDynamicsCompressor?AC.createDynamicsCompressor():null;
+    if(LIMIT){
+      LIMIT.threshold.value=-6; LIMIT.knee.value=2; LIMIT.ratio.value=12;
+      LIMIT.attack.value=0.003; LIMIT.release.value=0.25;
+      LIMIT.connect(MASTER);
+    }
+    applyTone();
+    rewire();
+    return AC;
+  }
+
+  function applyTone(){
+    if(!AC) return;
+    var t=toneOf();
+    if(_busTone===t.id) return;
+    _busTone=t.id;
+    if(t.drive&&PRE){
+      var d=t.drive,pre=d[0],k=d[1],cab=d[2],mid=d[3],mg=d[4],hp=d[5],k2=d[6],lp2=d[7],pre2=d[8],rect=d[9];
+      HP.frequency.value=Math.max(10,hp||10);
+      var rr=Math.max(0,Math.min(1,rect||0));
+      if(RECT&&_shpR!==rr){ RECT.curve=rr>0?rectCurve(rr):null; _shpR=rr; }
+      var kk2=(k2>0)?Math.max(0.5,k2):0;
+      if(LP2) LP2.frequency.value=kk2?(lp2||6000):20000;
+      if(PRE2) PRE2.gain.value=kk2?(pre2||2.2):1;
+      if(SHP2&&_shpK2!==kk2){ SHP2.curve=kk2?driveCurve(kk2):null; _shpK2=kk2; }
+      PRE.gain.value=pre;
+      var kk=Math.max(0.5,k);
+      if(SHP&&_shpK!==kk){ SHP.curve=driveCurve(kk); _shpK=kk; }
+      CAB.frequency.value=cab; MID.frequency.value=mid; MID.gain.value=mg;
+      DIRT.gain.value=1; CLEAN.gain.value=0;
+    }else{
+      DIRT.gain.value=0; CLEAN.gain.value=1;
+      if(RECT){ RECT.curve=null; _shpR=null; }
+    }
+    TRIM.gain.value=(t.trim||1);
+  }
+
+
+  var _ks=new Map(),_stC=new Map(),_pmC=new Map();
+  function ksFreq(N){ return AC.sampleRate/(N-0.5); }
+  function ksLength(f){ return Math.max(3,Math.round(AC.sampleRate/f+0.5)); }
+  function ksT60(freq,tn){
+    var t=tn.t60;
+    return Math.max(t[0],Math.min(t[1],(t[1]*1.18)*Math.pow(80/Math.max(60,freq),0.20)));
+  }
+  function strTone(tn,str){
+    if(str==null||str<0) return tn;
+    var key=tn.id+'|s'+str;
+    if(_stC.has(key)) return _stC.get(key);
+    var u=Math.max(0,Math.min(1,str/5)), o=Object.assign({},tn);
+    o.id=key;
+    o.seed=Math.max(0.05,Math.min(1,(tn.seed||0.5)*(0.50+1.10*u)));
+    var m=1.22-0.40*u;
+    o.t60=[tn.t60[0]*m,tn.t60[1]*m];
+    _stC.set(key,o); return o;
+  }
+  function pmTone(tn){
+    var key=tn.id+'|pm';
+    if(_pmC.has(key)) return _pmC.get(key);
+    var o=Object.assign({},tn); o.id=key;
+    o.t60=[tn.t60[0]*PM.t60,tn.t60[1]*PM.t60];
+    o.lp=[tn.lp[0],Math.max(240,tn.lp[1]*PM.lp),Math.max(900,tn.lp[2]*PM.lp)];
+    o.pick=[Math.max(600,tn.pick[0]*PM.pick),tn.pick[1],tn.pick[2]*(2-PM.pick),tn.pick[3]];
+    _pmC.set(key,o); return o;
+  }
+  /* 名前から決まる乱数。同じ名前なら毎回まったく同じ並びになる */
+  function seededRnd(key){
+    var rs=1779033703;
+    for(var c=0;c<key.length;c++){ rs=Math.imul(rs^key.charCodeAt(c),3432918353); rs=(rs<<13)|(rs>>>19); }
+    return function(){
+      rs=Math.imul(rs^(rs>>>15),2246822507); rs=Math.imul(rs^(rs>>>13),3266489909);
+      rs^=rs>>>16; return (rs>>>0)/4294967296;
+    };
+  }
+  function ksBuffer(N,tn){
+    var key=N+'|'+tn.id;
+    if(_ks.has(key)) return _ks.get(key);
+    var sr=AC.sampleRate, freq=ksFreq(N);
+    var secs=Math.min(12,ksT60(freq,tn)*0.75);
+    var len=Math.max(1,Math.round(sr*secs));
+    var buf=AC.createBuffer(1,len,sr), out=buf.getChannelData(0);
+    var d=new Float32Array(N), prev=0, sd=tn.seed, rnd=seededRnd(key);
+    for(var i=0;i<N;i++){ var w=rnd()*2-1; prev=sd*w+(1-sd)*prev; d[i]=prev; }
+    var decay=Math.exp(Math.log(0.001)/(freq*ksT60(freq,tn))), idx=0, y=0;
+    for(var j=0;j<len;j++){
+      var a=d[idx], b=d[(idx+1)%N];
+      y=decay*0.5*(a+b);
+      out[j]=d[idx]; d[idx]=y; idx=(idx+1)%N;
+    }
+    var fi=Math.min(48,len);
+    for(var q=0;q<fi;q++) out[q]*=q/fi;
+    var fo=Math.min(6600,len);
+    for(var r=0;r<fo;r++) out[len-1-r]*=r/fo;
+    _ks.set(key,buf);
+    if(_ks.size>90){ var kk=_ks.keys().next(); if(!kk.done) _ks.delete(kk.value); }
+    return buf;
+  }
+  /* いま鳴らした音を控える。止める時はここから断つ */
+  var LIVE=[];
+  function keep(g,srcs){
+    var v={g:g,srcs:srcs};
+    LIVE.push(v);
+    if(LIVE.length>240) LIVE.splice(0,LIVE.length-240);
+    return v;
+  }
+  /* ══ 同じ弦を弾いたら、前の音は止まる（ScoreLineTAB の掟）══
+     実弦では当たり前のことだが、写す際に抜けていた。止めないまま重ねると、
+     6弦だけで5音が同時に鳴り続け、歪みで潰されて延々と残る。 */
+  var LASTV={};
+  /* ══ 前の音を次の音へ渡す繋ぎ ══
+     同じ弦を弾き直したら前の音は止まる、という掟のための処理。
+     ただし**音を断ち切るためのものではない**。プツッと鳴らないだけの
+     短い丈（既定40ms）で受け渡す。
+     すでに自前で終わる手はずが整っている音（単音のフレーズ）には
+     重ねて掛けない。二重に掛かると、そこだけ早く消えて途切れて聞こえる。 */
+  function hushStr(str,at,ms){
+    var v=LASTV[str];
+    if(!v) return;
+    /* もう終いに入っている音（単音のフレーズの音）には重ねない。
+       自前の渡しが次の音を少しまたぐよう組んであるので、そちらに任せる。 */
+    if(v.endAt!=null&&v.endAt<=at+0.10){ delete LASTV[str]; return; }
+    var fade=(ms||40)/1000;
+    try{
+      if(v.g.gain.cancelAndHoldAtTime) v.g.gain.cancelAndHoldAtTime(at);
+      else if(v.g.gain.cancelScheduledValues){
+        v.g.gain.cancelScheduledValues(at);
+        v.g.gain.setValueAtTime(Math.max(0.0001,v.g.gain.value),at);
+      }
+      v.g.gain.exponentialRampToValueAtTime(0.0001,at+fade);
+    }catch(e){}
+    v.srcs.forEach(function(x){ try{ x.stop(at+fade+0.02); }catch(e){} });
+    delete LASTV[str];
+  }
+
+  /* ══ 弾いた瞬間の当たり ══
+     移植元はここを毎回 Math.random() で作っていた。弾くたびに頭の音が
+     変わり、歪みが強い音色ほど差が目立つ。**聴き比べる道具では、
+     同じ設定なら毎回同じに鳴らなければならない。**
+     音色ごとに一度だけ作り、以後は控えを使い回す。 */
+  var _pick=new Map();
+  function pickBuffer(tn,dur){
+    var key=tn.id+'|pick|'+dur;
+    if(_pick.has(key)) return _pick.get(key);
+    var sr=AC.sampleRate, len=Math.max(8,Math.round(sr*dur));
+    var buf=AC.createBuffer(1,len,sr), o=buf.getChannelData(0), rnd=seededRnd(key);
+    for(var i=0;i<len;i++){ var e=1-i/len; o[i]=(rnd()*2-1)*e*e; }
+    _pick.set(key,buf);
+    return buf;
+  }
+  function pickHit(at,vol,tn){
+    if(!tn.pick) return;
+    var hz=tn.pick[0],q=tn.pick[1],dur=tn.pick[2],lv=tn.pick[3];
+    var buf=pickBuffer(tn,dur);
+    var src=AC.createBufferSource(); src.buffer=buf;
+    var bq=AC.createBiquadFilter(); bq.type='bandpass'; bq.frequency.value=hz; bq.Q.value=q;
+    var g=AC.createGain(); g.gain.value=Math.max(0.0001,vol*lv);
+    src.connect(bq); bq.connect(g); g.connect(BUS);
+    src.start(at); src.stop(at+dur+0.02);
+    keep(g,[src]);
+  }
+  /* ハーモニクスの当たりも同じく固定する */
+  var _harmHit=null;
+  function harmHitBuffer(){
+    if(_harmHit) return _harmHit;
+    var sr=AC.sampleRate, hl=Math.max(8,Math.round(sr*0.012));
+    var b=AC.createBuffer(1,hl,sr), o=b.getChannelData(0), rnd=seededRnd('harm|hit');
+    for(var i=0;i<hl;i++){ var e=1-i/hl; o[i]=(rnd()*2-1)*e*e*e; }
+    _harmHit=b; return b;
+  }
+  function pluckHarmonic(at,midi,vol,str){
+    var f=440*Math.pow(2,(midi-69)/12), g=AC.createGain(), dur=4.6;
+    g.gain.setValueAtTime(0.0001,at);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002,vol*1.15),at+0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001,at+dur);
+    g.connect(BUS);
+    var oscs=[];
+    [[1,1.0,1.0],[2,0.16,0.62],[3,0.07,0.42]].forEach(function(m){
+      if(f*m[0]>16000) return;
+      var o=AC.createOscillator(); o.type='sine'; o.frequency.value=f*m[0];
+      var gg=AC.createGain();
+      gg.gain.setValueAtTime(0.0001,at);
+      gg.gain.exponentialRampToValueAtTime(Math.max(0.0002,m[1]),at+0.010);
+      gg.gain.exponentialRampToValueAtTime(0.0001,at+dur*m[2]);
+      o.connect(gg); gg.connect(g); o.start(at); o.stop(at+dur+0.05);
+      oscs.push(o);
+    });
+    var vh=keep(g,oscs);
+    if(str!=null&&str>=0) LASTV[str]=vh;
+    var hs=AC.createBufferSource(); hs.buffer=harmHitBuffer();
+    var hf=AC.createBiquadFilter(); hf.type='bandpass'; hf.frequency.value=2800; hf.Q.value=1.4;
+    var hg=AC.createGain(); hg.gain.value=vol*0.22;
+    hs.connect(hf); hf.connect(hg); hg.connect(BUS);
+    hs.start(at); hs.stop(at+0.04);
+    keep(hg,[hs]);
+  }
+  /* ══ 技 ══
+     opt.hold  … この秒数で音を止める（単音のフレーズで、次の音が来たら切る）
+     opt.bend  … チョーキング。半音単位で持ち上げる
+     opt.vib   … ビブラート。{depth:セント, rate:Hz, delay:秒}
+     音程は再生の速さで動かす。弦を押し上げるのと同じで、
+     速く回せば高くなる。 */
+  function pluck(at,midi,str,opt){
+    opt=opt||{};
+    var base=toneOf(), vol=0.5, cut=0;
+    if(st.art==='harm'){ hushStr(str,at,22); pluckHarmonic(at,midi+12,vol,str); return; }
+    var tn=strTone(base,str);
+    if(st.art==='pm'){ tn=pmTone(tn); vol*=PM.vol; cut=PM.cut; }
+    else if(st.art==='short'){ cut=0.12; }
+    if(opt.hold>0) cut=cut>0?Math.min(cut,opt.hold):opt.hold;
+    hushStr(str,at,22);
+    var f=440*Math.pow(2,(midi-69)/12), N=ksLength(f), buf=ksBuffer(N,tn);
+    var src=AC.createBufferSource(); src.buffer=buf;
+    var rate0=f/ksFreq(N), extra=[];
+    if(src.playbackRate){
+      src.playbackRate.setValueAtTime(rate0,at);
+      if(opt.bend){                                   /* チョーキング */
+        var up=rate0*Math.pow(2,opt.bend/12);
+        var t1=at+(opt.bendDelay||0.05), t2=t1+(opt.bendTime||0.14);
+        src.playbackRate.setValueAtTime(rate0,t1);
+        src.playbackRate.linearRampToValueAtTime(up,t2);
+        rate0=up;
+      }
+      if(opt.vib){                                    /* ビブラート */
+        try{
+          var lfo=AC.createOscillator(), lg=AC.createGain();
+          lfo.type='sine'; lfo.frequency.value=opt.vib.rate||5.5;
+          var depth=rate0*(Math.pow(2,(opt.vib.depth||30)/1200)-1);
+          lg.gain.setValueAtTime(0,at);
+          lg.gain.setValueAtTime(0,at+(opt.vib.delay||0.2));
+          lg.gain.linearRampToValueAtTime(depth,at+(opt.vib.delay||0.2)+0.12);
+          lfo.connect(lg); lg.connect(src.playbackRate);
+          lfo.start(at); lfo.stop(at+6);
+          extra.push(lfo);
+        }catch(e){}
+      }
+    }
+    var secs=buf.length/AC.sampleRate;
+    var bq=AC.createBiquadFilter(); bq.type='lowpass'; bq.Q.value=0.5;
+    var c0=Math.min(tn.lp[2],f*tn.lp[0]+tn.lp[1]), sp=tn.swp||[1,0];
+    if(sp[1]>0){
+      bq.frequency.setValueAtTime(Math.min(16000,c0*sp[0]),at);
+      bq.frequency.exponentialRampToValueAtTime(c0,at+sp[1]/1000);
+    }else bq.frequency.value=c0;
+    /* ══ 音の終い方 ══
+       終わりの基準は1つだけ持つ。弾き方による切り（短い音・ブリッジミュート）と、
+       単音のフレーズの音価（hold）のうち、早く来るほうを採る。
+       繋ぎは音価に合わせて縮め、次の音を少しまたぐように掛けるので、
+       **次の音が始まる前に無音にはならない。** */
+    var g=AC.createGain(), endAt=null, fade=0;
+    if(cut>0){ endAt=at+cut; fade=0.06; }
+    if(opt.hold>0){
+      var hEnd=at+opt.hold, hFade=Math.min(0.045,Math.max(0.008,opt.hold*0.25));
+      if(endAt===null||hEnd<endAt){ endAt=hEnd; fade=hFade; }
+    }
+    g.gain.setValueAtTime(Math.max(0.0001,vol),at);
+    var offAt=null;
+    if(endAt!==null){
+      var f0=Math.max(at+0.001,endAt-fade*0.3);   /* 次の音の少し手前から下げ始める */
+      offAt=endAt+fade*0.7;                        /* 次の音に少しまたいで消える */
+      g.gain.setValueAtTime(Math.max(0.0001,vol),f0);
+      g.gain.exponentialRampToValueAtTime(0.0001,offAt);
+    }
+    src.connect(bq); bq.connect(g); g.connect(BUS);
+    src.start(at);
+    src.stop(offAt!==null?Math.min(at+secs+0.05,offAt+0.05):at+secs+0.05);
+    var v=keep(g,[src].concat(extra));
+    v.endAt=offAt;                                 /* 自前で終わる手はず */
+    if(str!=null&&str>=0) LASTV[str]=v;
+    pickHit(at,vol,tn);
+  }
+
+
+  /* ══════ ペダルの登録 ══════ */
+  var PEDALS=[], current=null;
+  function definePedal(def){ def.stop=function(){ pedalStop(); }; PEDALS.push(def); return def; }
+
+  /* ══════ 共通の部品 ══════ */
+  function addScale(knobEl,count,sweep,texts){
+    var wrap=document.createElement('div');
+    wrap.className='knob-wrap';
+    knobEl.parentNode.insertBefore(wrap,knobEl);
+    wrap.appendChild(knobEl);
+    var sc=document.createElement('div');
+    sc.className='scale';
+    for(var i=0;i<count;i++){
+      var m=document.createElement('i');
+      var ang=-sweep/2+(count>1?i*(sweep/(count-1)):0);
+      if(i===0||i===count-1) m.className='edge';
+      m.style.transform='rotate('+(180+ang)+'deg)';
+      sc.appendChild(m);
+    }
+    if(texts){
+      var a=document.createElement('span'); a.className='scale-txt min'; a.textContent=texts[0];
+      var b=document.createElement('span'); b.className='scale-txt max'; b.textContent=texts[1];
+      sc.appendChild(a); sc.appendChild(b);
+    }
+    wrap.appendChild(sc);
+  }
+  function valueKnob(node,onDelta,onKey){
+    var drag=false,lastY=0;
+    node.addEventListener("pointerdown",function(e){
+      drag=true; lastY=e.clientY;
+      if(node.setPointerCapture) node.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    node.addEventListener("pointermove",function(e){
+      if(!drag) return;
+      onDelta(lastY-e.clientY); lastY=e.clientY;
+    });
+    node.addEventListener("pointerup",function(){ drag=false; });
+    node.addEventListener("pointercancel",function(){ drag=false; });
+    node.addEventListener("keydown",function(e){
+      if(e.key==="ArrowUp"||e.key==="ArrowRight"){ onKey(1,e.shiftKey); e.preventDefault(); }
+      if(e.key==="ArrowDown"||e.key==="ArrowLeft"){ onKey(-1,e.shiftKey); e.preventDefault(); }
+    });
+  }
+  /* 割合のつまみ。max は回しきった時の値 */
+  function pctKnob(k,v,get,set,max,fmt){
+    function draw(){
+      var val=get();
+      k.style.transform='rotate('+((val/max)*280-140)+'deg)';
+      k.setAttribute('aria-valuenow',String(Math.round(val*100)));
+      v.textContent=fmt?fmt(val):(Math.round(val*100)+'%');
+    }
+    function put(x){ set(Math.max(0,Math.min(max,x))); draw(); }
+    valueKnob(k,function(dy){ put(get()+dy*0.006*max); },function(dir){ put(get()+dir*0.05*max); });
+    draw();
+    return draw;
+  }
+  /* 選ぶつまみ。押すと次へ、端では折り返す（一周はしない） */
+  function selKnob(k,v,list,apply,current){
+    var dir=1;
+    function draw(){
+      var i=current(), n=list.length;
+      k.style.transform='rotate('+((n>1?i/(n-1):0.5)*260-130)+'deg)';
+      k.setAttribute('aria-valuenow',String(i+1));
+      v.textContent=list[i].label;
+    }
+    function step(d){
+      var i=current()+d;
+      if(i<0){ i=0; dir=1; }
+      else if(i>list.length-1){ i=list.length-1; dir=-1; }
+      apply(list[i].id); draw();
+    }
+    function push(){
+      var i=current();
+      if(i>=list.length-1) dir=-1; else if(i<=0) dir=1;
+      step(dir);
+    }
+    var drag=false,startY=0,moved=false;
+    k.addEventListener('pointerdown',function(e){
+      drag=true; startY=e.clientY; moved=false;
+      if(k.setPointerCapture) k.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    k.addEventListener('pointermove',function(e){
+      if(!drag) return;
+      var dy=startY-e.clientY;
+      if(Math.abs(dy)>=16){ step(dy>0?1:-1); startY=e.clientY; moved=true; }
+    });
+    k.addEventListener('pointerup',function(){ if(drag&&!moved) push(); drag=false; });
+    k.addEventListener('pointercancel',function(){ drag=false; });
+    k.addEventListener('keydown',function(e){
+      if(e.key==="ArrowUp"||e.key==="ArrowRight"){ step(1); e.preventDefault(); }
+      if(e.key==="ArrowDown"||e.key==="ArrowLeft"){ step(-1); e.preventDefault(); }
+      if(e.key==="Enter"||e.key===" "){ push(); e.preventDefault(); }
+    });
+    draw();
+    return draw;
+  }
+
+  /* ══════ 試し弾き ══════ */
+  var playing=false,endTimer=null,fxBack=null;
+  function silenceAll(){
+    if(!AC) return;
+    var t=AC.currentTime;
+    LIVE.forEach(function(v){
+      try{
+        v.g.gain.cancelScheduledValues(t);
+        v.g.gain.setValueAtTime(Math.max(0.0001,v.g.gain.value),t);
+        v.g.gain.exponentialRampToValueAtTime(0.0001,t+0.06);
+      }catch(e){}
+      v.srcs.forEach(function(x){ try{ x.stop(t+0.09); }catch(e){} });
+    });
+    LIVE=[]; LASTV={};
+    if(current&&current.hush) current.hush(t);
+    if(fxBack) clearTimeout(fxBack);
+    fxBack=setTimeout(function(){ if(current&&current.apply) current.apply(); },600);
+  }
+  function finishPhrase(){
+    playing=false;
+    if(endTimer){ clearTimeout(endTimer); endTimer=null; }
+    el('playBtn').textContent='フレーズを鳴らす';
+  }
+  function stopPhrase(){ finishPhrase(); silenceAll(); }
+  /* ペダル側から「今の音を止めたい」時に呼ぶ */
+  function pedalStop(){ stopPhrase(); }
+  el('playBtn').addEventListener('click',function(){
+    if(!ensureAudio()) return;
+    if(playing){ stopPhrase(); return; }
+    applyTone();
+    if(current&&current.apply) current.apply();
+    var ph=phraseOf(), beat=60/(current&&current.bpm?current.bpm():120), t0=AC.currentTime+0.06;
+    ph.notes.forEach(function(n,i){
+      var o={bend:n.bend,bendDelay:n.bendDelay,bendTime:n.bendTime,vib:n.vib};
+      if(ph.mono&&i<ph.notes.length-1) o.hold=(ph.notes[i+1].b-n.b)*beat;
+      pluck(t0+n.b*beat,n.m,n.s,o);
+    });
+    playing=true;
+    el('playBtn').textContent='止める';
+    endTimer=setTimeout(finishPhrase,(ph.beats*beat+0.5)*1000);
+  });
+
+  /* 帯の選択。押すたびに次へ進む */
+  function cycler(btnId,valId,list,get,set){
+    var b=el(btnId), v=el(valId);
+    function draw(){
+      var i=get(), it=list[i]||list[0];
+      v.textContent=it.label;
+    }
+    b.addEventListener('click',function(){
+      var i=(get()+1)%list.length;
+      set(list[i].id); draw();
+    });
+    draw();
+    return draw;
+  }
+  var drawTone=cycler('toneSel','toneVal',TONES,toneIdx,function(id){
+    st.tone=id; save(); ensureAudio(); stopPhrase(); applyTone();
+  });
+  var drawArt=cycler('artSel','artVal',ARTS,artIdx,function(id){
+    st.art=id; save(); stopPhrase();
+  });
+  var drawPh=cycler('phSel','phVal',PHRASES,phraseIdx,function(id){
+    st.phrase=id; save(); stopPhrase();
+  });
+
+
+  /* ══════════════════════════════════════
+     1台目：ディレイ
+     弾いた音を、決めた間をおいて返す。返す間はBPMと音価から決める。
+     ══════════════════════════════════════ */
+  (function(){
+    var NOTES=[
+      {name:"4分音符",     ratio:1},
+      {name:"付点8分音符", ratio:0.75},
+      {name:"8分音符",     ratio:0.5},
+      {name:"3連8分音符",  ratio:1/3},
+      {name:"16分音符",    ratio:0.25}
+    ];
+    var MIN=30, MAX=300, FB_MAX=1;
+
+    /* このペダルの持ち物 */
+    var d={bpm:120, mode:'tap', note:0, fx:false, level:0.35, fb:0.35};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.delay')||'null');
+      if(sv) for(var k in d) if(sv[k]!==undefined) d[k]=sv[k];
+      if(!(d.bpm>=MIN&&d.bpm<=MAX)) d.bpm=120;
+      d.level=Math.max(0,Math.min(1,d.level));
+      d.fb=Math.max(0,Math.min(FB_MAX,d.fb));
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.delay',JSON.stringify(d)); }catch(e){} }
+
+    function msFor(bpm,ratio){ return 60000/bpm*ratio; }
+    function delayMs(){ return msFor(d.bpm,NOTES[d.note].ratio); }
+
+    /* ---- 音の道 ---- */
+    var DLY=null,FBLP,FBSAT,FBG,WET,DRY;
+    function rebuild(){
+      if(!AC) return;
+      DRY=AC.createGain(); DRY.gain.value=1;
+      DLY=AC.createDelay(2.5);
+      FBLP=AC.createBiquadFilter(); FBLP.type='lowpass'; FBLP.Q.value=0.5; FBLP.frequency.value=3200;
+      FBSAT=AC.createWaveShaper?AC.createWaveShaper():null;
+      if(FBSAT){ FBSAT.curve=satCurve(); FBSAT.oversample='2x'; }
+      FBG=AC.createGain(); WET=AC.createGain();
+      FXIN.connect(DRY); DRY.connect(FXOUT);
+      FXIN.connect(DLY); DLY.connect(FBLP);
+      if(FBSAT){ FBLP.connect(FBSAT); FBSAT.connect(FBG); } else FBLP.connect(FBG);
+      FBG.connect(DLY);
+      DLY.connect(WET); WET.connect(FXOUT);
+      apply();
+    }
+    function apply(){
+      if(!DLY) return;
+      DLY.delayTime.value=Math.min(2.4,delayMs()/1000);
+      DRY.gain.value=1;
+      WET.gain.value=d.fx?d.level:0;
+      FBG.gain.value=d.fx?d.fb:0;
+    }
+    /* 止める時。返り音を断つ */
+    function hush(t){
+      if(!DLY) return;
+      try{
+        FBG.gain.cancelScheduledValues(t); FBG.gain.setValueAtTime(0,t);
+        WET.gain.cancelScheduledValues(t);
+        WET.gain.setValueAtTime(Math.max(0.0001,WET.gain.value),t);
+        WET.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
+      }catch(e){}
+    }
+    function detach(){
+      if(!AC) return;
+      DLY=null;
+    }
+
+    /* ---- 見た目 ---- */
+    var HTML=''+
+    '<div class="case"><div class="pedal">'+
+      '<div class="head">'+
+        '<div class="lever-cell">'+
+          '<span class="lv-lbl on" id="lblFxOn">入</span>'+
+          '<button class="lever" id="fxSw" role="switch" aria-checked="true" aria-label="ディレイの入切"><i></i></button>'+
+          '<span class="lv-lbl" id="lblFxOff">切</span>'+
+          '<span class="lever-name">ディレイ</span>'+
+        '</div>'+
+        '<div class="brand">DELAY SIMULATOR</div>'+
+        '<div class="lever-cell">'+
+          '<span class="lv-lbl" id="lblView">表示</span>'+
+          '<button class="lever" id="modeSw" role="switch" aria-checked="false" aria-label="タップと表示の切り替え"><i></i></button>'+
+          '<span class="lv-lbl on" id="lblTap">タップ</span>'+
+          '<span class="lever-name"></span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="screen" id="screen" tabindex="0" role="button" aria-label="BPMを直接入力">'+
+        '<div class="screen-label"><span id="label">BPM</span><span class="screen-sub" id="sub"></span></div>'+
+        '<div class="digits"><span class="ghost" id="ghost">888</span>'+
+        '<span class="value" id="value">120</span><span class="unit" id="unit"></span></div>'+
+        '<div class="screen-foot"><div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>'+
+        '<span id="foot"></span></div>'+
+        '<input id="bpmInput" type="text" inputmode="numeric" maxlength="3" aria-label="BPMの数値">'+
+      '</div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob big" id="knob" tabindex="0" role="slider" aria-label="BPM"'+
+          ' aria-valuemin="30" aria-valuemax="300" aria-valuenow="120"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">BPM</div><div class="ctl-val" id="bpmVal">120</div></div>'+
+        '<div class="ctl"><div class="knob" id="lvlKnob" tabindex="0" role="slider" aria-label="LEVEL"'+
+          ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="35"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">LEVEL</div><div class="ctl-val" id="lvlVal">35%</div></div>'+
+        '<div class="ctl"><div class="knob" id="fbKnob" tabindex="0" role="slider" aria-label="FEEDBACK"'+
+          ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="35"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">FEEDBACK</div><div class="ctl-val" id="fbVal">35%</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="indicator"></div>'+
+        '<button class="stomp" id="stomp" aria-label="フットスイッチ"></button>'+
+        '<div class="stomp-name" id="stompName">4回踏んでテンポを入力</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    var taps=[], blinkTimer=null, beatNext=0, flashOff=null;
+    var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+    function beatMs(){ return 60000/d.bpm; }
+    function nowMs(){ return (window.performance&&window.performance.now)?window.performance.now():Date.now(); }
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var screenEl=el('screen'),labelEl=el('label'),subEl=el('sub'),valueEl=el('value'),
+          ghostEl=el('ghost'),unitEl=el('unit'),footEl=el('foot'),dotsEl=el('dots'),
+          inputEl=el('bpmInput'),knob=el('knob'),modeSw=el('modeSw'),fxSw=el('fxSw'),
+          stomp=el('stomp'),stompName=el('stompName'),indicator=el('indicator');
+
+      function draw(){
+        knob.style.transform="rotate("+((d.bpm-MIN)/(MAX-MIN)*280-140)+"deg)";
+        knob.setAttribute("aria-valuenow",String(d.bpm));
+        el('bpmVal').textContent=String(d.bpm);
+        var txt,unit;
+        if(d.mode==="tap"){
+          labelEl.textContent="BPM"; subEl.textContent="";
+          txt=String(d.bpm); unit=""; footEl.textContent="";
+          dotsEl.style.visibility="visible";
+        }else{
+          var n=NOTES[d.note], ms=delayMs();
+          labelEl.textContent=n.name; subEl.textContent="BPM "+d.bpm;
+          txt=String(Math.round(ms*10)/10); unit="ms";
+          footEl.textContent=(Math.round(1000/ms*100)/100)+" Hz";
+          dotsEl.style.visibility="hidden";
+        }
+        valueEl.textContent=txt; unitEl.textContent=unit;
+        ghostEl.textContent=txt.replace(/[0-9]/g,"8");
+        inputEl.value=String(d.bpm);
+        apply();
+      }
+      function drawDots(){
+        var q=dotsEl.children;
+        for(var i=0;i<q.length;i++) q[i].className=i<taps.length?"on":"";
+      }
+      function setBpm(v){ d.bpm=Math.max(MIN,Math.min(MAX,Math.round(v))); keepIt(); draw(); }
+
+      /* 拍の点滅。作り直さず、基準の時刻だけを持つ */
+      function startBlink(){
+        if(reduce){ indicator.className="indicator on"; return; }
+        if(blinkTimer) clearInterval(blinkTimer);
+        beatNext=nowMs();
+        blinkTimer=setInterval(function(){
+          if(!document.body.contains(indicator)){ clearInterval(blinkTimer); blinkTimer=null; return; }
+          var t=nowMs();
+          if(t<beatNext) return;
+          indicator.className="indicator on";
+          if(flashOff) clearTimeout(flashOff);
+          flashOff=setTimeout(function(){ indicator.className="indicator"; },Math.min(90,beatMs()*0.3));
+          beatNext+=beatMs();
+          if(beatNext<t) beatNext=t+beatMs();
+        },20);
+      }
+      function syncBeat(){ if(!reduce) beatNext=nowMs()+beatMs(); }
+
+      var bpmAcc=0;
+      valueKnob(knob,function(dy){
+        bpmAcc+=dy*0.5;
+        if(Math.abs(bpmAcc)>=1){ setBpm(d.bpm+Math.trunc(bpmAcc)); bpmAcc-=Math.trunc(bpmAcc); }
+      },function(dir,shift){ setBpm(d.bpm+dir*(shift?10:1)); });
+      addScale(knob,11,280,['30','300']);
+
+      pctKnob(el('lvlKnob'),el('lvlVal'),function(){ return d.level; },
+              function(x){ d.level=x; keepIt(); apply(); },1);
+      pctKnob(el('fbKnob'),el('fbVal'),function(){ return d.fb; },
+              function(x){ d.fb=x; keepIt(); apply(); },FB_MAX);
+      addScale(el('lvlKnob'),11,280,['0','100']);
+      addScale(el('fbKnob'),11,280,['0','100']);
+
+      /* タップは4回で確定。外れ値は中央値で弾く */
+      function tapTempo(){
+        if(taps.length<4) return null;
+        var iv=[],i;
+        for(i=taps.length-3;i<taps.length;i++) iv.push(taps[i]-taps[i-1]);
+        var sorted=iv.slice().sort(function(a,b){ return a-b; });
+        var med=sorted[Math.floor(sorted.length/2)];
+        var ok=iv.filter(function(x){ return x>=med*0.6&&x<=med*1.6; });
+        if(!ok.length) ok=[med];
+        var sum=0;
+        for(i=0;i<ok.length;i++) sum+=ok[i];
+        var avg=sum/ok.length;
+        return avg>0?60000/avg:null;
+      }
+      stomp.addEventListener("click",function(){
+        if(d.mode==="tap"){
+          var now=nowMs();
+          if(taps.length&&now-taps[taps.length-1]>2500) taps=[];
+          taps.push(now);
+          if(taps.length>4) taps.shift();
+          var bpm=tapTempo();
+          if(bpm){ setBpm(bpm); syncBeat(); }
+          drawDots();
+          stompName.textContent=taps.length<4?("あと"+(4-taps.length)+"回"):"テンポを入力しました";
+        }else{
+          d.note=(d.note+1)%NOTES.length; keepIt(); draw();
+        }
+      });
+
+      modeSw.addEventListener("click",function(){
+        d.mode=(d.mode==="tap")?"view":"tap";
+        var view=(d.mode==="view");
+        modeSw.setAttribute("aria-checked",view?"true":"false");
+        el("lblTap").className=view?"lv-lbl":"lv-lbl on";
+        el("lblView").className=view?"lv-lbl on":"lv-lbl";
+        stompName.textContent=view?"踏むと音価が切り替わります":"4回踏んでテンポを入力";
+        if(!view){ taps=[]; drawDots(); }
+        keepIt(); draw();
+      });
+      fxSw.addEventListener("click",function(){
+        d.fx=!d.fx;
+        fxSw.setAttribute("aria-checked",d.fx?"true":"false");
+        el("lblFxOff").className=d.fx?"lv-lbl":"lv-lbl on";
+        el("lblFxOn").className=d.fx?"lv-lbl on":"lv-lbl";
+        keepIt(); apply();
+      });
+
+      /* 数字を直接入れる。Escapeで取り消し */
+      var editFrom=null, editCancel=false;
+      function beginEdit(){
+        editFrom=d.bpm; editCancel=false;
+        screenEl.classList.add("editing"); inputEl.value=""; inputEl.focus();
+      }
+      function endEdit(){
+        screenEl.classList.remove("editing");
+        if(editCancel){ editCancel=false; if(editFrom!=null) setBpm(editFrom); else draw(); return; }
+        var v=parseInt(inputEl.value,10);
+        if(!isNaN(v)) setBpm(v); else draw();
+      }
+      screenEl.addEventListener("click",function(e){ if(e.target!==inputEl) beginEdit(); });
+      screenEl.addEventListener("keydown",function(e){
+        if(e.target===screenEl&&(e.key==="Enter"||e.key===" ")){ beginEdit(); e.preventDefault(); }
+      });
+      inputEl.addEventListener("blur",endEdit);
+      inputEl.addEventListener("keydown",function(e){
+        if(e.key==="Enter"){ inputEl.blur(); }
+        if(e.key==="Escape"){ editCancel=true; inputEl.blur(); }
+      });
+
+      /* 開き直した時の見た目を合わせる */
+      modeSw.setAttribute("aria-checked",d.mode==="view"?"true":"false");
+      el("lblTap").className=(d.mode==="view")?"lv-lbl":"lv-lbl on";
+      el("lblView").className=(d.mode==="view")?"lv-lbl on":"lv-lbl";
+      stompName.textContent=(d.mode==="view")?"踏むと音価が切り替わります":"4回踏んでテンポを入力";
+      fxSw.setAttribute("aria-checked",d.fx?"true":"false");
+      el("lblFxOff").className=d.fx?"lv-lbl":"lv-lbl on";
+      el("lblFxOn").className=d.fx?"lv-lbl on":"lv-lbl";
+      taps=[]; drawDots(); draw(); startBlink();
+    }
+
+    definePedal({
+      id:'delay', name:'ディレイ', plate:'DELAY SIMULATOR',
+      blurb:'弾いた音を、決めた間をおいて返す',
+      theme:{top:'#2a4658',mid:'#20374a',bot:'#152532',led:'#4fc9ff'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="10" text-anchor="middle" font-size="6.6">DELAY</text>'+
+             '<rect class="lv" x="5" y="4" width="7" height="10" rx="2"/>'+
+             '<rect class="lv" x="62" y="4" width="7" height="10" rx="2"/>'+
+             '<rect class="sc" x="8" y="15" width="58" height="17" rx="2"/>'+
+             '<text class="sct" x="60" y="28" text-anchor="end" font-size="6.5">120</text>'+
+             '<g class="kn"><circle cx="17" cy="47" r="8"/><line x1="17" y1="41" x2="17" y2="45"/></g>'+
+             '<g class="kn"><circle cx="37" cy="47" r="8"/><line x1="37" y1="41" x2="37" y2="45"/></g>'+
+             '<g class="kn"><circle cx="57" cy="47" r="8"/><line x1="57" y1="41" x2="57" y2="45"/></g>'+
+             '<circle class="ld" cx="37" cy="64" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="83" r="11"/>'+
+           '</g></svg>',
+      help:[
+        /* 一枚目：何をする道具か／仕組み */
+        '<span class="lead">弾いた音を、決めた時間だけ遅らせて返す道具である。</span>'+
+        '山に向かって声を出した時のやまびこと同じで、返ってきた音が原音の後ろに続く。'+
+        '返す間隔を短くすれば音が厚くなり、長くすれば一つひとつの返りが数えられるほど離れる。'+
+        '<span class="hn">仕組み</span>'+
+        '入ってきた音を一度ためておき、決めた時間が経ってから出す。'+
+        '出した音をもう一度ためれば、二度、三度と返る。'+
+        'この戻す量を上げるほど繰り返しは長く続き、'+'非常に高くすると発振に近い状態になる。'+
+        '返るたびに高い成分が少しずつ失われるため、繰り返しは次第にこもってゆく。'+
+        'これは磁気テープを使っていた頃の機械の癖を写したもので、今も好んで残されている。',
+        /* 二枚目：使う場面 */
+        '<span class="hn">使う場面</span>'+
+        '最も多いのは、拍に合わせて返す使い方である。'+
+        '8分音符の間隔にすれば、単音のフレーズが二重に聞こえて厚みが出る。'+
+        '付点8分にすると、返りが元の音の裏に落ちて独特のうねりが生まれる。'+
+        'この付点8分の設定は、U2のジ・エッジが使った音として広く知られるが、'+
+        'ほかの奏者やジャンルでも古くから使われてきた。<br>'+
+        'ゆっくりした曲では、返す間隔を長く取り、返り音を小さく混ぜる。'+
+        '音が遠くから戻ってくるような広がりが出る。'+
+        '逆に数十ミリ秒ほどまで詰めて一度だけ返せば、二人で同じフレーズを弾いたような厚みになる。'+
+        'ロカビリーなどで聞かれる短い返りは、この種の掛け方に近い。<br>'+
+        'バンドの中では、返り音が他の楽器と喧嘩しやすい。'+
+        '音数の多い曲では小さく、間の多い曲では大きく。これが掛け方の勘所である。',
+        /* 三枚目：似た道具との違い／つまみ */
+        '<span class="hn">似た道具との違い</span>'+
+        '同じ空間系のリバーブとは、返る音を数えられるかどうかで分かれる。'+
+        'ディレイは一つひとつの返りが聞き分けられ、'+
+        'リバーブは無数の反射が溶け合って聞き分けられない。'+
+        '返す間隔を極端に短くし、繰り返しを増やしてゆくと、ディレイの音はリバーブに近づく。'+
+        '両者は地続きである。'+
+        '<span class="hn">つまみ</span>'+
+        '<b>BPM</b>と音価で返す間隔を決める。'+
+        '<b>LEVEL</b>は返り音の音量。'+'<b>FEEDBACK</b>は返り音をもう一度入口へ戻す量で、上げるほど繰り返しが増える。'+
+        '上のレバーは、左がディレイの入切、右はタップと表示の切り替えである。'
+      ],
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!d.fx; },
+      setOn:function(v){ d.fx=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush, detach:detach,
+      bpm:function(){ return d.bpm; },
+      state:d, notes:NOTES, delayMs:delayMs
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     2台目：リバーブ
+     ディレイが「数えられる返り」なら、こちらは「数えられない広がり」。
+     部屋の反射を集めた波形（残響の型）を音に掛け合わせて作る。
+     ══════════════════════════════════════ */
+  (function(){
+    var KINDS=[
+      {id:'room', label:'ROOM',  pre:0.006, build:0.004, bright:0.55, early:[0.011,0.019,0.027,0.038]},
+      {id:'hall', label:'HALL',  pre:0.028, build:0.045, bright:0.38, early:[0.031,0.049,0.071]},
+      {id:'plate',label:'PLATE', pre:0.002, build:0.001, bright:0.85, early:[]}
+    ];
+    var SEC_MIN=0.4, SEC_MAX=6.0;
+
+    var r={secs:2.2, tone:0.6, level:0.35, kind:'hall', on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.reverb')||'null');
+      if(sv) for(var k in r) if(sv[k]!==undefined) r[k]=sv[k];
+      r.secs=Math.max(SEC_MIN,Math.min(SEC_MAX,r.secs));
+      r.tone=Math.max(0,Math.min(1,r.tone));
+      r.level=Math.max(0,Math.min(1,r.level));
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.reverb',JSON.stringify(r)); }catch(e){} }
+    function kindOf(){ for(var i=0;i<KINDS.length;i++) if(KINDS[i].id===r.kind) return KINDS[i]; return KINDS[1]; }
+    function kindIdx(){ for(var i=0;i<KINDS.length;i++) if(KINDS[i].id===r.kind) return i; return 1; }
+
+    /* ══ 残響の型 ══
+       雑音を減衰させたものが残響の芯になる。頭に反射をいくつか置き、
+       立ち上がりと明るさを空間ごとに変える。
+       長さは0.2秒刻みに丸めて控えに持つ。つまみを回すたびに
+       作り直していては重いため。 */
+    var _ir=new Map();
+    function irBuffer(kind,secs){
+      var q=Math.round(secs*5)/5;
+      var key=kind.id+'|'+q.toFixed(1)+'|'+AC.sampleRate;
+      if(_ir.has(key)) return _ir.get(key);
+      var sr=AC.sampleRate, len=Math.max(8,Math.round(sr*(q+kind.pre+0.05)));
+      var buf=AC.createBuffer(2,len,sr);
+      for(var ch=0;ch<2;ch++){
+        var o=buf.getChannelData(ch), rnd=seededRnd(key+'|ch'+ch);
+        var pre=Math.round(sr*kind.pre), build=Math.max(1,Math.round(sr*kind.build));
+        var lp=0, a=kind.bright;                      /* 明るいほど雑音がそのまま通る */
+        for(var i=0;i<len;i++){
+          if(i<pre){ o[i]=0; continue; }
+          var n=i-pre, t=n/sr;
+          var env=Math.exp(-6.9078*t/q);              /* この秒数で-60dBまで落ちる */
+          var up=n<build?(n/build):1;                 /* 立ち上がり */
+          var w=rnd()*2-1;
+          lp=lp+a*(w-lp);                             /* 高い成分を少し丸める */
+          o[i]=lp*env*up;
+        }
+        /* 頭の反射。部屋やホールでは、壁からの最初の跳ね返りが聞こえる */
+        kind.early.forEach(function(tt,idx){
+          var p=pre+Math.round(sr*tt);
+          if(p<len) o[p]+= (idx%2?-1:1)*0.55/(idx+1);
+        });
+        /* 尻を寝かせる */
+        var fo=Math.min(Math.round(sr*0.05),len);
+        for(var f=0;f<fo;f++) o[len-1-f]*=f/fo;
+      }
+      _ir.set(key,buf);
+      if(_ir.size>12){ var kk=_ir.keys().next(); if(!kk.done) _ir.delete(kk.value); }
+      return buf;
+    }
+
+    /* ---- 音の道 ---- */
+    var CONV=null,TONEF,WET,DRY,_irKey=null;
+    function rebuild(){
+      if(!AC) return;
+      DRY=AC.createGain(); DRY.gain.value=1;
+      CONV=AC.createConvolver(); CONV.normalize=true;
+      TONEF=AC.createBiquadFilter(); TONEF.type='lowpass'; TONEF.Q.value=0.5;
+      WET=AC.createGain();
+      FXIN.connect(DRY); DRY.connect(FXOUT);
+      FXIN.connect(CONV); CONV.connect(TONEF); TONEF.connect(WET); WET.connect(FXOUT);
+      _irKey=null;
+      apply();
+    }
+    function apply(){
+      if(!CONV) return;
+      var kind=kindOf(), key=kind.id+'|'+(Math.round(r.secs*5)/5);
+      if(_irKey!==key){ CONV.buffer=irBuffer(kind,r.secs); _irKey=key; }
+      TONEF.frequency.value=700*Math.pow(12000/700,r.tone);   /* 700Hz〜12kHz */
+      /* ══ 入切で音量を揃える ══
+         原音はいつも素通し。LEVELは余韻の量だけを決める。
+         入切で全体の大きさが変わると、効果ではなく音量差を聴いてしまう。 */
+      DRY.gain.value=1;
+      WET.gain.value=r.on?r.level:0;
+    }
+    function hush(t){
+      if(!WET) return;
+      try{
+        WET.gain.cancelScheduledValues(t);
+        WET.gain.setValueAtTime(Math.max(0.0001,WET.gain.value),t);
+        WET.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
+      }catch(e){}
+    }
+    function detach(){
+      if(!AC) return;
+      CONV=null;
+    }
+
+    /* ---- 見た目 ---- */
+    var HTML=''+
+    '<div class="case"><div class="pedal rvb">'+
+      '<div class="rvb-plate">'+
+        '<div class="rvb-name">REVERB</div>'+
+        '<div class="rvb-sub">SPACE SIMULATOR</div>'+
+      '</div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob" id="secKnob" tabindex="0" role="slider" aria-label="DECAY"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">DECAY</div><div class="ctl-val" id="secVal">2.2秒</div></div>'+
+        '<div class="ctl"><div class="knob" id="toneFKnob" tabindex="0" role="slider" aria-label="TONE"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">TONE</div><div class="ctl-val" id="toneFVal">60%</div></div>'+
+        '<div class="ctl"><div class="knob" id="rvLvlKnob" tabindex="0" role="slider" aria-label="LEVEL"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">LEVEL</div><div class="ctl-val" id="rvLvlVal">35%</div></div>'+
+      '</div>'+
+      '<div class="rvb-rule"></div>'+
+      '<div class="deck two">'+
+        '<div class="ctl"><div class="knob" id="kindKnob" tabindex="0" role="slider" aria-label="TYPE"'+
+          ' aria-valuemin="1" aria-valuemax="3"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">TYPE</div><div class="ctl-val" id="kindVal">HALL</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="rvLed"></div>'+
+        '<button class="stomp" id="rvStomp" aria-label="リバーブの入切"></button>'+
+        '<div class="stomp-name" id="rvName">踏むと入切</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('rvLed');
+      function drawOn(){ led.className=r.on?'indicator on':'indicator'; }
+
+      pctKnob(el('secKnob'),el('secVal'),
+        function(){ return (r.secs-SEC_MIN)/(SEC_MAX-SEC_MIN); },
+        function(x){ r.secs=SEC_MIN+x*(SEC_MAX-SEC_MIN); keepIt(); apply(); },1,
+        function(){ return (Math.round(r.secs*10)/10)+'秒'; });
+      pctKnob(el('toneFKnob'),el('toneFVal'),
+        function(){ return r.tone; },
+        function(x){ r.tone=x; keepIt(); apply(); },1);
+      pctKnob(el('rvLvlKnob'),el('rvLvlVal'),
+        function(){ return r.level; },
+        function(x){ r.level=x; keepIt(); apply(); },1);
+      addScale(el('secKnob'),11,280,['0.4','6.0']);
+      addScale(el('toneFKnob'),11,280,['DARK','BRIGHT']);
+      addScale(el('rvLvlKnob'),11,280,['0','100']);
+
+      selKnob(el('kindKnob'),el('kindVal'),KINDS,function(id){
+        r.kind=id; keepIt();
+        if(current&&current.stop) current.stop();
+        apply();
+      },kindIdx);
+      addScale(el('kindKnob'),KINDS.length,260,null);
+
+      el('rvStomp').addEventListener('click',function(){
+        r.on=!r.on; keepIt(); drawOn(); apply();
+        el('rvName').textContent=r.on?'踏むと入切':'今は素通り';
+      });
+      drawOn();
+      el('rvName').textContent=r.on?'踏むと入切':'今は素通り';
+    }
+
+    definePedal({
+      id:'reverb', name:'リバーブ', plate:'SPACE SIMULATOR',
+      blurb:'音を空間に広げ、余韻を残す',
+      theme:{top:'#33604c',mid:'#264a3a',bot:'#17301f',led:'#ffb454'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="16" text-anchor="middle" font-size="6.2">REVERB</text>'+
+             '<line class="rl" x1="14" y1="21" x2="60" y2="21"/>'+
+             '<g class="kn"><circle cx="17" cy="38" r="8"/><line x1="17" y1="32" x2="17" y2="36"/></g>'+
+             '<g class="kn"><circle cx="37" cy="38" r="8"/><line x1="37" y1="32" x2="37" y2="36"/></g>'+
+             '<g class="kn"><circle cx="57" cy="38" r="8"/><line x1="57" y1="32" x2="57" y2="36"/></g>'+
+             '<g class="kn cr"><circle cx="37" cy="58" r="7"/><line x1="37" y1="53" x2="37" y2="56"/></g>'+
+             '<circle class="ld" cx="37" cy="72" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="88" r="11"/>'+
+           '</g></svg>',
+      help:[
+        '<span class="lead">音が鳴っている場所そのものを作る道具である。</span>'+
+        '風呂場で声を出すと響き、押し入れで出すと響かない。'+
+        'あの違いを、演奏の後ろに足す。'+
+        'ディレイが「返る音」を作るのに対し、こちらは「その場の空気」を作る。'+
+        '<span class="hn">仕組み</span>'+
+        '部屋の中で音を出すと、壁や天井や床から数え切れない反射が返ってくる。'+
+        '最初に届くのは近い壁からの一発、次いで遠い壁から、'+
+        'やがて反射同士が混ざり合って一つの余韻になる。'+
+        'この道具は、その反射の集まりを一枚の波形として持っておき、'+
+        '元の音に、その空間で返ってくる反射の成分を重ねる。'+
+        '演奏した一音一音を、その部屋で鳴らし直すのと同じことである。',
+
+        '<span class="hn">使う場面</span>'+
+        '多くの録音では、何らかの形で空間の感じが作られている。'+
+        '乾きすぎた音は、ほかの楽器と同じ場所で鳴っている感じが弱くなることがある。'+
+        'バラードやアルペジオでは長めに取り、音が消える先を作る。'+
+        '速い曲や音数の多い曲では短くする。'+
+        '長く掛けると余韻同士が重なり、輪郭がぼやけるためである。<br>'+
+        '歪んだ音に深く掛けるのは扱いが難しい。'+
+        '歪みは音を長く伸ばすので、そこへ余韻を足すと'+
+        '前の音と次の音が繋がってしまう。'+
+        'そういう時は、余韻の明るさを落として奥へ引かせる。<br>'+
+        '教室で最も分かりやすいのは、切って弾き、入れて弾く、を繰り返すことである。'+
+        '入れた時の「広がった感じ」がリバーブそのものであり、'+
+        '切った時に音がどれほど近く聞こえるかが、この道具の値打ちを示す。',
+
+        '<span class="hn">響きのタイプ</span>'+
+        '<b>ROOM</b>は部屋。壁が近いので反射がすぐ戻り、余韻も短い。'+
+        '自然に馴染むので、掛かっていることに気づかれにくい。'+
+        '<b>HALL</b>は演奏会場。壁が遠いので、少し遅れてから広がりが立ち上がる。'+
+        'ゆったりした曲に向く。'+
+        '<b>PLATE</b>は板。部屋ではなく、金属板を震わせて作る人工の残響である。'+
+        '最初から詰まった余韻が立ち上がり、歌やスネアに古くから使われてきた。'+
+        'ROOMとHALLが空間を思わせるのに対し、これは装置の名でもある。'+
+        '<span class="hn">似た道具との違い</span>'+
+        'ディレイとは、返る音を数えられるかどうかで分かれる。'+
+        'この本ではディレイの次に置いた。並べて聴き比べるためである。'+
+        '<span class="hn">つまみ</span>'+
+        '<b>DECAY</b>は余韻の長さ、<b>TONE</b>は余韻の明るさ、'+
+        '<b>LEVEL</b>は余韻の音量。<b>TYPE</b>で響く場所を選ぶ。'
+      ],
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!r.on; },
+      setOn:function(v){ r.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush, detach:detach,
+      state:r, kinds:KINDS, irBuffer:function(){ return irBuffer(kindOf(),r.secs); }
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     3台目：コーラス
+     ごく短い遅れ（10〜20ミリ秒）を作り、その遅れの長さを
+     ゆっくり伸び縮みさせる。音程がわずかに揺れた分身が生まれ、
+     原音と重なって厚みになる。
+     ══════════════════════════════════════ */
+  (function(){
+    var TYPES=[
+      {id:'chorus',  label:'CHORUS'},   /* 原音と混ぜる＝厚み */
+      {id:'vibrato', label:'VIBRATO'}   /* 揺れた音だけ＝音程のうねり */
+    ];
+    var RATE_MIN=0.1, RATE_MAX=7.0;      /* Hz */
+    var BASE=[0.012,0.018];              /* 2声ぶんの遅れの土台（秒） */
+
+    var c={rate:0.9, depth:0.5, mix:0.45, type:'chorus', on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.chorus')||'null');
+      if(sv) for(var k in c) if(sv[k]!==undefined) c[k]=sv[k];
+      c.rate=Math.max(RATE_MIN,Math.min(RATE_MAX,c.rate));
+      c.depth=Math.max(0,Math.min(1,c.depth));
+      c.mix=Math.max(0,Math.min(1,c.mix));
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.chorus',JSON.stringify(c)); }catch(e){} }
+    function typeIdx(){ for(var i=0;i<TYPES.length;i++) if(TYPES[i].id===c.type) return i; return 0; }
+
+    /* ---- 音の道 ---- */
+    var LFO=null,DL=[],MOD=[],WET,DRY,LP;
+    function rebuild(){
+      if(!AC) return;
+      DRY=AC.createGain(); DRY.gain.value=1;
+      WET=AC.createGain();
+      LP=AC.createBiquadFilter(); LP.type='lowpass'; LP.Q.value=0.5; LP.frequency.value=7000;
+      FXIN.connect(DRY); DRY.connect(FXOUT);
+      LFO=AC.createOscillator(); LFO.type='sine';
+      DL=[]; MOD=[];
+      for(var i=0;i<BASE.length;i++){
+        var dl=AC.createDelay(0.1);
+        dl.delayTime.value=BASE[i];
+        var mod=AC.createGain();
+        /* 2声は互い違いに揺らす。片方が伸びる時、もう片方は縮む */
+        mod.gain.value=(i===0?1:-1)*0.004*c.depth;
+        LFO.connect(mod); mod.connect(dl.delayTime);
+        FXIN.connect(dl); dl.connect(LP);
+        DL.push(dl); MOD.push(mod);
+      }
+      LP.connect(WET); WET.connect(FXOUT);
+      try{ LFO.start(); }catch(e){}
+      apply();
+    }
+    function apply(){
+      if(!LFO) return;
+      LFO.frequency.value=c.rate;
+      for(var i=0;i<MOD.length;i++) MOD[i].gain.value=(i===0?1:-1)*0.004*c.depth;
+      var vib=(c.type==='vibrato');
+      /* ══ 入切で音量を揃える ══
+         原音はいつも素通し（VIBRATOのときだけ差し替える）。
+         MIXは重ねる量だけを決め、全体の大きさは変えない。 */
+      DRY.gain.value=(c.on&&vib)?0:1;
+      WET.gain.value=c.on?(vib?1:c.mix):0;
+    }
+    function hush(t){
+      if(!WET) return;
+      try{
+        WET.gain.cancelScheduledValues(t);
+        WET.gain.setValueAtTime(Math.max(0.0001,WET.gain.value),t);
+        WET.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
+      }catch(e){}
+    }
+    function detachAudio(){
+      if(!AC) return;
+      LFO=null;
+    }
+
+    /* ---- 見た目 ---- */
+    var HTML=''+
+    '<div class="case"><div class="pedal chr">'+
+      '<div class="chr-head">'+
+        '<div class="chr-name">CHORUS</div>'+
+        '<div class="chr-sub">MODULATION</div>'+
+      '</div>'+
+      '<div class="chr-window" id="chrWin" aria-hidden="true">'+
+        '<svg viewBox="0 0 260 44" preserveAspectRatio="none">'+
+          '<path id="chrWave" d="" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".5"/>'+
+          '<circle id="chrDot" cx="0" cy="22" r="3.4" fill="currentColor"/>'+
+        '</svg>'+
+      '</div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob" id="rateKnob" tabindex="0" role="slider" aria-label="RATE"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">RATE</div><div class="ctl-val" id="rateVal">0.9Hz</div></div>'+
+        '<div class="ctl"><div class="knob" id="depthKnob" tabindex="0" role="slider" aria-label="DEPTH"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">DEPTH</div><div class="ctl-val" id="depthVal">50%</div></div>'+
+        '<div class="ctl"><div class="knob" id="mixKnob" tabindex="0" role="slider" aria-label="MIX"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">MIX</div><div class="ctl-val" id="mixVal">45%</div></div>'+
+      '</div>'+
+      '<div class="chr-rule"></div>'+
+      '<div class="deck two">'+
+        '<div class="ctl"><div class="knob" id="chTypeKnob" tabindex="0" role="slider" aria-label="MODE"'+
+          ' aria-valuemin="1" aria-valuemax="2"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">MODE</div><div class="ctl-val" id="chTypeVal">CHORUS</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="chLed"></div>'+
+        '<button class="stomp" id="chStomp" aria-label="コーラスの入切"></button>'+
+        '<div class="stomp-name" id="chName">踏むと入切</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    var anim=null;
+    var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('chLed'), dot=el('chrDot'), wave=el('chrWave');
+      var pts=[];
+      for(var x=0;x<=260;x+=4) pts.push(x+','+(22-15*Math.sin(x/260*Math.PI*4)).toFixed(1));
+      wave.setAttribute('d','M'+pts.join(' L'));
+
+      function drawOn(){ led.className=c.on?'indicator on':'indicator'; }
+      /* 窓の点は、今の速さと幅で動く。揺れを目でも掴めるようにする */
+      function moveDot(){
+        if(!document.body.contains(dot)){ if(anim) clearInterval(anim); anim=null; return; }
+        var t=(Date.now()/1000)*c.rate, ph=t-Math.floor(t), x=ph*260;
+        var y=22-15*Math.sin(x/260*Math.PI*4)*(c.on?Math.max(0.06,c.depth):0.06);
+        dot.setAttribute('cx',x.toFixed(1));
+        dot.setAttribute('cy',y.toFixed(1));
+      }
+      if(anim) clearInterval(anim);
+      if(!reduce) anim=setInterval(moveDot,40);
+      moveDot();
+
+      pctKnob(el('rateKnob'),el('rateVal'),
+        function(){ return (c.rate-RATE_MIN)/(RATE_MAX-RATE_MIN); },
+        function(x){ c.rate=RATE_MIN+x*(RATE_MAX-RATE_MIN); keepIt(); apply(); },1,
+        function(){ return (Math.round(c.rate*10)/10)+'Hz'; });
+      pctKnob(el('depthKnob'),el('depthVal'),
+        function(){ return c.depth; },
+        function(x){ c.depth=x; keepIt(); apply(); },1);
+      pctKnob(el('mixKnob'),el('mixVal'),
+        function(){ return c.mix; },
+        function(x){ c.mix=x; keepIt(); apply(); },1);
+      addScale(el('rateKnob'),11,280,['0.1','7.0']);
+      addScale(el('depthKnob'),11,280,['0','100']);
+      addScale(el('mixKnob'),11,280,['0','100']);
+
+      selKnob(el('chTypeKnob'),el('chTypeVal'),TYPES,function(id){
+        c.type=id; keepIt(); apply();
+      },typeIdx);
+      addScale(el('chTypeKnob'),TYPES.length,260,null);
+
+      el('chStomp').addEventListener('click',function(){
+        c.on=!c.on; keepIt(); drawOn(); apply();
+        el('chName').textContent=c.on?'踏むと入切':'今は素通り';
+      });
+      drawOn();
+      el('chName').textContent=c.on?'踏むと入切':'今は素通り';
+    }
+
+    definePedal({
+      id:'chorus', name:'コーラス', plate:'MODULATION',
+      blurb:'音を揺らして厚みを出す',
+      theme:{top:'#4b3d70',mid:'#3a2f59',bot:'#241d3a',led:'#c79bff'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="10" text-anchor="middle" font-size="6.2">CHORUS</text>'+
+             '<rect class="sc" x="7" y="14" width="60" height="13" rx="2"/>'+
+             '<path class="wv" d="M10 21q6-6 12 0t12 0 12 0 12 0"/>'+
+             '<g class="kn"><circle cx="17" cy="42" r="8"/><line x1="17" y1="36" x2="17" y2="40"/></g>'+
+             '<g class="kn"><circle cx="37" cy="42" r="8"/><line x1="37" y1="36" x2="37" y2="40"/></g>'+
+             '<g class="kn"><circle cx="57" cy="42" r="8"/><line x1="57" y1="36" x2="57" y2="40"/></g>'+
+             '<g class="kn cr"><circle cx="37" cy="61" r="7"/><line x1="37" y1="56" x2="37" y2="59"/></g>'+
+             '<circle class="ld" cx="37" cy="74" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="89" r="11"/>'+
+           '</g></svg>',
+      help:[
+        '<span class="lead">一人で弾いた音を、二人で弾いたように聞かせる道具である。</span>'+
+        '同じ楽器を二人で同時に弾いても、音程も出だしもわずかにずれる。'+
+        'そのずれが厚みを生む。合唱が一人の歌より厚く聞こえるのと同じ理屈で、'+
+        '名前もそこから来ている。'+
+        '<span class="hn">仕組み</span>'+
+        'ごく短い遅れを作り、その長さをゆっくり伸び縮みさせる。'+
+        '遅れが伸びている間は音程がわずかに下がり、縮んでいる間は上がる。'+
+        'この揺れた分身を原音に重ねると、二つの音程がすれ違い、'+
+        'うねりを含んだ厚みになる。'+
+        'この本の道具では、遅れの線を二本持たせ、互い違いに揺らしている。'+
+        '片方が伸びる時、もう片方は縮む。',
+
+        '<span class="hn">使う場面</span>'+
+        'クリーンの分散和音に薄く掛けるのが最も多い。'+
+        '和音の粒がつながり、音が広がって聞こえる。'+
+        '1980年代のポップスやフュージョンでは、'+
+        'クリーンのギターにコーラスを使った音が多く聞かれた。'+
+        '当時らしいクリーンの音を狙うなら、試してみたい代表的な一台である。<br>'+
+        '歪みと合わせる時は、歪みの後に置くのが定石である。'+
+        '前に置くと、揺れた音まで歪みに潰されて効きが分かりにくい。<br>'+
+        '速さを上げすぎると、音程が揺れているのがはっきり分かるようになり、'+
+        '船酔いのような気持ち悪さが出る。'+
+        '厚みを狙うなら、揺れが気づかれない程度に抑えるのがよい。'+
+        '逆に、その気持ち悪さをわざと出す使い方もある。',
+
+        '<span class="hn">似た道具との違い</span>'+
+        'この本の次の項に置いたフランジャーは、仕組みがよく似ている。'+
+        '一般にコーラスは十数ミリ秒ほどの長めの遅れを混ぜ、'+
+        'フランジャーは非常に短い遅れに戻し（フィードバック）を加える。'+
+        'ただし境目は連続的で、この二つだけで割り切れるものではない。'+
+        '続けて聴き比べれば、厚みが前に出るか、うねりが前に出るかの違いは掴める。'+
+        '<span class="hn">つまみ</span>'+
+        '<b>RATE</b>は揺れの速さ、<b>DEPTH</b>は揺れの幅、'+
+        '<b>MIX</b>は揺れた音を混ぜる量。'+
+        '<b>MODE</b>を<b>VIBRATO</b>にすると原音が混ざらず、揺れた音だけになる。'+
+        'コーラスに含まれる音程の揺れを、単独で聴き取るための切り替えである。'
+      ],
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!c.on; },
+      setOn:function(v){ c.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush,
+      detach:function(){ if(anim){ clearInterval(anim); anim=null; } detachAudio(); },
+      state:c, types:TYPES
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     4台目：歪み
+     ほかの3台と違い、アンプの<前>に入る。
+     波の頭を潰して倍音を増やす。潰し方の違いが
+     オーバードライブ／ディストーション／ファズの違いになる。
+     ══════════════════════════════════════ */
+  (function(){
+    var MODES=[
+      /* pre=前段の押し込み, k=潰しの強さ, hp=前で削る低域, lp=後ろで削る高域, rect=偏り */
+      {id:'od',   label:'OVERDRIVE',   pre:[1.5,14],  k:[2,9],   hp:120, lp:[2200,8000], rect:0},
+      {id:'dist', label:'DISTORTION',  pre:[4,40],    k:[10,30], hp:180, lp:[1600,6000], rect:0},
+      {id:'fuzz', label:'FUZZ',        pre:[8,60],    k:[40,90], hp:80,  lp:[1500,5000], rect:0.35}
+    ];
+
+    var g={gain:0.45, tone:0.5, level:0.5, mode:'od', on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.drive')||'null');
+      if(sv) for(var k in g) if(sv[k]!==undefined) g[k]=sv[k];
+      g.gain=Math.max(0,Math.min(1,g.gain));
+      g.tone=Math.max(0,Math.min(1,g.tone));
+      g.level=Math.max(0,Math.min(1,g.level));
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.drive',JSON.stringify(g)); }catch(e){} }
+    function modeOf(){ for(var i=0;i<MODES.length;i++) if(MODES[i].id===g.mode) return MODES[i]; return MODES[0]; }
+    function modeIdx(){ for(var i=0;i<MODES.length;i++) if(MODES[i].id===g.mode) return i; return 0; }
+    function lerp(a,b,x){ return a+(b-a)*x; }
+
+    /* ---- 音の道（アンプの前）---- */
+    var IN=null,HPF,SHAPE,RECTS,LPF,OUT,BYPASS,_ck=null,_rk=null;
+    function rebuild(){
+      if(!AC) return;
+      IN=AC.createGain();
+      HPF=AC.createBiquadFilter(); HPF.type='highpass'; HPF.Q.value=0.6;
+      RECTS=AC.createWaveShaper?AC.createWaveShaper():null; if(RECTS) RECTS.oversample='4x';
+      SHAPE=AC.createWaveShaper?AC.createWaveShaper():null; if(SHAPE) SHAPE.oversample='4x';
+      LPF=AC.createBiquadFilter(); LPF.type='lowpass'; LPF.Q.value=0.6;
+      OUT=AC.createGain();
+      BYPASS=AC.createGain();
+      /* 踏んでいない時は素通り。踏むと歪みの道を通る */
+      FXIN.connect(BYPASS); BYPASS.connect(FXOUT);
+      FXIN.connect(IN); IN.connect(HPF);
+      if(RECTS){ HPF.connect(RECTS); RECTS.connect(SHAPE?SHAPE:LPF); }
+      else HPF.connect(SHAPE?SHAPE:LPF);
+      if(SHAPE) SHAPE.connect(LPF);
+      LPF.connect(OUT); OUT.connect(FXOUT);
+      _ck=null; _rk=null;
+      apply();
+    }
+    function apply(){
+      if(!IN) return;
+      var m=modeOf();
+      IN.gain.value=lerp(m.pre[0],m.pre[1],g.gain);
+      HPF.frequency.value=m.hp;
+      var kk=lerp(m.k[0],m.k[1],g.gain);
+      if(SHAPE&&_ck!==m.id+kk.toFixed(2)){ SHAPE.curve=driveCurve(kk); _ck=m.id+kk.toFixed(2); }
+      if(RECTS&&_rk!==m.id){ RECTS.curve=m.rect>0?rectCurve(m.rect):null; _rk=m.id; }
+      LPF.frequency.value=lerp(m.lp[0],m.lp[1],g.tone);
+      /* ══ 入切で音量を揃える ══
+         潰すほど音は大きくなる。押し込んだぶんを戻し、
+         LEVELの真ん中で素通りとほぼ同じ大きさになるようにしてある。
+         LEVELは最終音量として、動かした時だけ全体を変える。 */
+      var comp=1/Math.sqrt(IN.gain.value);
+      OUT.gain.value=g.on?(0.55+0.9*g.level)*comp*1.6:0;
+      BYPASS.gain.value=g.on?0:1;
+    }
+    function hush(t){
+      if(!OUT) return;
+      try{
+        OUT.gain.cancelScheduledValues(t);
+        OUT.gain.setValueAtTime(Math.max(0.0001,OUT.gain.value),t);
+      }catch(e){}
+    }
+    function detach(){ IN=null; }
+
+    /* ---- 見た目 ---- */
+    var HTML=''+
+    '<div class="case"><div class="pedal drv">'+
+      '<div class="drv-stripe"></div>'+
+      '<div class="drv-head">'+
+        '<div class="drv-name" id="drvName">OVERDRIVE</div>'+
+        '<div class="drv-sub">GAIN STAGE</div>'+
+      '</div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob big" id="gainKnob" tabindex="0" role="slider" aria-label="GAIN"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">GAIN</div><div class="ctl-val" id="gainVal">45%</div></div>'+
+        '<div class="ctl"><div class="knob" id="drvToneKnob" tabindex="0" role="slider" aria-label="TONE"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">TONE</div><div class="ctl-val" id="drvToneVal">50%</div></div>'+
+        '<div class="ctl"><div class="knob" id="drvLvlKnob" tabindex="0" role="slider" aria-label="LEVEL"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">LEVEL</div><div class="ctl-val" id="drvLvlVal">50%</div></div>'+
+      '</div>'+
+      '<div class="drv-rule"></div>'+
+      '<div class="deck two">'+
+        '<div class="ctl"><div class="knob" id="drvModeKnob" tabindex="0" role="slider" aria-label="MODE"'+
+          ' aria-valuemin="1" aria-valuemax="3"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">MODE</div><div class="ctl-val" id="drvModeVal">OVERDRIVE</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="drvLed"></div>'+
+        '<button class="stomp" id="drvStomp" aria-label="歪みの入切"></button>'+
+        '<div class="stomp-name" id="drvStompName">踏むと入切</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('drvLed');
+      function drawOn(){ led.className=g.on?'indicator on':'indicator'; }
+
+      pctKnob(el('gainKnob'),el('gainVal'),
+        function(){ return g.gain; },
+        function(x){ g.gain=x; keepIt(); apply(); },1);
+      pctKnob(el('drvToneKnob'),el('drvToneVal'),
+        function(){ return g.tone; },
+        function(x){ g.tone=x; keepIt(); apply(); },1);
+      pctKnob(el('drvLvlKnob'),el('drvLvlVal'),
+        function(){ return g.level; },
+        function(x){ g.level=x; keepIt(); apply(); },1);
+      addScale(el('gainKnob'),11,280,['0','100']);
+      addScale(el('drvToneKnob'),11,280,['DARK','BRIGHT']);
+      addScale(el('drvLvlKnob'),11,280,['0','100']);
+
+      selKnob(el('drvModeKnob'),el('drvModeVal'),MODES,function(id){
+        g.mode=id; keepIt();
+        el('drvName').textContent=modeOf().label;
+        apply();
+      },modeIdx);
+      addScale(el('drvModeKnob'),MODES.length,260,null);
+      el('drvName').textContent=modeOf().label;
+
+      el('drvStomp').addEventListener('click',function(){
+        g.on=!g.on; keepIt(); drawOn(); apply();
+        el('drvStompName').textContent=g.on?'踏むと入切':'今は素通り';
+      });
+      drawOn();
+      el('drvStompName').textContent=g.on?'踏むと入切':'今は素通り';
+    }
+
+    definePedal({
+      id:'drive', name:'歪み', plate:'GAIN STAGE', stage:'pre',
+      blurb:'波の頭を潰して倍音を増やす',
+      theme:{top:'#9c6b21',mid:'#7c5217',bot:'#452d09',led:'#ff5a3c'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="12" text-anchor="middle" font-size="6.6">DRIVE</text>'+
+             '<line class="rl" x1="4" y1="18" x2="70" y2="16"/>'+
+             '<g class="kn"><circle cx="20" cy="38" r="10"/><line x1="20" y1="31" x2="20" y2="35"/></g>'+
+             '<g class="kn"><circle cx="45" cy="40" r="7"/><line x1="45" y1="35" x2="45" y2="38"/></g>'+
+             '<g class="kn"><circle cx="61" cy="40" r="7"/><line x1="61" y1="35" x2="61" y2="38"/></g>'+
+             '<g class="kn cr"><circle cx="37" cy="60" r="7"/><line x1="37" y1="55" x2="37" y2="58"/></g>'+
+             '<circle class="ld" cx="37" cy="73" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="88" r="11"/>'+
+           '</g></svg>',
+      help:[
+        '<span class="lead">音の形そのものを変える道具である。</span>'+
+        'ほかの道具が音を返したり揺らしたりするのに対し、'+
+        'これは波の形を作り替え、元の音には無かった成分を生み出す。'+
+        'エレキギターの音を決定づけてきたのは、ほかならぬこの働きである。'+
+        '<span class="hn">仕組み</span>'+
+        '音を大きくしていくと、装置が受け止めきれる限界に達し、波の頭が潰れる。'+
+        'この潰れが倍音を生み、音は太く、長く伸びるようになる。'+
+        '真空管のアンプを大音量で鳴らした時に起きていたことを、'+
+        '小さな箱の中で起こすのがこの道具である。'+
+        'この教材では、アンプの前に置く台の代表としてここに置いている。'+
+        'アンプへ強く押し込むことが役目だからだが、'+
+        'ワウやコンプレッサー、EQなども前に置くことは普通にある。',
+
+        '<span class="hn">潰し方の違い</span>'+
+        'ここでは違いを掴みやすくするため、潰し方を三つに単純化している。<br>'+
+        '<b>OVERDRIVE</b>は、頭を丸く潰す。'+
+        '弱く弾けば歪まず、強く弾けば歪むので、右手の加減が音に出る。'+
+        'ブルースやロックのバッキングで最も使われる。'+
+        '<b>DISTORTION</b>は、より深く潰す。'+
+        '粒がそろい、和音の刻みが安定して聞こえやすい。'+
+        '<b>FUZZ</b>は、強く潰した独特の質感を持つ。'+
+        '毛羽立った、電池が切れかけたような音になる。'+
+        '1960年代に生まれた古い種類で、今も好んで使われる。'+
+        '実際の歪みは回路の作りによって様々で、この三つに収まるものではない。<br>'+
+        '三つを弾き比べると、歪みの量ではなく<b>潰し方</b>で音が変わることが分かる。',
+
+        '<span class="hn">使う場面</span>'+
+        '最も多いのは、アンプの音を一段押し上げる使い方である。'+
+        'ソロの手前で踏み、音量と伸びを足す。'+
+        '歪みを浅くして音量だけ上げれば、押し出しの強い音になる。<br>'+
+        '重ねて使うこともある。'+
+        '軽い歪みを踏みっぱなしにし、その前にもう一台足して深くする。'+
+        '一台で深く歪ませるより、輪郭が残る。<br>'+
+        'なお、歪ませるほど音は長く伸び、弾いていない弦の雑音も大きくなる。'+
+        '深く歪ませる時ほど、左手で弦に触れて止める技が要る。'+
+        '<span class="hn">つまみ</span>'+
+        '<b>GAIN</b>は潰す量、<b>TONE</b>は明るさ、<b>LEVEL</b>は出口の音量。'+
+        'この一台だけで確かめる時は、試し弾きの音色を<b>クリーン</b>にするとよい。'+
+        'ほかの音色にはアンプ側の歪みが含まれている。'
+      ],
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!g.on; },
+      setOn:function(v){ g.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush, detach:detach,
+      state:g, modes:MODES
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     5台目：フランジャー
+     コーラスと仕組みは近いが、遅れがさらに短く（1ミリ秒前後）、
+     出た音を入口へ戻す（FEEDBACK）。原音と重なった時に
+     特定の周波数が打ち消し合い、櫛の歯のような谷が並ぶ。
+     その谷が揺れ動くので、ジェット機のような音になる。
+     ══════════════════════════════════════ */
+  (function(){
+    var RATE_MIN=0.05, RATE_MAX=5.0;
+    var MAN_MIN=0.0004, MAN_MAX=0.008;     /* 遅れの土台 0.4〜8ミリ秒 */
+
+    var f={rate:0.35, depth:0.6, fb:0.55, man:0.35, on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.flanger')||'null');
+      if(sv) for(var k in f) if(sv[k]!==undefined) f[k]=sv[k];
+      f.rate=Math.max(RATE_MIN,Math.min(RATE_MAX,f.rate));
+      ['depth','fb','man'].forEach(function(k){ f[k]=Math.max(0,Math.min(1,f[k])); });
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.flanger',JSON.stringify(f)); }catch(e){} }
+    function manSec(){ return MAN_MIN+(MAN_MAX-MAN_MIN)*f.man; }
+
+    var LFO=null,MOD,DL,FB,FBLP,WET,DRY;
+    function rebuild(){
+      if(!AC) return;
+      DRY=AC.createGain(); DRY.gain.value=1;
+      WET=AC.createGain(); WET.gain.value=0.7;
+      DL=AC.createDelay(0.05);
+      FB=AC.createGain();
+      FBLP=AC.createBiquadFilter(); FBLP.type='lowpass'; FBLP.Q.value=0.5; FBLP.frequency.value=7000;
+      LFO=AC.createOscillator(); LFO.type='sine';
+      MOD=AC.createGain();
+      LFO.connect(MOD); MOD.connect(DL.delayTime);
+      FXIN.connect(DRY); DRY.connect(FXOUT);
+      FXIN.connect(DL);
+      DL.connect(FBLP); FBLP.connect(FB); FB.connect(DL);   /* 戻り */
+      DL.connect(WET); WET.connect(FXOUT);
+      try{ LFO.start(); }catch(e){}
+      apply();
+    }
+    function apply(){
+      if(!LFO) return;
+      LFO.frequency.value=RATE_MIN+(RATE_MAX-RATE_MIN)*f.rate;
+      DL.delayTime.value=manSec();
+      MOD.gain.value=f.depth*Math.min(manSec()*0.9,0.0035);
+      /* 入切で変わるのはうねりの量だけ。原音はいつも素通し */
+      FB.gain.value=f.on?f.fb*0.85:0;
+      DRY.gain.value=1;
+      WET.gain.value=f.on?0.7:0;
+    }
+    function hush(t){
+      if(!WET) return;
+      try{
+        FB.gain.cancelScheduledValues(t); FB.gain.setValueAtTime(0,t);
+        WET.gain.cancelScheduledValues(t);
+        WET.gain.setValueAtTime(Math.max(0.0001,WET.gain.value),t);
+        WET.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
+      }catch(e){}
+    }
+    function detachAudio(){
+      if(!AC) return;
+      LFO=null;
+    }
+
+    var HTML=''+
+    '<div class="case"><div class="pedal flg">'+
+      '<div class="flg-head">'+
+        '<div class="flg-name">FLANGER</div>'+
+        '<div class="flg-sub">JET MODULATION</div>'+
+      '</div>'+
+      '<div class="flg-comb" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob" id="flRate" tabindex="0" role="slider" aria-label="RATE"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">RATE</div><div class="ctl-val" id="flRateV">0.4Hz</div></div>'+
+        '<div class="ctl"><div class="knob" id="flDepth" tabindex="0" role="slider" aria-label="DEPTH"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">DEPTH</div><div class="ctl-val" id="flDepthV">60%</div></div>'+
+      '</div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob" id="flFb" tabindex="0" role="slider" aria-label="FEEDBACK"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">FEEDBACK</div><div class="ctl-val" id="flFbV">55%</div></div>'+
+        '<div class="ctl"><div class="knob" id="flMan" tabindex="0" role="slider" aria-label="MANUAL"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">MANUAL</div><div class="ctl-val" id="flManV">3.0ms</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="flLed"></div>'+
+        '<button class="stomp" id="flStomp" aria-label="フランジャーの入切"></button>'+
+        '<div class="stomp-name" id="flName">踏むと入切</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('flLed');
+      function drawOn(){ led.className=f.on?'indicator on':'indicator'; }
+      pctKnob(el('flRate'),el('flRateV'),function(){ return f.rate; },
+        function(x){ f.rate=x; keepIt(); apply(); },1,
+        function(){ return (Math.round((RATE_MIN+(RATE_MAX-RATE_MIN)*f.rate)*100)/100)+'Hz'; });
+      pctKnob(el('flDepth'),el('flDepthV'),function(){ return f.depth; },
+        function(x){ f.depth=x; keepIt(); apply(); },1);
+      pctKnob(el('flFb'),el('flFbV'),function(){ return f.fb; },
+        function(x){ f.fb=x; keepIt(); apply(); },1);
+      pctKnob(el('flMan'),el('flManV'),function(){ return f.man; },
+        function(x){ f.man=x; keepIt(); apply(); },1,
+        function(){ return (Math.round(manSec()*10000)/10)+'ms'; });
+      addScale(el('flRate'),11,280,['0.05','5.0']);
+      addScale(el('flDepth'),11,280,['0','100']);
+      addScale(el('flFb'),11,280,['0','100']);
+      addScale(el('flMan'),11,280,['0.4','8.0']);
+      el('flStomp').addEventListener('click',function(){
+        f.on=!f.on; keepIt(); drawOn(); apply();
+        el('flName').textContent=f.on?'踏むと入切':'今は素通り';
+      });
+      drawOn();
+      el('flName').textContent=f.on?'踏むと入切':'今は素通り';
+    }
+
+    definePedal({
+      id:'flanger', name:'フランジャー', plate:'JET MODULATION',
+      blurb:'櫛の歯の谷を動かし、うねりを出す',
+      theme:{top:'#8a939a',mid:'#6c757c',bot:'#3b4348',led:'#bfe9ff'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl dark" x="37" y="11" text-anchor="middle" font-size="5.6">FLANGER</text>'+
+             '<g class="cb"><rect x="14" y="15" width="3" height="6"/><rect x="21" y="15" width="3" height="9"/>'+
+             '<rect x="28" y="15" width="3" height="5"/><rect x="35" y="15" width="3" height="10"/>'+
+             '<rect x="42" y="15" width="3" height="6"/><rect x="49" y="15" width="3" height="8"/>'+
+             '<rect x="56" y="15" width="3" height="5"/></g>'+
+             '<g class="kn dark"><circle cx="23" cy="40" r="8"/><line x1="23" y1="34" x2="23" y2="38"/></g>'+
+             '<g class="kn dark"><circle cx="51" cy="40" r="8"/><line x1="51" y1="34" x2="51" y2="38"/></g>'+
+             '<g class="kn dark"><circle cx="23" cy="60" r="8"/><line x1="23" y1="54" x2="23" y2="58"/></g>'+
+             '<g class="kn dark"><circle cx="51" cy="60" r="8"/><line x1="51" y1="54" x2="51" y2="58"/></g>'+
+             '<circle class="ld" cx="37" cy="74" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="89" r="11"/>'+
+           '</g></svg>',
+      help:'コーラスと仕組みは近く、遅れをさらに短く（1ミリ秒前後）した上で、'+
+           '出た音を入口へ戻しています。原音と重なると特定の周波数が打ち消し合い、'+
+           '櫛の歯のような谷が並びます。その谷が動くので、ジェット機のような音になります。<br>'+
+           '<b>RATE</b>（レイト）は動く速さ、<b>DEPTH</b>（デプス）は動く幅、'+
+           '<b>FEEDBACK</b>（フィードバック）は戻す量で、上げるほど谷が鋭くなります。'+
+           '<b>MANUAL</b>（マニュアル）は遅れの土台で、谷の位置そのものが変わります。<br>'+
+           'コーラスと聴き比べてください。厚みが出るのがコーラス、'+
+           'うねりが前に出るのがフランジャーです。',
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!f.on; },
+      setOn:function(v){ f.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush, detach:detachAudio,
+      state:f, manSec:manSec
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     6台目：フェイザー
+     フランジャーが「打ち消し合いの谷」を動かすのに対し、
+     こちらは位相をずらす回路（オールパス）を数段重ね、
+     原音と混ぜた時にできる谷を動かす。段数が多いほど谷が増える。
+     ══════════════════════════════════════ */
+  (function(){
+    var STAGES=[{id:'s4',label:'4 STAGE',n:4},{id:'s8',label:'8 STAGE',n:8}];
+    var RATE_MIN=0.05, RATE_MAX=6.0;
+    var F_MIN=250, F_MAX=1800;             /* 谷が動く範囲（Hz） */
+
+    var p={rate:0.3, depth:0.7, fb:0.35, stage:'s4', on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.phaser')||'null');
+      if(sv) for(var k in p) if(sv[k]!==undefined) p[k]=sv[k];
+      p.rate=Math.max(0,Math.min(1,p.rate));
+      p.depth=Math.max(0,Math.min(1,p.depth));
+      p.fb=Math.max(0,Math.min(1,p.fb));
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.phaser',JSON.stringify(p)); }catch(e){} }
+    function stageOf(){ for(var i=0;i<STAGES.length;i++) if(STAGES[i].id===p.stage) return STAGES[i]; return STAGES[0]; }
+    function stageIdx(){ for(var i=0;i<STAGES.length;i++) if(STAGES[i].id===p.stage) return i; return 0; }
+
+    var LFO=null,MODS=[],APS=[],FB,WET,DRY,_n=0;
+    function rebuild(){
+      if(!AC) return;
+      DRY=AC.createGain(); DRY.gain.value=1;
+      WET=AC.createGain();
+      FB=AC.createGain();
+      LFO=AC.createOscillator(); LFO.type='sine';
+      APS=[]; MODS=[];
+      var n=stageOf().n, prev=null, first=null;
+      for(var i=0;i<n;i++){
+        var ap=AC.createBiquadFilter();
+        ap.type='allpass'; ap.Q.value=0.7; ap.frequency.value=(F_MIN+F_MAX)/2;
+        var mod=AC.createGain();
+        LFO.connect(mod); mod.connect(ap.frequency);
+        if(prev) prev.connect(ap); else first=ap;
+        prev=ap;
+        APS.push(ap); MODS.push(mod);
+      }
+      _n=n;
+      FXIN.connect(DRY); DRY.connect(FXOUT);
+      FXIN.connect(first);
+      prev.connect(FB); FB.connect(first);      /* 戻り。谷が鋭くなる */
+      prev.connect(WET); WET.connect(FXOUT);
+      try{ LFO.start(); }catch(e){}
+      apply();
+    }
+    function apply(){
+      if(!LFO) return;
+      LFO.frequency.value=RATE_MIN+(RATE_MAX-RATE_MIN)*p.rate;
+      var mid=(F_MIN+F_MAX)/2, span=(F_MAX-F_MIN)/2*p.depth;
+      for(var i=0;i<APS.length;i++){
+        /* 段ごとに少しずらすと、谷が横に広がって厚みが出る */
+        APS[i].frequency.value=mid*(1+0.12*(i-(APS.length-1)/2)/APS.length);
+        MODS[i].gain.value=span;
+      }
+      /* ══ 入切で音量を揃える ══
+         位相をずらした音を原音と同じだけ混ぜると、打ち消しの谷ができるぶん
+         全体は少し小さくなる。素通りの時と釣り合うよう、原音側を半分にする。 */
+      FB.gain.value=p.on?p.fb*0.7:0;
+      DRY.gain.value=p.on?0.62:1;
+      WET.gain.value=p.on?0.62:0;
+    }
+    function hush(t){
+      if(!WET) return;
+      try{
+        FB.gain.cancelScheduledValues(t); FB.gain.setValueAtTime(0,t);
+        WET.gain.cancelScheduledValues(t);
+        WET.gain.setValueAtTime(Math.max(0.0001,WET.gain.value),t);
+        WET.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
+      }catch(e){}
+    }
+    function detachAudio(){
+      if(!AC) return;
+      LFO=null;
+    }
+
+    var HTML=''+
+    '<div class="case"><div class="pedal phs">'+
+      '<div class="phs-head">'+
+        '<div class="phs-name">PHASER</div>'+
+        '<div class="phs-sub">PHASE SHIFTER</div>'+
+      '</div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob big" id="phRate" tabindex="0" role="slider" aria-label="RATE"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">RATE</div><div class="ctl-val" id="phRateV">1.8Hz</div></div>'+
+      '</div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob" id="phDepth" tabindex="0" role="slider" aria-label="DEPTH"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">DEPTH</div><div class="ctl-val" id="phDepthV">70%</div></div>'+
+        '<div class="ctl"><div class="knob" id="phFb" tabindex="0" role="slider" aria-label="FEEDBACK"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">FEEDBACK</div><div class="ctl-val" id="phFbV">35%</div></div>'+
+        '<div class="ctl"><div class="knob" id="phStage" tabindex="0" role="slider" aria-label="STAGE"'+
+          ' aria-valuemin="1" aria-valuemax="2"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">STAGE</div><div class="ctl-val" id="phStageV">4 STAGE</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="phLed"></div>'+
+        '<button class="stomp" id="phStomp" aria-label="フェイザーの入切"></button>'+
+        '<div class="stomp-name" id="phName">踏むと入切</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('phLed');
+      function drawOn(){ led.className=p.on?'indicator on':'indicator'; }
+      pctKnob(el('phRate'),el('phRateV'),function(){ return p.rate; },
+        function(x){ p.rate=x; keepIt(); apply(); },1,
+        function(){ return (Math.round((RATE_MIN+(RATE_MAX-RATE_MIN)*p.rate)*100)/100)+'Hz'; });
+      pctKnob(el('phDepth'),el('phDepthV'),function(){ return p.depth; },
+        function(x){ p.depth=x; keepIt(); apply(); },1);
+      pctKnob(el('phFb'),el('phFbV'),function(){ return p.fb; },
+        function(x){ p.fb=x; keepIt(); apply(); },1);
+      addScale(el('phRate'),11,280,['0.05','6.0']);
+      addScale(el('phDepth'),11,280,['0','100']);
+      addScale(el('phFb'),11,280,['0','100']);
+      selKnob(el('phStage'),el('phStageV'),STAGES,function(id){
+        p.stage=id; keepIt();
+        if(current&&current.stop) current.stop();
+        rebuild();                       /* 段数が変わるので組み直す */
+      },stageIdx);
+      addScale(el('phStage'),STAGES.length,260,null);
+      el('phStomp').addEventListener('click',function(){
+        p.on=!p.on; keepIt(); drawOn(); apply();
+        el('phName').textContent=p.on?'踏むと入切':'今は素通り';
+      });
+      drawOn();
+      el('phName').textContent=p.on?'踏むと入切':'今は素通り';
+    }
+
+    definePedal({
+      id:'phaser', name:'フェイザー', plate:'PHASE SHIFTER',
+      blurb:'位相をずらし、谷を動かす',
+      theme:{top:'#6d3050',mid:'#54233d',bot:'#301324',led:'#9dff70'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="12" text-anchor="middle" font-size="6.2">PHASER</text>'+
+             '<g class="kn"><circle cx="37" cy="32" r="10"/><line x1="37" y1="25" x2="37" y2="29"/></g>'+
+             '<g class="kn"><circle cx="16" cy="55" r="7"/><line x1="16" y1="50" x2="16" y2="53"/></g>'+
+             '<g class="kn"><circle cx="37" cy="55" r="7"/><line x1="37" y1="50" x2="37" y2="53"/></g>'+
+             '<g class="kn"><circle cx="58" cy="55" r="7"/><line x1="58" y1="50" x2="58" y2="53"/></g>'+
+             '<circle class="ld" cx="37" cy="70" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="86" r="11"/>'+
+           '</g></svg>',
+      help:'位相をずらす回路を何段も重ね、原音と混ぜています。'+
+           '混ざった時に打ち消し合う場所（谷）ができ、その谷が動くのでうねって聞こえます。<br>'+
+           '<b>RATE</b>（レイト）は動く速さ、<b>DEPTH</b>（デプス）は動く幅、'+
+           '<b>FEEDBACK</b>（フィードバック）は戻す量で、上げるほど谷が鋭くなります。'+
+           '<b>STAGE</b>（ステージ）は段数です。段が増えると谷の数が増え、音色のクセが複雑になります。'+
+           '強い弱いというより、変化の込み入り方が変わると捉えてください。<br>'+
+           'フランジャーと似て聞こえますが、フランジャーは遅れによる櫛状の谷、'+
+           'フェイザーは位相ずれによる数個の谷です。'+
+           'ここでは仕組みを掴みやすくするため、段数と谷の関係を単純にして扱っています。',
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!p.on; },
+      setOn:function(v){ p.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush, detach:detachAudio,
+      state:p, stages:STAGES, stageCount:function(){ return _n; }
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     7台目：トレモロ
+     音量そのものを揺らす。仕組みが最も単純で、
+     「揺れ」を耳で掴む最初の1台に向く。
+     ══════════════════════════════════════ */
+  (function(){
+    var WAVES=[
+      {id:'sine',  label:'SINE',   type:'sine'},      /* なめらかに寄せては返す */
+      {id:'tri',   label:'TRIANGLE',type:'triangle'}, /* 一定の速さで上下する */
+      {id:'square',label:'SQUARE', type:'square'}     /* 出る・切れるがはっきりする */
+    ];
+    var RATE_MIN=0.3, RATE_MAX=12.0;
+
+    var m={rate:0.35, depth:0.6, level:0.6, wave:'sine', on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.tremolo')||'null');
+      if(sv) for(var k in m) if(sv[k]!==undefined) m[k]=sv[k];
+      ['rate','depth','level'].forEach(function(k){ m[k]=Math.max(0,Math.min(1,m[k])); });
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.tremolo',JSON.stringify(m)); }catch(e){} }
+    function waveOf(){ for(var i=0;i<WAVES.length;i++) if(WAVES[i].id===m.wave) return WAVES[i]; return WAVES[0]; }
+    function waveIdx(){ for(var i=0;i<WAVES.length;i++) if(WAVES[i].id===m.wave) return i; return 0; }
+    function rateHz(){ return RATE_MIN+(RATE_MAX-RATE_MIN)*m.rate; }
+
+    var LFO=null,MOD,AMP,OUT;
+    function rebuild(){
+      if(!AC) return;
+      AMP=AC.createGain();
+      OUT=AC.createGain();
+      LFO=AC.createOscillator();
+      MOD=AC.createGain();
+      LFO.connect(MOD); MOD.connect(AMP.gain);
+      FXIN.connect(AMP); AMP.connect(OUT); OUT.connect(FXOUT);
+      try{ LFO.start(); }catch(e){}
+      apply();
+    }
+    function apply(){
+      if(!LFO) return;
+      LFO.type=waveOf().type;
+      LFO.frequency.value=rateHz();
+      /* 揺れの中心を下げ、その幅ぶんを上下させる。切れても音は消えきらない */
+      /* ══ 入切で音量を揃える ══
+         揺れの中心を1−幅/2に置くと、揺れの平均は素通りより小さくなる。
+         その分を戻し、入切で平均の大きさが変わらないようにする。
+         LEVELは最終音量として、動かした時だけ全体を変える。 */
+      var d=m.on?m.depth*0.9:0;
+      var comp=(d>0)?1/(1-d/2):1;
+      AMP.gain.value=(1-d/2)*comp;
+      MOD.gain.value=(d/2)*comp;
+      OUT.gain.value=0.55+0.9*m.level;
+    }
+    function hush(t){
+      if(!OUT) return;
+      try{ OUT.gain.cancelScheduledValues(t); OUT.gain.setValueAtTime(OUT.gain.value,t); }catch(e){}
+    }
+    function detachAudio(){
+      if(!AC) return;
+      LFO=null;
+    }
+
+    var HTML=''+
+    '<div class="case"><div class="pedal trm">'+
+      '<div class="trm-head">'+
+        '<div class="trm-name">TREMOLO</div>'+
+        '<div class="trm-sub">AMPLITUDE</div>'+
+      '</div>'+
+      '<div class="trm-lamp" id="trmLamp" aria-hidden="true"><i></i></div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob" id="trRate" tabindex="0" role="slider" aria-label="RATE"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">RATE</div><div class="ctl-val" id="trRateV">4.4Hz</div></div>'+
+        '<div class="ctl"><div class="knob" id="trDepth" tabindex="0" role="slider" aria-label="DEPTH"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">DEPTH</div><div class="ctl-val" id="trDepthV">60%</div></div>'+
+        '<div class="ctl"><div class="knob" id="trLvl" tabindex="0" role="slider" aria-label="LEVEL"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">LEVEL</div><div class="ctl-val" id="trLvlV">60%</div></div>'+
+      '</div>'+
+      '<div class="trm-rule"></div>'+
+      '<div class="deck two">'+
+        '<div class="ctl"><div class="knob" id="trWave" tabindex="0" role="slider" aria-label="WAVE"'+
+          ' aria-valuemin="1" aria-valuemax="3"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">WAVE</div><div class="ctl-val" id="trWaveV">SINE</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="trLed"></div>'+
+        '<button class="stomp" id="trStomp" aria-label="トレモロの入切"></button>'+
+        '<div class="stomp-name" id="trName">踏むと入切</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    var anim=null;
+    var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('trLed'), lampDot=el('trmLamp').firstChild;
+      function drawOn(){ led.className=m.on?'indicator on':'indicator'; }
+      /* 明かりが揺れの形どおりに明滅する。音量の揺れを目で見せる */
+      function pulse(){
+        if(!document.body.contains(lampDot)){ if(anim) clearInterval(anim); anim=null; return; }
+        var t=(Date.now()/1000)*rateHz(), ph=(t-Math.floor(t))*2*Math.PI, w=waveOf().id, v;
+        if(w==='square') v=Math.sin(ph)>=0?1:-1;
+        else if(w==='tri') v=2/Math.PI*Math.asin(Math.sin(ph));
+        else v=Math.sin(ph);
+        var d=m.on?m.depth*0.9:0;
+        lampDot.style.opacity=String(Math.max(0.06,(1-d/2)+v*d/2));
+      }
+      if(anim) clearInterval(anim);
+      if(!reduce) anim=setInterval(pulse,40);
+      pulse();
+
+      pctKnob(el('trRate'),el('trRateV'),function(){ return m.rate; },
+        function(x){ m.rate=x; keepIt(); apply(); },1,
+        function(){ return (Math.round(rateHz()*10)/10)+'Hz'; });
+      pctKnob(el('trDepth'),el('trDepthV'),function(){ return m.depth; },
+        function(x){ m.depth=x; keepIt(); apply(); },1);
+      pctKnob(el('trLvl'),el('trLvlV'),function(){ return m.level; },
+        function(x){ m.level=x; keepIt(); apply(); },1);
+      addScale(el('trRate'),11,280,['0.3','12']);
+      addScale(el('trDepth'),11,280,['0','100']);
+      addScale(el('trLvl'),11,280,['0','100']);
+      selKnob(el('trWave'),el('trWaveV'),WAVES,function(id){
+        m.wave=id; keepIt(); apply();
+      },waveIdx);
+      addScale(el('trWave'),WAVES.length,260,null);
+      el('trStomp').addEventListener('click',function(){
+        m.on=!m.on; keepIt(); drawOn(); apply();
+        el('trName').textContent=m.on?'踏むと入切':'今は素通り';
+      });
+      drawOn();
+      el('trName').textContent=m.on?'踏むと入切':'今は素通り';
+    }
+
+    definePedal({
+      id:'tremolo', name:'トレモロ', plate:'AMPLITUDE',
+      blurb:'音量そのものを揺らす',
+      theme:{top:'#8d3f2c',mid:'#6f3021',bot:'#3d1a11',led:'#ff8a6b'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="11" text-anchor="middle" font-size="5.6">TREMOLO</text>'+
+             '<rect class="lamp" x="27" y="15" width="20" height="6" rx="3"/>'+
+             '<g class="kn"><circle cx="17" cy="38" r="8"/><line x1="17" y1="32" x2="17" y2="36"/></g>'+
+             '<g class="kn"><circle cx="37" cy="38" r="8"/><line x1="37" y1="32" x2="37" y2="36"/></g>'+
+             '<g class="kn"><circle cx="57" cy="38" r="8"/><line x1="57" y1="32" x2="57" y2="36"/></g>'+
+             '<g class="kn cr"><circle cx="37" cy="58" r="7"/><line x1="37" y1="53" x2="37" y2="56"/></g>'+
+             '<circle class="ld" cx="37" cy="72" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="88" r="11"/>'+
+           '</g></svg>',
+      help:'音量そのものを上げ下げしています。'+
+           'ここでは、音量だけを揺らす基本的なトレモロとして扱っています。'+
+           '実際の機種では波形や回路によって聞こえ方が変わります。<br>'+
+           '<b>RATE</b>（レイト）は揺れの速さ、<b>DEPTH</b>（デプス）は揺れの幅、'+
+           '<b>LEVEL</b>（レベル）は出口の音量です。'+
+           '面の明かりが揺れの形どおりに明滅しますので、目でも掴めます。<br>'+
+           '<b>WAVE</b>（ウェーブ）で揺れの形が変わります。'+
+           '<b>SINE</b>（サイン）はなめらかに寄せては返し、'+
+           '<b>TRIANGLE</b>（トライアングル）は一定の速さで上下し、'+
+           '<b>SQUARE</b>（スクエア）は出る・切れるがはっきり分かれます。',
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!m.on; },
+      setOn:function(v){ m.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush,
+      detach:function(){ if(anim){ clearInterval(anim); anim=null; } detachAudio(); },
+      state:m, waves:WAVES, rateHz:rateHz
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     8台目：ワウ
+     山（強調される帯）を一つ作り、その位置を踏み板で動かす。
+     かかと側で低く、つま先側で高い。人が「ワウ」と言う時の
+     口の形の変化に近い。
+     この1台だけ、操作の中心が踏み板そのものになる。
+     ══════════════════════════════════════ */
+  (function(){
+    var F_MIN=400, F_MAX=2200;          /* 山の動く範囲（Hz） */
+    var AUTO_HZ=1.1;                    /* オートで往復する速さ */
+
+    var w={pos:0.35, auto:false, on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.wah')||'null');
+      if(sv) for(var k in w) if(sv[k]!==undefined) w[k]=sv[k];
+      w.pos=Math.max(0,Math.min(1,w.pos));
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.wah',JSON.stringify(w)); }catch(e){} }
+    function freqAt(pos){ return F_MIN*Math.pow(F_MAX/F_MIN,pos); }   /* 耳に合わせて対数で動かす */
+
+    var PEAK=null,WET,DRY,OUT,LFO=null,LMOD=null;
+    function rebuild(){
+      if(!AC) return;
+      DRY=AC.createGain();
+      WET=AC.createGain();
+      OUT=AC.createGain(); OUT.gain.value=1;
+      PEAK=AC.createBiquadFilter();
+      PEAK.type='bandpass'; PEAK.Q.value=3.2;
+      FXIN.connect(DRY); DRY.connect(OUT);
+      FXIN.connect(PEAK); PEAK.connect(WET); WET.connect(OUT);
+      OUT.connect(FXOUT);
+      apply();
+    }
+    /* オートは、踏み板を勝手に動かしているのと同じ扱いにする。
+       音だけ揺らすのではなく板も動かすので、目と耳が一致する。 */
+    function apply(){
+      if(!PEAK) return;
+      PEAK.frequency.value=freqAt(w.pos);
+      /* 山を強く出しつつ、原音も少し残す。全部を山にすると細くなる */
+      WET.gain.value=w.on?1.5:0;
+      DRY.gain.value=w.on?0.25:1;
+      OUT.gain.value=w.on?0.9:1;
+    }
+    function hush(t){
+      if(!WET) return;
+      try{ WET.gain.cancelScheduledValues(t); WET.gain.setValueAtTime(WET.gain.value,t); }catch(e){}
+    }
+    function detachAudio(){
+      if(!AC) return;
+      PEAK=null;
+    }
+
+    /* ---- 見た目 ---- */
+    var HTML=''+
+    '<div class="wah-wrap">'+
+      '<div class="wah-base">'+
+        '<div class="wah-side"></div>'+
+        /* 踏み板。上下にドラッグすると傾く */
+        '<div class="wah-pedal" id="wahPedal" tabindex="0" role="slider"'+
+          ' aria-label="踏み板" aria-valuemin="0" aria-valuemax="100" aria-valuenow="35">'+
+          '<div class="wah-tread"></div>'+
+          '<div class="wah-plate">WAH</div>'+
+        '</div>'+
+        '<div class="wah-toe">つま先</div>'+
+        '<div class="wah-heel">かかと</div>'+
+      '</div>'+
+      '<div class="wah-read">'+
+        '<span class="wah-read-n" id="wahHz">700</span> Hz'+
+        '<span class="wah-read-s" id="wahPos">踏み具合 35%</span>'+
+      '</div>'+
+      '<div class="wah-row">'+
+        '<div class="stomp-cell">'+
+          '<div class="indicator" id="wahLed"></div>'+
+          '<button class="stomp small" id="wahStomp" aria-label="ワウの入切"></button>'+
+          '<div class="stomp-name" id="wahName">踏むと入切</div>'+
+        '</div>'+
+        '<div class="stomp-cell">'+
+          '<div class="indicator" id="wahAutoLed"></div>'+
+          '<button class="stomp small" id="wahAuto" aria-label="オートの入切"></button>'+
+          '<div class="stomp-name" id="wahAutoName">オート</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+    var anim=null;
+    var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var pedal=el('wahPedal'), led=el('wahLed'), aLed=el('wahAutoLed');
+
+      function draw(){
+        /* かかと側＝寝ている（0度）、つま先側＝踏み込んでいる（-26度） */
+        pedal.style.transform='rotate('+(-26*w.pos)+'deg)';
+        pedal.setAttribute('aria-valuenow',String(Math.round(w.pos*100)));
+        el('wahHz').textContent=String(Math.round(freqAt(w.pos)));
+        el('wahPos').textContent='踏み具合 '+Math.round(w.pos*100)+'%';
+        led.className=w.on?'indicator on':'indicator';
+        aLed.className=w.auto?'indicator on':'indicator';
+        apply();
+      }
+      function setPos(x){ w.pos=Math.max(0,Math.min(1,x)); keepIt(); draw(); }
+
+      /* 踏み板のドラッグ。上へ動かすと踏み込む */
+      var drag=false,lastY=0;
+      pedal.addEventListener('pointerdown',function(e){
+        drag=true; lastY=e.clientY;
+        if(pedal.setPointerCapture) pedal.setPointerCapture(e.pointerId);
+        if(w.auto){ w.auto=false; keepIt(); }      /* 手で動かしたらオートは切れる */
+        e.preventDefault();
+      });
+      pedal.addEventListener('pointermove',function(e){
+        if(!drag) return;
+        setPos(w.pos+(lastY-e.clientY)*0.012);
+        lastY=e.clientY;
+      });
+      pedal.addEventListener('pointerup',function(){ drag=false; });
+      pedal.addEventListener('pointercancel',function(){ drag=false; });
+      pedal.addEventListener('keydown',function(e){
+        if(e.key==='ArrowUp'||e.key==='ArrowRight'){ setPos(w.pos+0.05); e.preventDefault(); }
+        if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ setPos(w.pos-0.05); e.preventDefault(); }
+      });
+
+      el('wahStomp').addEventListener('click',function(){
+        w.on=!w.on; keepIt(); draw();
+        el('wahName').textContent=w.on?'踏むと入切':'今は素通り';
+      });
+      el('wahAuto').addEventListener('click',function(){
+        w.auto=!w.auto; keepIt(); draw();
+        el('wahAutoName').textContent=w.auto?'オート 入':'オート';
+      });
+
+      /* オートの間は板そのものを往復させる */
+      function tick(){
+        if(!document.body.contains(pedal)){ if(anim) clearInterval(anim); anim=null; return; }
+        if(!w.auto) return;
+        var t=(Date.now()/1000)*AUTO_HZ;
+        var ph=(t-Math.floor(t))*2*Math.PI;
+        w.pos=0.5-0.45*Math.cos(ph);
+        draw();
+      }
+      if(anim) clearInterval(anim);
+      if(!reduce) anim=setInterval(tick,40);
+
+      el('wahName').textContent=w.on?'踏むと入切':'今は素通り';
+      el('wahAutoName').textContent=w.auto?'オート 入':'オート';
+      draw();
+    }
+
+    definePedal({
+      id:'wah', name:'ワウ', plate:'WAH',
+      blurb:'踏み板で音の山を動かす',
+      theme:{top:'#2f3338',mid:'#23272b',bot:'#111417',led:'#ff4d4d'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<rect class="tread" x="10" y="10" width="54" height="56" rx="5" transform="rotate(-6 37 38)"/>'+
+             '<g class="trl" transform="rotate(-6 37 38)">'+
+             '<line x1="16" y1="20" x2="58" y2="20"/><line x1="16" y1="28" x2="58" y2="28"/>'+
+             '<line x1="16" y1="36" x2="58" y2="36"/><line x1="16" y1="44" x2="58" y2="44"/>'+
+             '<line x1="16" y1="52" x2="58" y2="52"/><line x1="16" y1="60" x2="58" y2="60"/></g>'+
+             '<text class="pl" x="37" y="82" text-anchor="middle" font-size="6.6">WAH</text>'+
+             '<circle class="ld" cx="37" cy="93" r="2.4"/>'+
+           '</g></svg>',
+      help:'強調される帯を踏み板で動かしています。'+
+           'ここでは仕組みを分かりやすくするため、その帯を一つの山として表しています。'+
+           '実際のワウは、周波数の特性全体が動くフィルターです。'+
+           'かかと側では低い帯が、つま先側では高い帯が持ち上がります。'+
+           '人が「ワウ」と言う時の口の形の変化に近い動きです。<br>'+
+           '<b>踏み板を上下にドラッグ</b>してください。指を離した位置に留まります。'+
+           '今の山の高さはヘルツで表示されます（400〜2200Hz）。<br>'+
+           '左のフットスイッチで入切、右で<b>オート</b>になります。'+
+           'オートの間は板が勝手に往復しますので、両手が空いた状態で効果を確かめられます。'+
+           '板を手で動かすとオートは切れます。',
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!w.on; },
+      setOn:function(v){ w.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush,
+      detach:function(){ if(anim){ clearInterval(anim); anim=null; } detachAudio(); },
+      state:w, freqAt:freqAt
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     9台目：ピッチシフター
+     音程を変えた声を作り、原音に重ねてハモリにする。
+     ブラウザには音程だけを変える機能が無いので、
+     音を細かく刻んで並べ直す（粒に切って重ねる）方式で作る。
+     金属質な揺らぎが残るが、実機の安価な機種も同じ理屈である。
+     ══════════════════════════════════════ */
+  (function(){
+    /* 使う音程の組み。半音の数で持つ。2つ入っているものは2声 */
+    /* ══ 音程の並び ══
+       度数（3rd、5th）と方向（UP／DOWN）で表す。実機で広く使われる書き方。
+       半音の数も併せて出し、度数と半音の対応がその場で分かるようにする。
+       短3度（3半音）と長3度（4半音）を別に置くのは、ハモリを教える上で要るため。 */
+    var PRESETS=[
+      {id:'oct_dn',  label:'1 OCT DOWN', ja:'1オクターブ下', semis:[-12]},
+      {id:'5th_dn',  label:'5th DOWN',   ja:'完全5度下',     semis:[-7]},
+      {id:'4th_dn',  label:'4th DOWN',   ja:'完全4度下',     semis:[-5]},
+      {id:'2nd_up',  label:'2nd UP',     ja:'長2度上',       semis:[2]},
+      {id:'m3rd_up', label:'m3rd UP',    ja:'短3度上',       semis:[3]},
+      {id:'3rd_up',  label:'3rd UP',     ja:'長3度上',       semis:[4]},
+      {id:'4th_up',  label:'4th UP',     ja:'完全4度上',     semis:[5]},
+      {id:'5th_up',  label:'5th UP',     ja:'完全5度上',     semis:[7]},
+      {id:'oct_up',  label:'1 OCT UP',   ja:'1オクターブ上', semis:[12]},
+      {id:'triad',   label:'3rd + 5th',  ja:'長3度上と完全5度上', semis:[4,7]},
+      {id:'m_triad', label:'m3rd + 5th', ja:'短3度上と完全5度上', semis:[3,7]},
+      {id:'oct_2',   label:'1 OCT ±',    ja:'1オクターブ上と下',  semis:[-12,12]}
+    ];
+    var GRAIN=0.09;                 /* 粒の長さ（秒）。長いと滑らか、短いと反応が速い */
+
+    var p={preset:'3rd_up', mix:0.5, level:0.5, fine:0.5, on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.pitch')||'null');
+      if(sv) for(var k in p) if(sv[k]!==undefined) p[k]=sv[k];
+      ['mix','level','fine'].forEach(function(k){ p[k]=Math.max(0,Math.min(1,p[k])); });
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.pitch',JSON.stringify(p)); }catch(e){} }
+    function presetOf(){ for(var i=0;i<PRESETS.length;i++) if(PRESETS[i].id===p.preset) return PRESETS[i]; return PRESETS[5]; }
+    function presetIdx(){ for(var i=0;i<PRESETS.length;i++) if(PRESETS[i].id===p.preset) return i; return 5; }
+    function cents(){ return Math.round((p.fine-0.5)*100); }        /* −50〜+50セント */
+    function ratioOf(semi){ return Math.pow(2,(semi+cents()/100)/12); }
+
+    /* ══ 粒に切って並べ直す ══
+       遅れの長さを一定の速さで伸ばし続ければ音は下がり、縮め続ければ上がる。
+       ただし端に着いた時に飛ぶので、2本を半周ずらして交互に鳴らし、
+       山なりの音量で受け渡す。継ぎ目が聞こえないのはそのため。 */
+    function sawWave(shifted){
+      var n=24, real=new Float32Array(n), imag=new Float32Array(n);
+      for(var i=1;i<n;i++){
+        var v=(i%2?1:-1)*2/(i*Math.PI);          /* のこぎり波 */
+        imag[i]=shifted?v*((i%2)?-1:1):v;        /* 半周ずらす */
+      }
+      return AC.createPeriodicWave(real,imag,{disableNormalization:true});
+    }
+    function cosWave(neg){
+      var real=new Float32Array([0,neg?-1:1]), imag=new Float32Array(2);
+      return AC.createPeriodicWave(real,imag,{disableNormalization:true});
+    }
+    function constSource(v){
+      if(AC.createConstantSource){
+        var cs=AC.createConstantSource(); cs.offset.value=v; return cs;
+      }
+      /* 古い環境向け。直流をこしらえて流す */
+      var b=AC.createBuffer(1,128,AC.sampleRate), d=b.getChannelData(0);
+      for(var i=0;i<128;i++) d[i]=1;
+      var s=AC.createBufferSource(); s.buffer=b; s.loop=true;
+      var g=AC.createGain(); g.gain.value=v; s.connect(g);
+      s.__out=g; return s;
+    }
+
+    var IN=null,DRY,VOICE,OUT,parts=[];
+    function buildVoice(semi,dest){
+      var r=ratioOf(semi);
+      var hz=Math.abs(1-r)/GRAIN;
+      var sum=AC.createGain(); sum.gain.value=0.9; sum.connect(dest);
+      for(var i=0;i<2;i++){
+        var dl=AC.createDelay(GRAIN*2);
+        dl.delayTime.value=GRAIN/2;
+        var g=AC.createGain(); g.gain.value=0;
+        IN.connect(dl); dl.connect(g); g.connect(sum);
+
+        var saw=AC.createOscillator();
+        saw.setPeriodicWave(sawWave(i===1));
+        saw.frequency.value=hz;
+        var amp=AC.createGain();
+        amp.gain.value=(1-r>0?1:-1)*GRAIN/2;
+        saw.connect(amp); amp.connect(dl.delayTime);
+
+        var win=AC.createOscillator();
+        win.setPeriodicWave(cosWave(i===1));
+        win.frequency.value=hz;
+        var wg=AC.createGain(); wg.gain.value=0.5;
+        win.connect(wg); wg.connect(g.gain);
+        var dc=constSource(0.5);
+        (dc.__out||dc).connect(g.gain);
+
+        try{ saw.start(); win.start(); dc.start(); }catch(e){}
+        parts.push(saw,win,dc);
+      }
+      return sum;
+    }
+    function rebuild(){
+      if(!AC) return;
+      stopParts();
+      IN=AC.createGain();
+      DRY=AC.createGain(); DRY.gain.value=1;     /* 原音は必ず残す（ハモリ） */
+      VOICE=AC.createGain();
+      OUT=AC.createGain();
+      FXIN.connect(IN);
+      IN.connect(DRY); DRY.connect(OUT);
+      var semis=presetOf().semis;
+      for(var i=0;i<semis.length;i++) buildVoice(semis[i],VOICE);
+      VOICE.connect(OUT); OUT.connect(FXOUT);
+      apply();
+    }
+    function stopParts(){
+      parts.forEach(function(n){ try{ n.stop(); }catch(e){} });
+      parts=[];
+    }
+    function apply(){
+      if(!OUT) return;
+      /* ══ 入切で音量を揃える ══
+         原音はいつも素通し。MIXは重ねる声の量、LEVELは最終音量。
+         入切そのものでは全体の大きさを変えない。 */
+      DRY.gain.value=1;
+      VOICE.gain.value=p.on?p.mix*(1/Math.max(1,presetOf().semis.length)):0;
+      OUT.gain.value=0.55+0.9*p.level;
+    }
+    function hush(t){
+      if(!VOICE) return;
+      try{ VOICE.gain.cancelScheduledValues(t); VOICE.gain.setValueAtTime(VOICE.gain.value,t); }catch(e){}
+    }
+    function detachAudio(){
+      if(!AC) return;
+      stopParts();
+      OUT=null;
+    }
+
+    var HTML=''+
+    '<div class="case"><div class="pedal pit">'+
+      '<div class="pit-head">'+
+        '<div class="pit-name">PITCH SHIFTER</div>'+
+        '<div class="pit-sub">HARMONY</div>'+
+      '</div>'+
+      '<div class="pit-win">'+
+        '<div class="pit-row">'+
+          '<span class="pit-deg" id="pitDeg">3rd UP</span>'+
+          '<span class="pit-fine" id="pitFine">±0セント</span>'+
+        '</div>'+
+        '<div class="pit-row2">'+
+          '<span class="pit-ja" id="pitJa">長3度上</span>'+
+          '<span class="pit-semi" id="pitSemi">+4半音</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="deck two">'+
+        '<div class="ctl"><div class="knob big" id="pitPreset" tabindex="0" role="slider" aria-label="PITCH"'+
+          ' aria-valuemin="1" aria-valuemax="7"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">PITCH</div><div class="ctl-val" id="pitPresetV">3rd UP</div></div>'+
+        '<div class="ctl"><div class="knob" id="pitFineK" tabindex="0" role="slider" aria-label="FINE"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">FINE</div><div class="ctl-val" id="pitFineV">±0</div></div>'+
+      '</div>'+
+      '<div class="deck two">'+
+        '<div class="ctl"><div class="knob" id="pitMix" tabindex="0" role="slider" aria-label="MIX"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">MIX</div><div class="ctl-val" id="pitMixV">50%</div></div>'+
+        '<div class="ctl"><div class="knob" id="pitLvl" tabindex="0" role="slider" aria-label="LEVEL"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">LEVEL</div><div class="ctl-val" id="pitLvlV">50%</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="pitLed"></div>'+
+        '<button class="stomp" id="pitStomp" aria-label="ピッチシフターの入切"></button>'+
+        '<div class="stomp-name" id="pitName">踏むと入切</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('pitLed');
+      function drawWin(){
+        var pr=presetOf();
+        el('pitDeg').textContent=pr.label;
+        el('pitJa').textContent=pr.ja;
+        el('pitSemi').textContent=pr.semis.map(function(x){ return (x>0?'+':'')+x; }).join(' / ')+'半音';
+        var c=cents();
+        el('pitFine').textContent=(c>0?'+':(c<0?'':'±'))+c+'セント';
+        el('pitFineV').textContent=(c>0?'+':(c<0?'':'±'))+c;
+        led.className=p.on?'indicator on':'indicator';
+      }
+      pctKnob(el('pitMix'),el('pitMixV'),function(){ return p.mix; },
+        function(x){ p.mix=x; keepIt(); apply(); },1);
+      pctKnob(el('pitLvl'),el('pitLvlV'),function(){ return p.level; },
+        function(x){ p.level=x; keepIt(); apply(); },1);
+      pctKnob(el('pitFineK'),el('pitFineV'),function(){ return p.fine; },
+        function(x){
+          p.fine=x; keepIt(); drawWin();
+          if(current&&current.stop) current.stop();
+          rebuild();                       /* 音程が変わるので組み直す */
+        },1,
+        function(){ var c=cents(); return (c>0?'+':(c<0?'':'±'))+c; });
+      addScale(el('pitMix'),11,280,['0','100']);
+      addScale(el('pitLvl'),11,280,['0','100']);
+      addScale(el('pitFineK'),11,280,['-50','+50']);
+
+      selKnob(el('pitPreset'),el('pitPresetV'),PRESETS,function(id){
+        p.preset=id; keepIt(); drawWin();
+        if(current&&current.stop) current.stop();
+        rebuild();
+      },presetIdx);
+      addScale(el('pitPreset'),PRESETS.length,260,null);
+
+      el('pitStomp').addEventListener('click',function(){
+        p.on=!p.on; keepIt(); drawWin(); apply();
+        el('pitName').textContent=p.on?'踏むと入切':'今は素通り';
+      });
+      drawWin();
+      el('pitName').textContent=p.on?'踏むと入切':'今は素通り';
+    }
+
+    definePedal({
+      id:'pitch', name:'ピッチシフター', plate:'HARMONY',
+      blurb:'音程を変えた声を重ねる',
+      theme:{top:'#33508f',mid:'#283f71',bot:'#152241',led:'#eaf6ff'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="10" text-anchor="middle" font-size="6.6">PITCH</text>'+
+             '<rect class="sc" x="7" y="13" width="60" height="15" rx="2"/>'+
+             '<text class="sct" x="60" y="24" text-anchor="end" font-size="6.5">3rd</text>'+
+             '<g class="kn"><circle cx="22" cy="43" r="9"/><line x1="22" y1="37" x2="22" y2="40"/></g>'+
+             '<g class="kn"><circle cx="52" cy="43" r="7"/><line x1="52" y1="38" x2="52" y2="41"/></g>'+
+             '<g class="kn"><circle cx="22" cy="62" r="7"/><line x1="22" y1="57" x2="22" y2="60"/></g>'+
+             '<g class="kn"><circle cx="52" cy="62" r="7"/><line x1="52" y1="57" x2="52" y2="60"/></g>'+
+             '<circle class="ld" cx="37" cy="75" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="89" r="11"/>'+
+           '</g></svg>',
+      help:'音程を変えた声を作り、原音に重ねています。原音は常に残りますので、'+
+           '出てくるのはハモリです。<br>'+
+           '<b>PITCH</b>（ピッチ）で音程を選びます。表し方は実機に倣って度数と向きで、'+
+           'この教材では<b>3rd</b>を長3度、<b>m3rd</b>を短3度としています。'+
+           '<b>3rd UP</b>なら長3度上、<b>5th DOWN</b>なら完全5度下です。'+
+           '窓には度数・日本語・半音の数が並んで出ますので、'+
+           '「長3度上とは4半音」という対応がその場で分かります。'+
+           '<b>m3rd UP</b>（短3度上・3半音）と<b>3rd UP</b>（長3度上・4半音）を弾き比べると、'+
+           'わずか半音の違いで、暗くも明るくも響くことが分かります。'+
+           '<b>3rd + 5th</b>のように2声を選べば、和音になります。<br>'+
+           '<b>FINE</b>（ファイン）はセント単位の微調整、<b>MIX</b>（ミックス）は重ねる声の音量、'+
+           '<b>LEVEL</b>（レベル）は出口の音量です。<br>'+
+           'ブラウザだけで音程を変えるため、ここでは音を細かく刻み、'+
+           '遅れの長さを動かす簡易な方式にしています。'+
+           'そのため金属質な揺らぎが残ります。実機の方式は様々で、これと同じとは限りません。'+
+           '試し弾きは<b>ソロ</b>か<b>ジグザグ</b>（単音のフレーズ）でお試しください。',
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!p.on; },
+      setOn:function(v){ p.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush,
+      detach:detachAudio,
+      state:p, presets:PRESETS, cents:cents, ratioOf:ratioOf
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     10台目：コンプレッサー
+     大きい音を押さえ込み、音量の凸凹をならす。
+     効果が耳で掴みにくい種類なので、
+     「今どれだけ押さえ込まれているか」を目で見せる。
+     ══════════════════════════════════════ */
+  (function(){
+    var m={amount:0.5, attack:0.4, level:0.5, on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.comp')||'null');
+      if(sv) for(var k in m) if(sv[k]!==undefined) m[k]=sv[k];
+      ['amount','attack','level'].forEach(function(k){ m[k]=Math.max(0,Math.min(1,m[k])); });
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.comp',JSON.stringify(m)); }catch(e){} }
+    /* SUSTAIN を上げるほど、低い音量から強く押さえ込む */
+    function threshDb(){ return -6-36*m.amount; }
+    function ratio(){ return 2+14*m.amount; }
+    function attackSec(){ return 0.001+0.049*m.attack; }
+
+    var COMP=null,OUT,BY;
+    function rebuild(){
+      if(!AC) return;
+      COMP=AC.createDynamicsCompressor?AC.createDynamicsCompressor():null;
+      OUT=AC.createGain();
+      BY=AC.createGain();
+      FXIN.connect(BY); BY.connect(OUT);
+      if(COMP){ FXIN.connect(COMP); COMP.connect(OUT); }
+      OUT.connect(FXOUT);
+      apply();
+    }
+    function apply(){
+      if(!OUT) return;
+      if(COMP){
+        COMP.threshold.value=threshDb();
+        COMP.ratio.value=ratio();
+        COMP.knee.value=6;
+        COMP.attack.value=attackSec();
+        COMP.release.value=0.25;
+      }
+      /* 押さえ込んだぶん音量が下がるので、LEVEL で持ち上げて使う */
+      /* 入切で変わるのは押さえ込みの有無だけ。LEVELは最終音量として常に効く */
+      var on=m.on&&!!COMP;
+      OUT.gain.value=0.7+1.1*m.level;
+      BY.gain.value=on?0:1;
+      if(COMP) COMP.__active=on;
+    }
+    function reduction(){
+      /* 今どれだけ押さえ込まれているか（dB、0以下） */
+      if(!COMP||!m.on) return 0;
+      return (typeof COMP.reduction==='number')?COMP.reduction
+            :(COMP.reduction&&typeof COMP.reduction.value==='number'?COMP.reduction.value:0);
+    }
+    function hush(t){
+      if(!OUT) return;
+      try{ OUT.gain.cancelScheduledValues(t); OUT.gain.setValueAtTime(OUT.gain.value,t); }catch(e){}
+    }
+    function detachAudio(){
+      if(!AC) return;
+      COMP=null;
+    }
+
+    var HTML=''+
+    '<div class="case"><div class="pedal cmp">'+
+      '<div class="cmp-head">'+
+        '<div class="cmp-name">COMPRESSOR</div>'+
+        '<div class="cmp-sub">DYNAMICS</div>'+
+      '</div>'+
+      /* 押さえ込みの量を見せる目盛。右へ振れるほど強く押さえている */
+      '<div class="cmp-meter">'+
+        '<div class="cmp-scale"><i></i><i></i><i></i><i></i><i></i><i></i></div>'+
+        '<div class="cmp-bar"><span id="cmpBar"></span></div>'+
+        '<div class="cmp-read"><span id="cmpDb">0.0</span> dB 押さえ込み</div>'+
+      '</div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob" id="cmpAmt" tabindex="0" role="slider" aria-label="SUSTAIN"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">SUSTAIN</div><div class="ctl-val" id="cmpAmtV">50%</div></div>'+
+        '<div class="ctl"><div class="knob" id="cmpAtk" tabindex="0" role="slider" aria-label="ATTACK"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">ATTACK</div><div class="ctl-val" id="cmpAtkV">21ms</div></div>'+
+        '<div class="ctl"><div class="knob" id="cmpLvl" tabindex="0" role="slider" aria-label="LEVEL"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">LEVEL</div><div class="ctl-val" id="cmpLvlV">50%</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="cmpLed"></div>'+
+        '<button class="stomp" id="cmpStomp" aria-label="コンプレッサーの入切"></button>'+
+        '<div class="stomp-name" id="cmpName">踏むと入切</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    var anim=null;
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('cmpLed'), bar=el('cmpBar');
+      function drawOn(){ led.className=m.on?'indicator on':'indicator'; }
+      function tick(){
+        if(!document.body.contains(bar)){ if(anim) clearInterval(anim); anim=null; return; }
+        var db=reduction();                       /* 0〜-30dB あたり */
+        var pct=Math.min(100,Math.max(0,-db/24*100));
+        bar.style.width=pct.toFixed(1)+'%';
+        el('cmpDb').textContent=(Math.round(db*10)/10).toFixed(1);
+      }
+      if(anim) clearInterval(anim);
+      anim=setInterval(tick,60);
+      tick();
+
+      pctKnob(el('cmpAmt'),el('cmpAmtV'),function(){ return m.amount; },
+        function(x){ m.amount=x; keepIt(); apply(); },1);
+      pctKnob(el('cmpAtk'),el('cmpAtkV'),function(){ return m.attack; },
+        function(x){ m.attack=x; keepIt(); apply(); },1,
+        function(){ return Math.round(attackSec()*1000)+'ms'; });
+      pctKnob(el('cmpLvl'),el('cmpLvlV'),function(){ return m.level; },
+        function(x){ m.level=x; keepIt(); apply(); },1);
+      addScale(el('cmpAmt'),11,280,['0','100']);
+      addScale(el('cmpAtk'),11,280,['1','50']);
+      addScale(el('cmpLvl'),11,280,['0','100']);
+
+      el('cmpStomp').addEventListener('click',function(){
+        m.on=!m.on; keepIt(); drawOn(); apply();
+        el('cmpName').textContent=m.on?'踏むと入切':'今は素通り';
+      });
+      drawOn();
+      el('cmpName').textContent=m.on?'踏むと入切':'今は素通り';
+    }
+
+    definePedal({
+      id:'comp', name:'コンプレッサー', plate:'DYNAMICS',
+      blurb:'音量の凸凹をならす',
+      theme:{top:'#5c6470',mid:'#464d57',bot:'#262b32',led:'#7dffd0'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="11" text-anchor="middle" font-size="6.6">COMP</text>'+
+             '<rect class="sc" x="8" y="15" width="58" height="9" rx="2"/>'+
+             '<rect class="bar" x="10" y="17.5" width="22" height="4" rx="2"/>'+
+             '<g class="kn"><circle cx="17" cy="40" r="8"/><line x1="17" y1="34" x2="17" y2="38"/></g>'+
+             '<g class="kn"><circle cx="37" cy="40" r="8"/><line x1="37" y1="34" x2="37" y2="38"/></g>'+
+             '<g class="kn"><circle cx="57" cy="40" r="8"/><line x1="57" y1="34" x2="57" y2="38"/></g>'+
+             '<circle class="ld" cx="37" cy="58" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="79" r="11"/>'+
+           '</g></svg>',
+      help:'大きい音を押さえ込み、小さい音との差を縮めます。'+
+           '弾く強さの差がならされ、粒がそろって聞こえます。'+
+           '小さい部分が持ち上がって聞こえるため、結果として伸びが長くなったように感じます。<br>'+
+           'この教材では<b>SUSTAIN</b>を、押さえ込みの強さをまとめて動かす簡易なつまみとして'+
+           '使っています。実機では機種ごとに意味が異なります。<br>'+
+           '<b>SUSTAIN</b>（サステイン）は押さえ込む強さ、'+
+           '<b>ATTACK</b>（アタック）は押さえ込み始めるまでの速さです。'+
+           '遅くすると弾いた瞬間の頭が通り抜け、粒立ちが残ります。'+
+           '<b>LEVEL</b>（レベル）は出口の音量で、押さえ込んで下がったぶんを持ち上げます。<br>'+
+           '効果が耳で掴みにくい種類ですので、面の目盛で'+
+           '<b>今どれだけ押さえ込まれているか</b>を見せています。'+
+           'フレーズを鳴らしながら目盛の動きを見ると、働きが分かります。',
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!m.on; },
+      setOn:function(v){ m.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush,
+      detach:function(){ if(anim){ clearInterval(anim); anim=null; } detachAudio(); },
+      state:m, threshDb:threshDb, ratio:ratio, attackSec:attackSec, reduction:reduction
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     11台目：EQ
+     帯域ごとに音量を上げ下げする。
+     ほかの台にある TONE つまみの正体でもある。
+     上げ下げの形をそのまま面に描いて見せる。
+     ══════════════════════════════════════ */
+  (function(){
+    /* 5つの帯。それぞれ中心の高さと受け持つ幅を持つ */
+    var BANDS=[
+      {id:'low',   label:'100',  hz:100,  q:0.7,  type:'lowshelf'},
+      {id:'lomid', label:'350',  hz:350,  q:0.9,  type:'peaking'},
+      {id:'mid',   label:'800',  hz:800,  q:0.9,  type:'peaking'},
+      {id:'himid', label:'2.5k', hz:2500, q:0.9,  type:'peaking'},
+      {id:'high',  label:'6k',   hz:6000, q:0.7,  type:'highshelf'}
+    ];
+    var DB_MAX=12;
+
+    var e={g:[0.5,0.5,0.5,0.5,0.5], level:0.5, on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.eq')||'null');
+      if(sv){
+        if(Array.isArray(sv.g)&&sv.g.length===5) e.g=sv.g.map(function(x){ return Math.max(0,Math.min(1,x)); });
+        if(sv.level!==undefined) e.level=Math.max(0,Math.min(1,sv.level));
+        if(sv.on!==undefined) e.on=sv.on;
+      }
+    }catch(x){}
+    function keepIt(){ try{ localStorage.setItem('efbook.eq',JSON.stringify(e)); }catch(x){} }
+    function dbAt(i){ return (e.g[i]-0.5)*2*DB_MAX; }     /* −12〜+12dB */
+
+    var FILT=[],OUT=null;
+    function rebuild(){
+      if(!AC) return;
+      FILT=[];
+      OUT=AC.createGain();
+      var prev=null, first=null;
+      for(var i=0;i<BANDS.length;i++){
+        var f=AC.createBiquadFilter();
+        f.type=BANDS[i].type; f.frequency.value=BANDS[i].hz; f.Q.value=BANDS[i].q;
+        if(prev) prev.connect(f); else first=f;
+        prev=f; FILT.push(f);
+      }
+      FXIN.connect(first);
+      prev.connect(OUT); OUT.connect(FXOUT);
+      apply();
+    }
+    function apply(){
+      if(!OUT) return;
+      /* 入切で変わるのは帯域の増減だけ。LEVELは最終音量として常に効く */
+      for(var i=0;i<FILT.length;i++) FILT[i].gain.value=e.on?dbAt(i):0;
+      OUT.gain.value=0.55+0.9*e.level;
+    }
+    function hush(t){
+      if(!OUT) return;
+      try{ OUT.gain.cancelScheduledValues(t); OUT.gain.setValueAtTime(OUT.gain.value,t); }catch(x){}
+    }
+    function detachAudio(){
+      if(!AC) return;
+      OUT=null;
+    }
+
+    /* 面の絵。5本の上げ下げをなめらかな線でつなぐ */
+    function curvePath(){
+      var pts=[],i;
+      for(i=0;i<BANDS.length;i++) pts.push({x:16+i*57,y:34-dbAt(i)/DB_MAX*24});
+      var d='M0,'+pts[0].y.toFixed(1)+' L'+pts[0].x.toFixed(1)+','+pts[0].y.toFixed(1);
+      for(i=1;i<pts.length;i++){
+        var a=pts[i-1], b=pts[i], mx=(a.x+b.x)/2;
+        d+=' C'+mx.toFixed(1)+','+a.y.toFixed(1)+' '+mx.toFixed(1)+','+b.y.toFixed(1)+
+           ' '+b.x.toFixed(1)+','+b.y.toFixed(1);
+      }
+      d+=' L260,'+pts[pts.length-1].y.toFixed(1);
+      return d;
+    }
+
+    var HTML=''+
+    '<div class="case"><div class="pedal eq">'+
+      '<div class="eq-head">'+
+        '<div class="eq-name">EQUALIZER</div>'+
+        '<div class="eq-sub">5 BAND</div>'+
+      '</div>'+
+      '<div class="eq-win">'+
+        '<svg viewBox="0 0 260 68" preserveAspectRatio="none">'+
+          '<line x1="0" y1="34" x2="260" y2="34" stroke="currentColor" stroke-width="1" opacity=".22"/>'+
+          '<path id="eqCurve" d="" fill="none" stroke="currentColor" stroke-width="2" opacity=".85"/>'+
+        '</svg>'+
+      '</div>'+
+      '<div class="eq-faders" id="eqFaders"></div>'+
+      '<div class="eq-rule"></div>'+
+      '<div class="deck two">'+
+        '<div class="ctl"><div class="knob" id="eqLvl" tabindex="0" role="slider" aria-label="LEVEL"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">LEVEL</div><div class="ctl-val" id="eqLvlV">50%</div></div>'+
+      '</div>'+
+      '<div class="stomps"><div class="stomp-cell">'+
+        '<div class="indicator" id="eqLed"></div>'+
+        '<button class="stomp" id="eqStomp" aria-label="EQの入切"></button>'+
+        '<div class="stomp-name" id="eqName">踏むと入切</div>'+
+      '</div></div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('eqLed'), wrap=el('eqFaders');
+      function drawCurve(){ el('eqCurve').setAttribute('d',curvePath()); }
+      function drawOn(){ led.className=e.on?'indicator on':'indicator'; }
+
+      /* 上げ下げは、つまみではなく縦のスライダーで持つ。形が一目で分かる */
+      BANDS.forEach(function(b,i){
+        var cell=document.createElement('div');
+        cell.className='eq-cell';
+        cell.innerHTML=
+          '<div class="eq-slot" id="eqSlot'+i+'" tabindex="0" role="slider"'+
+            ' aria-label="'+b.label+'Hz" aria-valuemin="-12" aria-valuemax="12">'+
+            '<div class="eq-track"></div><div class="eq-cap" id="eqCap'+i+'"></div></div>'+
+          '<div class="eq-hz">'+b.label+'</div>'+
+          '<div class="eq-db" id="eqDb'+i+'">0</div>';
+        wrap.appendChild(cell);
+        var slot=el('eqSlot'+i), cap=el('eqCap'+i);
+        function draw(){
+          cap.style.bottom=(e.g[i]*100)+'%';
+          var db=Math.round(dbAt(i)*10)/10;
+          el('eqDb'+i).textContent=(db>0?'+':'')+db;
+          slot.setAttribute('aria-valuenow',String(db));
+          drawCurve();
+        }
+        function set(x){ e.g[i]=Math.max(0,Math.min(1,x)); keepIt(); draw(); apply(); }
+        var drag=false,lastY=0;
+        slot.addEventListener('pointerdown',function(ev){
+          drag=true; lastY=ev.clientY;
+          if(slot.setPointerCapture) slot.setPointerCapture(ev.pointerId);
+          ev.preventDefault();
+        });
+        slot.addEventListener('pointermove',function(ev){
+          if(!drag) return;
+          set(e.g[i]+(lastY-ev.clientY)*0.012); lastY=ev.clientY;
+        });
+        slot.addEventListener('pointerup',function(){ drag=false; });
+        slot.addEventListener('pointercancel',function(){ drag=false; });
+        slot.addEventListener('keydown',function(ev){
+          if(ev.key==='ArrowUp'||ev.key==='ArrowRight'){ set(e.g[i]+0.0417); ev.preventDefault(); }
+          if(ev.key==='ArrowDown'||ev.key==='ArrowLeft'){ set(e.g[i]-0.0417); ev.preventDefault(); }
+        });
+        draw();
+      });
+
+      pctKnob(el('eqLvl'),el('eqLvlV'),function(){ return e.level; },
+        function(x){ e.level=x; keepIt(); apply(); },1);
+      addScale(el('eqLvl'),11,280,['0','100']);
+
+      el('eqStomp').addEventListener('click',function(){
+        e.on=!e.on; keepIt(); drawOn(); apply();
+        el('eqName').textContent=e.on?'踏むと入切':'今は素通り';
+      });
+      drawOn(); drawCurve();
+      el('eqName').textContent=e.on?'踏むと入切':'今は素通り';
+    }
+
+    definePedal({
+      id:'eq', name:'EQ', plate:'5 BAND',
+      blurb:'帯域ごとに上げ下げする',
+      theme:{top:'#2b3b3f',mid:'#213033',bot:'#111b1d',led:'#ffd166'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="10" text-anchor="middle" font-size="7">EQ</text>'+
+             '<rect class="sc" x="7" y="13" width="60" height="14" rx="2"/>'+
+             '<path class="wv" d="M9 24q8-8 15-4t15-2 15 4"/>'+
+             '<g class="fd">'+
+             '<line x1="15" y1="33" x2="15" y2="53"/><line x1="26" y1="33" x2="26" y2="53"/>'+
+             '<line x1="37" y1="33" x2="37" y2="53"/><line x1="48" y1="33" x2="48" y2="53"/>'+
+             '<line x1="59" y1="33" x2="59" y2="53"/></g>'+
+             '<g class="cap">'+
+             '<rect x="11" y="40" width="8" height="4" rx="1"/><rect x="22" y="36" width="8" height="4" rx="1"/>'+
+             '<rect x="33" y="43" width="8" height="4" rx="1"/><rect x="44" y="38" width="8" height="4" rx="1"/>'+
+             '<rect x="55" y="45" width="8" height="4" rx="1"/></g>'+
+             '<g class="kn cr"><circle cx="37" cy="64" r="6"/><line x1="37" y1="60" x2="37" y2="62"/></g>'+
+             '<circle class="ld" cx="37" cy="76" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="90" r="11"/>'+
+           '</g></svg>',
+      help:'音を高さで5つの帯に分け、それぞれを上げ下げします。'+
+           '目安として、100Hzは低音の土台、350Hzは太さ、800Hzは中音の芯、'+
+           '2.5kHzは音の輪郭、6kHzは艶やざらつきに関わりやすい帯です。'+
+           'どの帯が何を担うかは、楽器や音色によって変わります。<br>'+
+           'つまみを縦のスライダーにしてありますので、'+
+           '<b>並んだ形がそのまま音の形</b>になります。上の窓に、いま作っている形が線で出ます。<br>'+
+           'ほかの台にある<b>TONE</b>つまみも、広い意味では同じように帯域のつり合いを変えています。'+
+           'あちらは高い帯をまとめて動かすものが多く、EQはそれを帯ごとに分けて扱えるようにしたものです。<br>'+
+           '<b>LEVEL</b>（レベル）は出口の音量です。上げすぎた時に下げて使います。',
+      /* 板の上から入切を尋ね、また変えられるようにする */
+      isOn:function(){ return !!e.on; },
+      setOn:function(v){ e.on=!!v; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush, detach:detachAudio,
+      state:e, bands:BANDS, dbAt:dbAt
+    });
+  })();
+
+
+  /* ══════ 道の並び ══════
+     アンプの前に置くもの、後に置くもの。実際の繋ぎ順に沿って並べる。 */
+  /* ══ 区画 ══
+     この教材では、音の変化を追いやすい代表的な並びを一つ示している。
+     置き場所は固定の決まりではなく、入れ替えることも普通にある。 */
+  var ZONES=[
+    {id:'pre',  name:'アンプの前段', note:'ここでは音の形と大きさを整える台を置いた',
+     ids:['wah','comp','drive','eq']},
+    {id:'post', name:'アンプの後段', note:'ここでは揺らす・広げる台を置いた（FX LOOPを想定）',
+     ids:['chorus','flanger','phaser','tremolo','pitch','delay','reverb']}
+  ];
+  function pedalOf(id){
+    for(var i=0;i<PEDALS.length;i++) if(PEDALS[i].id===id) return PEDALS[i];
+    return null;
+  }
+  function chainOrder(){
+    var out=[],seen={};
+    ZONES.forEach(function(z){
+      z.ids.forEach(function(id){ if(pedalOf(id)){ out.push(id); seen[id]=1; } });
+    });
+    PEDALS.forEach(function(p){ if(!seen[p.id]) out.push(p.id); });
+    return out;
+  }
+  function zoneOf(id){
+    for(var i=0;i<ZONES.length;i++) if(ZONES[i].ids.indexOf(id)>=0) return ZONES[i];
+    return null;
+  }
+  function miniOf(p){
+    var m=document.createElement('div');
+    m.className='mini';
+    m.style.background='linear-gradient(178deg,'+p.theme.top+' 0%,'+p.theme.mid+' 45%,'+p.theme.bot+' 100%)';
+    m.style.setProperty('--led',p.theme.led);
+    m.innerHTML=p.mini;
+    return m;
+  }
+
+  /* ══════ 音の道を組み直す ══════
+     踏んだ台を、繋ぐ順どおりに数珠つなぎで挿す。
+     アンプの前の台は 弦→台…→アンプ、後の台は アンプ→台…→出口。
+     一台だけ開いて確かめている時は、その台だけを通す。 */
+  var soloId=null;
+  function activeIds(){
+    var order=chainOrder();
+    if(soloId) return [soloId];
+    return order.filter(function(id){
+      var p=pedalOf(id);
+      return p&&p.isOn&&p.isOn();
+    });
+  }
+  function rewire(){
+    if(!AC) return;
+    try{ BUS.disconnect(); }catch(e){}
+    try{ TRIM.disconnect(); }catch(e){}
+    PEDALS.forEach(function(p){ if(p.detach) p.detach(); });
+    var ids=activeIds();
+    var pre=[],post=[];
+    ids.forEach(function(id){
+      var p=pedalOf(id);
+      (p.stage==='pre'?pre:post).push(p);
+    });
+    /* アンプの前 */
+    var node=BUS;
+    pre.forEach(function(p){
+      FXIN=AC.createGain(); FXOUT=AC.createGain();
+      node.connect(FXIN);
+      p.rebuild();
+      node=FXOUT;
+    });
+    node.connect(AMPIN);
+    /* アンプの後 */
+    var tail=TRIM;
+    post.forEach(function(p){
+      FXIN=AC.createGain(); FXOUT=AC.createGain();
+      tail.connect(FXIN);
+      p.rebuild();
+      tail=FXOUT;
+    });
+    tail.connect(LIMIT||MASTER);
+    paintCables();
+  }
+
+  /* ══════ 板に並べる ══════
+     繋ぐ順は、右上 → その真下 → 一つ左の上 → その真下、と左へ進む。
+     実物のボードでよく取られる組み方で、シールドの取り回しが短くて済む。 */
+  function layout(){
+    /* ══ 並び ══
+       ギターは右端。上段を右から左へ通し、左端で下段の右端へ折り返し、
+       下段も右から左へ。最後にアンプへ入る。
+       上下をまたぐのは折り返しの一本だけで、直列であることが目で追える。 */
+    var order=chainOrder(), half=Math.ceil(order.length/2);
+    return {
+      top:order.slice(0,half),        /* 右から左へ並べる（描画側で反転）*/
+      bottom:order.slice(half),
+      order:order,
+      cols:half
+    };
+  }
+  function slotOf(p,n){
+    var b=document.createElement('div');
+    b.className='slot'; b.setAttribute('data-pedal',p.id);
+    var no=document.createElement('div');
+    no.className='no'; no.textContent=(n<10?'0':'')+n;
+    var nm=document.createElement('div');
+    nm.className='name'; nm.textContent=p.name;
+    var m=miniOf(p);
+    /* 右がIN、左がOUT。実物と同じ並びにする */
+    var jk=document.createElement('div');
+    jk.className='jacks';
+    jk.innerHTML='<span class="jk in"></span><span class="jk-lbl in">IN</span>'+
+                 '<span class="jk out"></span><span class="jk-lbl out">OUT</span>';
+    m.appendChild(jk);
+    /* 絵を押すと開く。下の踏みスイッチで音の道へ挿す */
+    var open=document.createElement('button');
+    open.className='slot-open'; open.type='button';
+    open.setAttribute('aria-label',p.name+'を開く');
+    open.appendChild(m);
+    open.addEventListener('click',function(){ openPedal(p.id); });
+    var sw=document.createElement('button');
+    sw.className='slot-sw'; sw.type='button';
+    sw.setAttribute('role','switch');
+    sw.setAttribute('aria-label',p.name+'の入切');
+    sw.innerHTML='<span class="dot"></span><span class="tx">切</span>';
+    sw.addEventListener('click',function(){
+      ensureAudio();
+      if(p.setOn) p.setOn(!(p.isOn&&p.isOn()));
+      paintSwitches(); updateOnCount(); rewire();
+    });
+    b.appendChild(no); b.appendChild(open); b.appendChild(nm); b.appendChild(sw);
+    return b;
+  }
+  /* 踏みスイッチと、線の明るさを塗り直す */
+  function paintSwitches(){
+    var slots=document.querySelectorAll('.slot');
+    for(var i=0;i<slots.length;i++){
+      var id=slots[i].getAttribute('data-pedal'), p=pedalOf(id);
+      var on=!!(p&&p.isOn&&p.isOn());
+      slots[i].classList.toggle('on',on);
+      var sw=slots[i].querySelector('.slot-sw');
+      if(sw){
+        sw.setAttribute('aria-checked',on?'true':'false');
+        var tx=sw.querySelector('.tx');
+        if(tx) tx.textContent=on?'入':'切';
+      }
+    }
+  }
+  function updateOnCount(){
+    var n=chainOrder().filter(function(id){
+      var p=pedalOf(id); return p&&p.isOn&&p.isOn();
+    }).length;
+    var e2=el('onCount');
+    if(!e2) return;
+    e2.textContent=soloId?'この一台だけ':(n?(n+'台 入'):'全台 素通り');
+  }
+  function paintCables(){
+    var svg=el('wire');
+    if(svg) svg.classList.toggle('live',activeIds().length>0);
+  }
+  function jack(lbl,sub,kind){
+    var j=document.createElement('div');
+    j.className='jack '+(kind||'');
+    var fig=document.createElement('div');
+    fig.className='fig';
+    if(kind==='in'){
+      /* ギター。横から見た輪郭を線だけで描く */
+      fig.innerHTML=
+        '<svg viewBox="0 0 92 56" width="92" height="56">'+
+          '<path d="M30 28c0-11 7-19 16-19 7 0 12 4 14 9 2 5 6 8 12 8s10-3 12-8"/>'+
+          '<path d="M30 28c0 11 7 19 16 19 7 0 12-4 14-9 2-5 6-8 12-8"/>'+
+          '<circle cx="52" cy="28" r="6"/>'+
+          '<line x1="30" y1="24" x2="6" y2="24"/>'+
+          '<line x1="30" y1="32" x2="6" y2="32"/>'+
+          '<path d="M6 20h-4v16h4z"/>'+
+          '<line class="thin" x1="12" y1="26" x2="26" y2="26"/>'+
+          '<line class="thin" x1="12" y1="30" x2="26" y2="30"/>'+
+        '</svg>'+
+        '<span class="jackpt" style="right:-4px;top:50%;margin-top:-4.5px"></span>';
+    }else{
+      /* アンプ。箱とグリルを線だけで描く */
+      fig.innerHTML=
+        '<svg viewBox="0 0 78 58" width="78" height="58">'+
+          '<rect x="4" y="4" width="70" height="50" rx="4"/>'+
+          '<line x1="4" y1="18" x2="74" y2="18"/>'+
+          '<circle cx="14" cy="11" r="2.5"/>'+
+          '<line class="thin" x1="24" y1="11" x2="66" y2="11"/>'+
+          '<line class="thin" x1="12" y1="26" x2="66" y2="42"/>'+
+          '<line class="thin" x1="12" y1="34" x2="66" y2="50"/>'+
+          '<line class="thin" x1="12" y1="42" x2="52" y2="53"/>'+
+        '</svg>'+
+        '<span class="jackpt" style="right:-4px;top:50%;margin-top:-4.5px"></span>';
+    }
+    j.appendChild(fig);
+    var l=document.createElement('div'); l.className='lbl'; l.textContent=lbl;
+    var b=document.createElement('div'); b.className='sub'; b.innerHTML=sub;
+    j.appendChild(l); j.appendChild(b);
+    return j;
+  }
+
+  function buildMap(){
+    var body=el('mapBody');
+    body.innerHTML='';
+    var L=layout();
+    var rowT=document.createElement('div'); rowT.className='row';
+    var rowB=document.createElement('div'); rowB.className='row';
+    /* 段は右から左へ並ぶ（row-reverse）。先頭を先に足せば右端に来る */
+    rowT.appendChild(jack('ギター','ここから<br>出る','in'));
+    L.top.forEach(function(id){
+      rowT.appendChild(slotOf(pedalOf(id),L.order.indexOf(id)+1));
+    });
+    L.bottom.forEach(function(id){
+      rowB.appendChild(slotOf(pedalOf(id),L.order.indexOf(id)+1));
+    });
+    rowB.appendChild(jack('アンプ','ここへ<br>入る','out'));   /* 下段の左端 */
+    body.appendChild(rowT); body.appendChild(rowB);
+    el('count').textContent='全'+L.order.length+'台';
+    paintSwitches(); updateOnCount();
+    var note=el('boardNote');
+    if(note) note.innerHTML=
+      '右のギターから左へ、十一台を順に通ってアンプへ入ります。'+
+      'ここでは音の変化を追いやすい<b>代表的な並び</b>にしています。'+
+      '実際のボードでは順番を入れ替えて音を作ることもあり、正解は一つではありません。<br>'+
+      '各台の踏みスイッチで入切し、下の帯から鳴らします。'+
+      '試し弾きの音は、ギターの物理模型ではなく、聴き比べのために作った<b>簡易な音源</b>です。';
+    drawWire();
+    var wrap=el('map');
+    if(wrap) wrap.scrollLeft=wrap.scrollWidth;   /* 繋ぎ始めの右端を見せる */
+  }
+
+  /* ══════ パッチケーブルを引く ══════
+     直線だけで引く。台の上は横切らせない。
+     ・同じ段で隣り合う台は、側面どうしを水平に結ぶ
+     ・段をまたぐ所は、台の外側で縦に折る直角の経路にする
+     ・折り返しの縦線は、経路ごとに位置をずらして重ならないようにする */
+  var dots=[], wirePath=null, wireLen=0, flow=null;
+  function drawWire(){
+    var svg=el('wire'), board=el('board');
+    if(!svg||!board) return;
+    var W=board.scrollWidth, H=board.scrollHeight;
+    if(!W||!H) return;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.setAttribute('width',W); svg.setAttribute('height',H);
+    svg.innerHTML='';
+    var base=board.getBoundingClientRect();
+    function box(node){
+      var r=node.getBoundingClientRect();
+      return {l:r.left-base.left, r:r.right-base.left, t:r.top-base.top, b:r.bottom-base.top,
+              cy:r.top-base.top+r.height/2};
+    }
+    /* 穴の位置をそのまま線の端にする。
+       台は右がIN、左がOUT。線はOUTから次のINへ渡る。 */
+    /* 台は右がIN、左がOUT。端子（ギター・アンプ）は絵に描いた挿し口を使う */
+    function port(node,side){
+      var j=node.querySelector('.jackpt');
+      if(!j){
+        var sel=(side==='left')?'.jk.out':'.jk.in';
+        j=node.querySelector(sel)||node.querySelector('.mini')||node;
+      }
+      var r=j.getBoundingClientRect();
+      return {x:r.left-base.left+r.width/2, y:r.top-base.top+r.height/2};
+    }
+    var L=layout(), jacks=board.querySelectorAll('.jack');
+    var nodes=[];
+    if(jacks[0]) nodes.push({el:jacks[0], kind:'jack'});
+    L.order.forEach(function(id){
+      var n=board.querySelector('.slot[data-pedal="'+id+'"]');
+      if(n) nodes.push({el:n, kind:'slot'});
+    });
+    if(jacks[1]) nodes.push({el:jacks[1], kind:'jack'});
+    if(nodes.length<2) return;
+
+    var d='', turn=0;
+    for(var i=0;i<nodes.length-1;i++){
+      var A=nodes[i].el, B=nodes[i+1].el;
+      var a=port(A,'left'), b=port(B,'right');
+      /* 右から左へ並ぶので、出口は左側、入口は右側 */
+      var ab=box(A), bb=box(B);
+      if(Math.abs(a.y-b.y)<24){
+        /* 同じ段。斜めに走らせず、水平に引いてから穴の高さへ合わせる */
+        d+=' M'+a.x.toFixed(1)+','+a.y.toFixed(1)+
+           ' L'+b.x.toFixed(1)+','+a.y.toFixed(1);
+        if(Math.abs(a.y-b.y)>0.5) d+=' L'+b.x.toFixed(1)+','+b.y.toFixed(1);
+      }else{
+        /* ══ 折り返し ══
+           上段の左端（OUT）から出て、板の左の外で下へ降り、
+           **上段と下段の間の空きを右へ走り**、下段の右端で下へ降りて
+           その台の IN へ入る。
+           台の裏を通すと線が隠れて繋がって見えないので、
+           必ず段の間の空きを通す。 */
+        turn++;
+        var xLeft=Math.min(ab.l,bb.l)-14;              /* 上段の左の外 */
+        var yMid=(ab.b+bb.t)/2;                        /* 上段と下段の間の空き */
+        var xRight=b.x+14;                             /* 入口の右の外 */
+        d+=' M'+a.x.toFixed(1)+','+a.y.toFixed(1)+
+           ' L'+xLeft.toFixed(1)+','+a.y.toFixed(1)+
+           ' L'+xLeft.toFixed(1)+','+yMid.toFixed(1)+
+           ' L'+xRight.toFixed(1)+','+yMid.toFixed(1)+
+           ' L'+xRight.toFixed(1)+','+b.y.toFixed(1)+
+           ' L'+b.x.toFixed(1)+','+b.y.toFixed(1);
+      }
+    }
+    var path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',d.trim());
+    path.setAttribute('class','hi');
+    svg.appendChild(path);
+    wirePath=path;
+    wireLen=path.getTotalLength?path.getTotalLength():0;
+    dots=[];
+    for(var q=0;q<3;q++){
+      var c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('class','dot'); c.setAttribute('r','2.6');
+      svg.appendChild(c);
+      dots.push({node:c, at:q/3});
+    }
+    startFlow();
+  }
+  /* 音が通っている印。繋いだ順に流れる */
+  function startFlow(){
+    if(flow) clearInterval(flow);
+    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if(reduce||!wirePath||!wireLen) return;
+    flow=setInterval(function(){
+      if(!wirePath||!wirePath.getPointAtLength) return;
+      dots.forEach(function(d){
+        d.at+=0.0016;
+        if(d.at>1) d.at-=1;
+        var pt=wirePath.getPointAtLength(d.at*wireLen);
+        d.node.setAttribute('cx',pt.x.toFixed(1));
+        d.node.setAttribute('cy',pt.y.toFixed(1));
+        var fade=Math.min(1,Math.min(d.at,1-d.at)*8);
+        d.node.setAttribute('opacity',fade.toFixed(2));
+      });
+    },40);
+  }
+  /* ══════ 一台を開く ══════ */
+  var docPage=0;                       /* 0=解説を出していない、1以上=解説の枚数 */
+  function helpParts(p){
+    if(!p) return [''];
+    return (Object.prototype.toString.call(p.help)==='[object Array]')?p.help:[p.help];
+  }
+  function openPedal(id){
+    var p=pedalOf(id);
+    if(!p) return;
+    if(current&&current!==p){
+      stopPhrase();
+      if(current.detach) current.detach();
+    }
+    var fresh=(current!==p);
+    current=p; st.pedal=id; save();
+    document.documentElement.style.setProperty('--case-top',p.theme.top);
+    document.documentElement.style.setProperty('--case-mid',p.theme.mid);
+    document.documentElement.style.setProperty('--case-bot',p.theme.bot);
+    document.documentElement.style.setProperty('--led',p.theme.led);
+    var order=chainOrder(), i=order.indexOf(id), z=zoneOf(id);
+    el('pNo').textContent=(i+1<10?'0':'')+(i+1);
+    el('pName').textContent=p.name;
+    el('pWhere').textContent=z?z.name:'';
+    el('panel').classList.add('on');
+    el('map').classList.add('dim');
+    document.body.style.overflow='hidden';
+    if(fresh||!el('stage').firstChild){
+      el('stage').innerHTML='';
+      p.render(el('stage'));
+    }
+    /* 開いている間は、その一台だけを通して確かめる */
+    soloId=id;
+    if(AC) rewire();
+    updateOnCount();
+    docPage=0; showDoc();
+    el('prevBtn').disabled=(i<=0);
+    el('nextBtn').disabled=(i>=order.length-1);
+    el('footMid').textContent=(i+1)+' / '+order.length;
+    /* 板の上でも、開いている一台に印を付ける */
+    var slots=document.querySelectorAll('.slot');
+    for(var s=0;s<slots.length;s++)
+      slots[s].classList.toggle('lit',slots[s].getAttribute('data-pedal')===id);
+    el('panel').scrollTop=0;
+  }
+  function closePedal(){
+    stopPhrase();
+    current=null; st.pedal=null; save();
+    soloId=null;                       /* 板の状態（踏んだ台）に戻す */
+    if(AC) rewire();
+    updateOnCount();
+    el('panel').classList.remove('on');
+    el('map').classList.remove('dim');
+    document.body.style.overflow='';
+    el('stage').innerHTML='';
+    var slots=document.querySelectorAll('.slot');
+    for(var s=0;s<slots.length;s++) slots[s].classList.remove('lit');
+  }
+  function step(dir){
+    var order=chainOrder(), i=order.indexOf(st.pedal), j=i+dir;
+    if(i<0||j<0||j>=order.length) return;
+    openPedal(order[j]);
+  }
+  /* 解説は別の面。読む時だけ開き、筐体と入れ替える */
+  function showDoc(){
+    var parts=helpParts(current);
+    var on=(docPage>0);
+    el('doc').classList.toggle('on',on);
+    el('doc').innerHTML=on?(parts[docPage-1]||''):'';
+    el('stage').parentNode.style.display=on?'none':'';
+    el('docPos').textContent=on?(docPage+' / '+parts.length):'';
+    el('docBtn').textContent=on?
+      ((docPage<parts.length)?'続きを読む':'ペダルへもどる'):'解説を読む';
+  }
+  el('docBtn').addEventListener('click',function(){
+    var parts=helpParts(current);
+    if(docPage===0) docPage=1;
+    else if(docPage<parts.length) docPage++;
+    else docPage=0;
+    showDoc();
+    el('panel').scrollTop=0;
+  });
+  el('closeBtn').addEventListener('click',closePedal);
+  el('prevBtn').addEventListener('click',function(){ step(-1); });
+  el('nextBtn').addEventListener('click',function(){ step(1); });
+  document.addEventListener('keydown',function(e){
+    if(!st.pedal) return;
+    var t=e.target;
+    if(t&&t.closest&&t.closest('.knob,.eq-slot,.wah-pedal,input,button,[role="slider"]')) return;
+    if(e.key==='Escape'){ closePedal(); e.preventDefault(); }
+    if(e.key==='ArrowLeft'){ step(-1); e.preventDefault(); }
+    if(e.key==='ArrowRight'){ step(1); e.preventDefault(); }
+  });
+
+  buildMap();
+  paintSwitches(); updateOnCount();
+  drawTone(); drawArt(); drawPh();
+  window.addEventListener('resize',function(){ drawWire(); });
+  if(window.requestAnimationFrame) window.requestAnimationFrame(drawWire);
+
+  window.__map={st:st,PEDALS:PEDALS,ZONES:ZONES,TONES:TONES,ARTS:ARTS,PHRASES:PHRASES,
+                chainOrder:chainOrder,zoneOf:zoneOf,layout:layout,drawWire:function(){ drawWire(); },
+                openPedal:openPedal,closePedal:closePedal,
+                activeIds:function(){ return activeIds(); },rewire:function(){ rewire(); },
+                soloId:function(){ return soloId; },
+                step:step,phraseOf:phraseOf,helpParts:helpParts,
+                docPage:function(){ return docPage; },
+                showDocPage:function(n){ docPage=n; showDoc(); }};
+})();
+</script>
+</body>
+</html>
