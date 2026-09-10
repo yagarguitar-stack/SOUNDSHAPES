@@ -42,6 +42,12 @@
   .head .sub{font-size:10.5px;letter-spacing:.14em;color:var(--ink-dim);}
   .head .count{margin-left:auto;font-size:10.5px;color:var(--ink-dim);
     font-family:ui-monospace,Menlo,monospace;}
+  .head .line-state{font-size:10.5px;color:var(--sig);letter-spacing:.04em;white-space:nowrap;}
+  .icon-btn.tiny{padding:3px 8px;font-size:10px;letter-spacing:.04em;}
+  @media (max-width:560px){
+    .head{flex-wrap:wrap;}
+    .head .line-state{margin-left:auto;}
+  }
 
   .board-note{
     max-width:760px;margin:0 auto;padding:2px 18px 8px;
@@ -58,7 +64,10 @@
   }
   .board-wrap.dim{opacity:.2;filter:blur(1px);pointer-events:none;}
   .board{
-    position:relative;display:inline-block;padding:26px 26px 30px;border-radius:6px;
+    /* 幅は中身の分だけ取り、余りがあれば左右に等分して中央へ寄せる。
+       画面より広い時は余りが無いので端から始まり、横に巻き取れる */
+    position:relative;display:block;width:max-content;margin:0 auto;
+    padding:26px 26px 30px;border-radius:6px;
     /* 板。目の詰んだ面ファスナーを張った天板 */
     background:
       repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
@@ -116,6 +125,78 @@
     font-family:ui-monospace,Menlo,monospace;font-size:9px;color:var(--ink-dim);
   }
   .slot .name{font-size:10.5px;letter-spacing:.04em;color:var(--ink-dim);text-align:center;}
+  /* ══ 踏み板のある台 ══
+     絵を上下にドラッグすると傾く。縦のドラッグを画面の巻き取りに取られないようにする */
+  /* ══ 並べ替え ══
+     横のドラッグはこちらで受け、縦は画面の巻き取りに渡す。
+     踏み板のある台だけは縦も使うので、両方こちらで受ける */
+  .slot .mini,.slot .slot-open{touch-action:pan-y;cursor:grab;}
+  /* ══ 踏み板のある台は、絵を上下に分ける ══
+     上半分は踏み板（縦のドラッグを受ける）、下半分は並べ替え（横だけ受ける）。
+     境目は薄い破線で示す */
+  .slot.trd .grab{position:absolute;left:0;right:0;height:50%;z-index:3;}
+  .slot.trd .tread-zone{top:0;touch-action:none;cursor:ns-resize;}
+  .slot.trd .order-zone{
+    bottom:0;touch-action:pan-y;cursor:grab;
+    border-top:1px dashed rgba(255,255,255,.16);
+  }
+  .slot.trd .order-zone::after{
+    content:"";position:absolute;left:50%;bottom:5px;width:16px;height:5px;
+    margin-left:-8px;border-radius:1px;
+    background:repeating-linear-gradient(0deg,
+      rgba(255,255,255,.26) 0 1px,transparent 1px 2px);
+  }
+  .slot.lift .mini{opacity:.35;transform:scale(.93);}
+  /* 入り先の隙間。ここが開いて、台と台が左右へ寄る */
+  .drop-gap{
+    flex:none;width:0;align-self:stretch;box-sizing:border-box;
+    border-radius:5px;transition:width .12s ease;
+    background:linear-gradient(180deg,rgba(90,209,255,.16),rgba(90,209,255,.03));
+    border:1px dashed rgba(90,209,255,.5);
+  }
+  .drop-gap.open{width:34px;}
+  /* 入れ替えの的。重ねた台に枠が出る */
+  .slot.drop .mini{
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 0 0 2px var(--sig),
+      0 2px 0 #0b1116,0 10px 20px rgba(0,0,0,.6);
+  }
+  .slot.drop .name{color:var(--sig);}
+  /* ══ 列の中のアンプ ══ */
+  .amp-slot .mini{
+    background:linear-gradient(178deg,#39424a 0%,#242c33 55%,#151b20 100%);
+    cursor:grab;
+  }
+  .amp-mini svg{display:block;width:74px;height:104px;}
+  .amp-mini svg .ln{fill:none;stroke:rgba(232,237,241,.6);stroke-width:1.4;
+    stroke-linejoin:round;stroke-linecap:round;}
+  .amp-mini svg .thin{fill:none;stroke:rgba(232,237,241,.28);stroke-width:1;stroke-linecap:round;}
+  .amp-mini svg text{fill:rgba(232,237,241,.62);font-size:6.4px;letter-spacing:.16em;
+    font-family:ui-monospace,Menlo,monospace;}
+  .amp-mini svg text.sm{fill:rgba(232,237,241,.3);font-size:5.2px;letter-spacing:.22em;}
+  .amp-mini svg .lamp{fill:var(--sig);stroke:none;}
+  .amp-slot.amp-ret .mini,.amp-slot.amp-ret .slot-open{cursor:default;}
+  .amp-slot.amp-ret .amp-note{border-style:dashed;}
+  /* ループの囲み */
+  .cables rect.loopband{
+    fill:rgba(90,209,255,.045);stroke:rgba(90,209,255,.3);
+    stroke-width:1;stroke-dasharray:5 4;
+  }
+  .cables text.looplbl{
+    fill:rgba(90,209,255,.6);font-size:9px;letter-spacing:.22em;
+    font-family:ui-monospace,Menlo,monospace;
+  }
+  .amp-slot .name{color:var(--ink);opacity:1;}
+  .amp-slot .no{color:var(--ink-faint);}
+  .amp-note{
+    font-size:8.5px;color:var(--ink-dim);text-align:center;line-height:1.4;
+    border:1px solid var(--ink-faint);border-radius:2px;padding:2px 5px;
+  }
+  .slot.trd .trd{transition:transform .06s linear;}
+  .slot-val{
+    font-family:ui-monospace,Menlo,monospace;font-size:9px;letter-spacing:.02em;
+    color:var(--ink-dim);text-align:center;white-space:nowrap;
+  }
+  .slot.on .slot-val{color:var(--sig);}
   /* ══ 挿し口 ══
      実物と同じく、右がIN（入る）、左がOUT（出る）。
      穴と、そこに挿さったプラグの頭を描く。
@@ -629,6 +710,54 @@
     box-shadow:0 0 10px var(--led);transition:width .06s linear;
   }
   .cmp-read{margin-top:6px;font-size:10.5px;color:var(--led);opacity:.75;text-align:right;}
+/* ══ ノイズゲートの面 ══ */
+  .gt-state{
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    margin-top:9px;font-size:10.5px;letter-spacing:.16em;color:rgba(230,225,211,.55);
+  }
+  .gt-lamp{
+    width:8px;height:8px;border-radius:50%;background:rgba(230,225,211,.2);
+    transition:background .08s linear,box-shadow .08s linear;
+  }
+  .gt-lamp.open{background:var(--led);box-shadow:0 0 8px var(--led);}
+  .gt-row{display:flex;justify-content:space-around;margin-top:14px;}
+
+  /* ══ 板の左端に置く解説の札 ══ */
+  .guide-slot{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    width:78px;flex:none;
+  }
+  .guide-btn{
+    width:74px;height:104px;border-radius:6px;cursor:pointer;padding:0;
+    border:1px dashed rgba(232,237,241,.3);background:rgba(232,237,241,.03);
+    color:var(--ink-dim);font-family:inherit;font-size:11px;letter-spacing:.1em;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+  }
+  .guide-btn:active{background:rgba(232,237,241,.08);}
+  .guide-btn:focus-visible{outline:1px solid var(--sig);outline-offset:3px;}
+  .guide-btn svg{display:block;}
+  .guide-btn svg path,.guide-btn svg line,.guide-btn svg rect{
+    fill:none;stroke:rgba(232,237,241,.5);stroke-width:1.3;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .guide-slot .cap{font-size:9px;color:var(--ink-dim);letter-spacing:.06em;text-align:center;}
+
+  /* ══ 繋ぐ順の解説 ══ */
+  #guide .doc{display:block;}
+  .guide-h{
+    font-size:14px;font-weight:600;letter-spacing:.08em;
+    margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--ink-faint);
+  }
+  .chain-line{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:10px 0 6px;}
+  .chain-line i{
+    font-style:normal;font-size:10.5px;letter-spacing:.04em;color:var(--ink);
+    border:1px solid var(--ink-faint);border-radius:2px;padding:3px 7px;
+    background:rgba(232,237,241,.04);white-space:nowrap;
+  }
+  .chain-line i.out{color:var(--ink-dim);border-style:dashed;}
+  .chain-line i.amp{color:var(--sig);border-color:rgba(90,209,255,.5);background:rgba(90,209,255,.07);}
+  .chain-line s{color:var(--ink-dim);text-decoration:none;font-size:10px;}
+
 /* ══ EQの面 ══ */
   .pedal.eq{padding-top:20px;}
   .eq-head{text-align:center;margin:2px 0 10px;}
@@ -686,6 +815,8 @@
   <h1>SOUND SHAPES</h1>
   <span class="sub">音のかたちを、耳で覚える</span>
   <span class="count" id="count"></span>
+  <span class="line-state" id="lineState"></span>
+  <button class="icon-btn tiny" id="lineReset" type="button">並びを戻す</button>
 </div>
 
 <div class="board-note" id="boardNote"></div>
@@ -734,6 +865,23 @@
       <button class="icon-btn" id="prevBtn">← 前の一台</button>
       <span class="mid" id="footMid"></span>
       <button class="icon-btn" id="nextBtn">次の一台 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 繋ぐ順の解説。板そのものについての読み物 -->
+<div class="panel" id="guide">
+  <div class="panel-inner">
+    <div class="panel-head">
+      <button class="icon-btn" id="gClose">← 図へ</button>
+      <span class="name">繋ぐ順の考え方</span>
+      <span class="where" id="gPos"></span>
+    </div>
+    <div class="doc on" id="guideDoc"></div>
+    <div class="foot-nav">
+      <button class="icon-btn" id="gPrev">← 前へ</button>
+      <span class="mid" id="gMid"></span>
+      <button class="icon-btn" id="gNext">次へ →</button>
     </div>
   </div>
 </div>
@@ -2125,7 +2273,7 @@
       isOn:function(){ return !!c.on; },
       setOn:function(v){ c.on=!!v; keepIt(); apply(); },
       render:render, rebuild:rebuild, apply:apply, hush:hush,
-      detach:function(){ if(anim){ clearInterval(anim); anim=null; } detachAudio(); },
+      detach:detachAudio,   /* 面の動きは絵が消えた時に自分で止まる */
       state:c, types:TYPES
     });
   })();
@@ -2272,7 +2420,7 @@
     }
 
     definePedal({
-      id:'drive', name:'歪み', plate:'GAIN STAGE', stage:'pre',
+      id:'drive', name:'歪み', plate:'GAIN STAGE',
       blurb:'波の頭を潰して倍音を増やす',
       theme:{top:'#9c6b21',mid:'#7c5217',bot:'#452d09',led:'#ff5a3c'},
       mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
@@ -2817,7 +2965,7 @@
       isOn:function(){ return !!m.on; },
       setOn:function(v){ m.on=!!v; keepIt(); apply(); },
       render:render, rebuild:rebuild, apply:apply, hush:hush,
-      detach:function(){ if(anim){ clearInterval(anim); anim=null; } detachAudio(); },
+      detach:detachAudio,   /* 面の動きは絵が消えた時に自分で止まる */
       state:m, waves:WAVES, rateHz:rateHz
     });
   })();
@@ -2976,11 +3124,13 @@
       blurb:'踏み板で音の山を動かす',
       theme:{top:'#2f3338',mid:'#23272b',bot:'#111417',led:'#ff4d4d'},
       mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
-             '<rect class="tread" x="10" y="10" width="54" height="56" rx="5" transform="rotate(-6 37 38)"/>'+
-             '<g class="trl" transform="rotate(-6 37 38)">'+
+             '<g class="trd" transform="rotate(-6 37 38)">'+
+             '<rect class="tread" x="10" y="10" width="54" height="56" rx="5"/>'+
+             '<g class="trl">'+
              '<line x1="16" y1="20" x2="58" y2="20"/><line x1="16" y1="28" x2="58" y2="28"/>'+
              '<line x1="16" y1="36" x2="58" y2="36"/><line x1="16" y1="44" x2="58" y2="44"/>'+
              '<line x1="16" y1="52" x2="58" y2="52"/><line x1="16" y1="60" x2="58" y2="60"/></g>'+
+             '</g>'+
              '<text class="pl" x="37" y="82" text-anchor="middle" font-size="6.6">WAH</text>'+
              '<circle class="ld" cx="37" cy="93" r="2.4"/>'+
            '</g></svg>',
@@ -2993,12 +3143,20 @@
            '今の山の高さはヘルツで表示されます（400〜2200Hz）。<br>'+
            '左のフットスイッチで入切、右で<b>オート</b>になります。'+
            'オートの間は板が勝手に往復しますので、両手が空いた状態で効果を確かめられます。'+
-           '板を手で動かすとオートは切れます。',
+           '板を手で動かすとオートは切れます。<br>'+
+           '図の上でも動かせます。絵の<b>上半分</b>を上下にドラッグしてください。'+
+           '下半分は台の並べ替えに使います。',
       /* 板の上から入切を尋ね、また変えられるようにする */
       isOn:function(){ return !!w.on; },
       setOn:function(v){ w.on=!!v; keepIt(); apply(); },
       render:render, rebuild:rebuild, apply:apply, hush:hush,
-      detach:function(){ if(anim){ clearInterval(anim); anim=null; } detachAudio(); },
+      detach:detachAudio,   /* 面の動きは絵が消えた時に自分で止まる */
+      /* 板の上からも踏み板を動かせるようにする */
+      treadle:{
+        get:function(){ return w.pos; },
+        set:function(x){ w.pos=Math.max(0,Math.min(1,x)); w.auto=false; keepIt(); apply(); },
+        text:function(){ return Math.round(w.pos*100)+'% ・ '+Math.round(freqAt(w.pos))+'Hz'; }
+      },
       state:w, freqAt:freqAt
     });
   })();
@@ -3420,7 +3578,7 @@
       isOn:function(){ return !!m.on; },
       setOn:function(v){ m.on=!!v; keepIt(); apply(); },
       render:render, rebuild:rebuild, apply:apply, hush:hush,
-      detach:function(){ if(anim){ clearInterval(anim); anim=null; } detachAudio(); },
+      detach:detachAudio,   /* 面の動きは絵が消えた時に自分で止まる */
       state:m, threshDb:threshDb, ratio:ratio, attackSec:attackSec, reduction:reduction
     });
   })();
@@ -3621,32 +3779,536 @@
   })();
 
 
+  /* ══════════════════════════════════════
+     12台目：ノイズゲート
+     決めた音量より小さい音を通さない。
+     歪みが持ち上げた「サー」という雑音や、
+     弾いていない間の余韻を断ち切るために使う。
+     効果が耳で掴みにくいので、開いている／閉じているを目で見せる。
+     ══════════════════════════════════════ */
+  (function(){
+    var n={thresh:0.42, release:0.35, on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.gate')||'null');
+      if(sv) for(var k in n) if(sv[k]!==undefined) n[k]=sv[k];
+      ['thresh','release'].forEach(function(k){ n[k]=Math.max(0,Math.min(1,n[k])); });
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.gate',JSON.stringify(n)); }catch(e){} }
+    /* しきい値は -66dB〜-18dB。耳に合わせて dB で動かす */
+    function threshDb(){ return -66+48*n.thresh; }
+    function threshLin(){ return Math.pow(10,threshDb()/20); }
+    function relSec(){ return 0.04+0.66*n.release; }
+
+    /* 雑音の出どころ。実機の練習台として、板の上で雑音を作れるようにする */
+    var noiseOn=false;                       /* これだけは覚えさせない（開くたび切） */
+
+    var G=null,ANA=null,BUF=null,NSRC=null,NGAIN=null,loop=null;
+    var opened=false, lvl=0;
+    function rebuild(){
+      if(!AC) return;
+      G=AC.createGain(); G.gain.value=1;
+      ANA=AC.createAnalyser(); ANA.fftSize=1024; ANA.smoothingTimeConstant=0;
+      BUF=new Float32Array(ANA.fftSize);
+      /* 雑音は台の入口で混ぜる。ゲートより前にあるものとして扱う */
+      NGAIN=AC.createGain(); NGAIN.gain.value=0;
+      try{
+        var len=Math.floor(AC.sampleRate*2), b=AC.createBuffer(1,len,AC.sampleRate), a=b.getChannelData(0);
+        for(var i=0;i<len;i++) a[i]=(Math.random()*2-1);
+        NSRC=AC.createBufferSource(); NSRC.buffer=b; NSRC.loop=true;
+        var hp=AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=900;
+        NSRC.connect(hp); hp.connect(NGAIN);
+        NSRC.start();
+      }catch(e){ NSRC=null; }
+      FXIN.connect(G); NGAIN.connect(G);
+      FXIN.connect(ANA); NGAIN.connect(ANA);
+      G.connect(FXOUT);
+      opened=false;
+      if(loop) clearInterval(loop);
+      loop=setInterval(watch,25);
+      apply();
+    }
+    /* 入口の音量を見張り、しきい値をまたいだところで開け閉めする。
+       開ける時は速く、閉じる時はゆっくり。急に切ると音が途切れて聞こえる */
+    function watch(){
+      if(!G||!ANA||!AC) return;
+      var s=0,i;
+      if(ANA.getFloatTimeDomainData){
+        ANA.getFloatTimeDomainData(BUF);
+        for(i=0;i<BUF.length;i++) s+=BUF[i]*BUF[i];
+        lvl=Math.sqrt(s/BUF.length);
+      }else{
+        var b8=new Uint8Array(ANA.fftSize);
+        ANA.getByteTimeDomainData(b8);
+        for(i=0;i<b8.length;i++){ var v=(b8[i]-128)/128; s+=v*v; }
+        lvl=Math.sqrt(s/b8.length);
+      }
+      var target=1;
+      if(n.on){
+        var openTh=threshLin(), closeTh=openTh*0.55;   /* 開閉で差をつけ、ばたつきを防ぐ */
+        if(!opened && lvl>openTh) opened=true;
+        else if(opened && lvl<closeTh) opened=false;
+        target=opened?1:0;
+      }else{
+        opened=true;
+      }
+      var tc=(target>0.5)?0.004:(relSec()/3);
+      try{ G.gain.setTargetAtTime(target,AC.currentTime,tc); }
+      catch(e){ G.gain.value=target; }
+    }
+    function apply(){
+      if(NGAIN&&AC){
+        try{ NGAIN.gain.setTargetAtTime(noiseOn?0.02:0,AC.currentTime,0.02); }
+        catch(e){ NGAIN.gain.value=noiseOn?0.02:0; }
+      }
+    }
+    function hush(t){
+      if(!G) return;
+      try{ G.gain.cancelScheduledValues(t); G.gain.setValueAtTime(G.gain.value,t); }catch(e){}
+    }
+    function detachAudio(){
+      if(loop){ clearInterval(loop); loop=null; }
+      if(NSRC){ try{ NSRC.stop(); }catch(e){} try{ NSRC.disconnect(); }catch(e){} NSRC=null; }
+      G=null; ANA=null; NGAIN=null;
+    }
+
+    var HTML=''+
+    '<div class="case"><div class="pedal cmp">'+
+      '<div class="cmp-head">'+
+        '<div class="cmp-name">NOISE GATE</div>'+
+        '<div class="cmp-sub">THRESHOLD</div>'+
+      '</div>'+
+      /* 入口の音量と、しきい値の位置を並べて見せる */
+      '<div class="cmp-meter">'+
+        '<div class="cmp-scale"><i></i><i></i><i></i><i></i><i></i><i></i></div>'+
+        '<div class="cmp-bar"><span id="gtBar"></span></div>'+
+        '<div class="cmp-read"><span id="gtDb">-60</span> dB 入口の音量</div>'+
+        '<div class="gt-state"><span class="gt-lamp" id="gtLamp"></span><span id="gtTxt">閉じている</span></div>'+
+      '</div>'+
+      '<div class="deck">'+
+        '<div class="ctl"><div class="knob" id="gtTh" tabindex="0" role="slider" aria-label="THRESHOLD"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">THRESHOLD</div><div class="ctl-val" id="gtThV">-46dB</div></div>'+
+        '<div class="ctl"><div class="knob" id="gtRel" tabindex="0" role="slider" aria-label="RELEASE"'+
+          ' aria-valuemin="0" aria-valuemax="100"><div class="knob-ring"></div></div>'+
+          '<div class="ctl-name">RELEASE</div><div class="ctl-val" id="gtRelV">271ms</div></div>'+
+      '</div>'+
+      '<div class="stomps gt-row">'+
+        '<div class="stomp-cell">'+
+          '<div class="indicator" id="gtLed"></div>'+
+          '<button class="stomp small" id="gtStomp" aria-label="ノイズゲートの入切"></button>'+
+          '<div class="stomp-name" id="gtName">踏むと入切</div>'+
+        '</div>'+
+        '<div class="stomp-cell">'+
+          '<div class="indicator" id="gtNzLed"></div>'+
+          '<button class="stomp small" id="gtNz" aria-label="雑音を出す"></button>'+
+          '<div class="stomp-name" id="gtNzName">雑音を出す</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="feet"><i></i><i></i></div>'+
+    '</div></div>';
+
+    var anim=null;
+    function render(stage){
+      stage.innerHTML=HTML;
+      var led=el('gtLed'), nzLed=el('gtNzLed'), bar=el('gtBar'), lamp=el('gtLamp');
+      function drawOn(){
+        led.className=n.on?'indicator on':'indicator';
+        nzLed.className=noiseOn?'indicator on':'indicator';
+        el('gtName').textContent=n.on?'踏むと入切':'今は素通り';
+        el('gtNzName').textContent=noiseOn?'雑音 出ている':'雑音を出す';
+      }
+      function tick(){
+        if(!document.body.contains(bar)){ if(anim) clearInterval(anim); anim=null; return; }
+        var db=(lvl>0)?20*Math.log10(lvl):-90;
+        if(db<-72) db=-72;
+        bar.style.width=Math.max(0,Math.min(100,(db+72)/72*100)).toFixed(1)+'%';
+        el('gtDb').textContent=String(Math.round(db));
+        var op=n.on?opened:true;
+        lamp.className=op?'gt-lamp open':'gt-lamp';
+        el('gtTxt').textContent=n.on?(op?'開いている':'閉じている'):'素通り';
+      }
+      if(anim) clearInterval(anim);
+      anim=setInterval(tick,60);
+      tick();
+
+      pctKnob(el('gtTh'),el('gtThV'),function(){ return n.thresh; },
+        function(x){ n.thresh=x; keepIt(); },1,
+        function(){ return Math.round(threshDb())+'dB'; });
+      pctKnob(el('gtRel'),el('gtRelV'),function(){ return n.release; },
+        function(x){ n.release=x; keepIt(); },1,
+        function(){ return Math.round(relSec()*1000)+'ms'; });
+      addScale(el('gtTh'),11,280,['-66','-18']);
+      addScale(el('gtRel'),11,280,['40','700']);
+
+      el('gtStomp').addEventListener('click',function(){
+        n.on=!n.on; keepIt(); drawOn();
+      });
+      el('gtNz').addEventListener('click',function(){
+        noiseOn=!noiseOn; apply(); drawOn();
+      });
+      drawOn();
+    }
+
+    definePedal({
+      id:'gate', name:'ノイズゲート', plate:'NOISE GATE',
+      blurb:'小さい音を通さない',
+      theme:{top:'#3c4a3f',mid:'#2e3a31',bot:'#18201a',led:'#9dffbe'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<text class="pl" x="37" y="11" text-anchor="middle" font-size="6.2">GATE</text>'+
+             '<rect class="sc" x="8" y="15" width="58" height="9" rx="2"/>'+
+             '<rect class="bar" x="10" y="17.5" width="14" height="4" rx="2"/>'+
+             '<g class="kn"><circle cx="24" cy="42" r="9"/><line x1="24" y1="35" x2="24" y2="40"/></g>'+
+             '<g class="kn"><circle cx="50" cy="42" r="9"/><line x1="50" y1="35" x2="50" y2="40"/></g>'+
+             '<circle class="ld" cx="37" cy="60" r="2.4"/>'+
+             '<circle class="st" cx="37" cy="80" r="11"/>'+
+           '</g></svg>',
+      help:[
+        '<span class="lead">決めた音量より小さい音を、通さない台です。</span>'+
+        '入口の音量を見張り、しきい値を上回ると門が開いて音が通り、'+
+        '下回ると門が閉じて音が止まります。'+
+        '音そのものは加工しません。通すか、通さないかだけを決めます。'+
+        '<span class="hn">何のために使うか</span>'+
+        '歪みは音を大きく持ち上げますが、その時に「サー」という雑音も一緒に持ち上げます。'+
+        '弾いている間は音に隠れて気になりませんが、手を止めた途端に残ります。'+
+        'これを断ち切るのがゲートの主な役目です。<br>'+
+        'もう一つ、余韻をわざと断ち切る使い方があります。'+
+        '刻んだフレーズの合間をすっぱり切ると、歯切れが良くなります。'+
+        'メタルの刻みで使われる、音の切れ目がはっきりした感じはこの掛け方です。',
+        '<span class="hn">確かめ方</span>'+
+        '右のスイッチで<b>雑音を出す</b>と、弾いていない間も「サー」という音が出ます。'+
+        'この状態で左のスイッチを踏むと、雑音が消えます。'+
+        '弾けば門が開いて音が通り、音が消えればまた閉じます。'+
+        'これがゲートの働きです。<br>'+
+        '面の目盛は入口の音量、下のランプは今開いているかどうかを示します。'+
+        '<span class="hn">つまみ</span>'+
+        '<b>THRESHOLD</b>は門を開ける境目の音量です。'+
+        '上げるほど大きな音でないと通らなくなり、'+
+        '上げすぎると弾いた音の終わりまで切れてしまいます。'+
+        '雑音が消える一番低いところに置くのが基本です。<br>'+
+        '<b>RELEASE</b>は閉じる速さです。'+
+        '速くすると切れ味が良くなりますが、音が不自然に途切れます。'+
+        '遅くすると自然ですが、雑音が少し残ります。',
+        '<span class="hn">置く場所</span>'+
+        '雑音を出す台の<b>直後</b>に置きます。'+
+        '歪みが雑音の出どころですから、歪みより前に置いても意味がありません。'+
+        'そこで切っても、その後で歪みが雑音を足してしまいます。'+
+        'この板では歪みの次に置いています。'+
+        '<span class="hn">注意する点</span>'+
+        '空間系より前に置くのが普通です。'+
+        'ディレイやリバーブの後ろに置くと、返り音や残響そのものを切ってしまい、'+
+        '尻尾が不自然に途切れます。<br>'+
+        '弱く弾いた音が通らないこともあります。'+
+        '設定は、雑音が消える最低限のところに留めてください。'+
+        '強く掛けるほど、弾き手の弱い表現が失われます。'
+      ],
+      isOn:function(){ return !!n.on; },
+      setOn:function(v){ n.on=!!v; keepIt(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush,
+      detach:detachAudio,
+      state:n, threshDb:threshDb, relSec:relSec
+    });
+  })();
+
+  /* ══════════════════════════════════════
+     13台目：ボリュームペダル
+     踏み板で音量そのものを上げ下げする。
+     筐体はワウと同じ形。中身は山を動かすのではなく、
+     出口の音量を動かすだけ。
+     ══════════════════════════════════════ */
+  (function(){
+    var AUTO_HZ=0.32;                   /* オートで上げ下げする速さ */
+    var v={pos:0.8, auto:false, on:false};
+    try{
+      var sv=JSON.parse(localStorage.getItem('efbook.vol')||'null');
+      if(sv) for(var k in v) if(sv[k]!==undefined) v[k]=sv[k];
+      v.pos=Math.max(0,Math.min(1,v.pos));
+    }catch(e){}
+    function keepIt(){ try{ localStorage.setItem('efbook.vol',JSON.stringify(v)); }catch(e){} }
+    /* 耳は音量の変化を対数で感じる。踏み板の動きと聞こえ方を合わせる */
+    function gainAt(pos){ return pos<=0.001?0:Math.pow(pos,2.2); }
+    function dbAt(pos){
+      var g=gainAt(pos);
+      return g<=0.0001?-80:20*Math.log10(g);
+    }
+
+    var G=null;
+    function rebuild(){
+      if(!AC) return;
+      G=AC.createGain();
+      FXIN.connect(G); G.connect(FXOUT);
+      apply();
+    }
+    function apply(){
+      if(!G||!AC) return;
+      var g=v.on?gainAt(v.pos):1;
+      try{ G.gain.setTargetAtTime(g,AC.currentTime,0.012); }
+      catch(e){ G.gain.value=g; }
+    }
+    function hush(t){
+      if(!G) return;
+      try{ G.gain.cancelScheduledValues(t); G.gain.setValueAtTime(G.gain.value,t); }catch(e){}
+    }
+    function detachAudio(){ G=null; }
+
+    /* ---- 見た目。ワウと同じ踏み板を使う ---- */
+    var HTML=''+
+    '<div class="wah-wrap">'+
+      '<div class="wah-base">'+
+        '<div class="wah-side"></div>'+
+        '<div class="wah-pedal" id="volPedal" tabindex="0" role="slider"'+
+          ' aria-label="踏み板" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80">'+
+          '<div class="wah-tread"></div>'+
+          '<div class="wah-plate">VOLUME</div>'+
+        '</div>'+
+        '<div class="wah-toe">つま先</div>'+
+        '<div class="wah-heel">かかと</div>'+
+      '</div>'+
+      '<div class="wah-read">'+
+        '<span class="wah-read-n" id="volDb">0.0</span> dB'+
+        '<span class="wah-read-s" id="volPos">踏み具合 80%</span>'+
+      '</div>'+
+      '<div class="wah-row">'+
+        '<div class="stomp-cell">'+
+          '<div class="indicator" id="volLed"></div>'+
+          '<button class="stomp small" id="volStomp" aria-label="ボリュームペダルの入切"></button>'+
+          '<div class="stomp-name" id="volName">踏むと入切</div>'+
+        '</div>'+
+        '<div class="stomp-cell">'+
+          '<div class="indicator" id="volAutoLed"></div>'+
+          '<button class="stomp small" id="volAuto" aria-label="オートの入切"></button>'+
+          '<div class="stomp-name" id="volAutoName">オート</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+    var anim=null;
+    var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+    function render(stage){
+      stage.innerHTML=HTML;
+      var pedal=el('volPedal'), led=el('volLed'), aLed=el('volAutoLed');
+
+      function draw(){
+        /* かかと側＝寝ている＝音が小さい、つま先側＝踏み込む＝音が大きい */
+        pedal.style.transform='rotate('+(-26*v.pos)+'deg)';
+        pedal.setAttribute('aria-valuenow',String(Math.round(v.pos*100)));
+        var db=dbAt(v.pos);
+        el('volDb').textContent=(db<=-79)?'−∞':(Math.round(db*10)/10).toFixed(1);
+        el('volPos').textContent='踏み具合 '+Math.round(v.pos*100)+'%';
+        led.className=v.on?'indicator on':'indicator';
+        aLed.className=v.auto?'indicator on':'indicator';
+        apply();
+      }
+      function setPos(x){ v.pos=Math.max(0,Math.min(1,x)); keepIt(); draw(); }
+
+      var drag=false,lastY=0;
+      pedal.addEventListener('pointerdown',function(e){
+        drag=true; lastY=e.clientY;
+        if(pedal.setPointerCapture) pedal.setPointerCapture(e.pointerId);
+        if(v.auto){ v.auto=false; keepIt(); }
+        e.preventDefault();
+      });
+      pedal.addEventListener('pointermove',function(e){
+        if(!drag) return;
+        setPos(v.pos+(lastY-e.clientY)*0.012);
+        lastY=e.clientY;
+      });
+      pedal.addEventListener('pointerup',function(){ drag=false; });
+      pedal.addEventListener('pointercancel',function(){ drag=false; });
+      pedal.addEventListener('keydown',function(e){
+        if(e.key==='ArrowUp'||e.key==='ArrowRight'){ setPos(v.pos+0.05); e.preventDefault(); }
+        if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ setPos(v.pos-0.05); e.preventDefault(); }
+      });
+
+      el('volStomp').addEventListener('click',function(){
+        v.on=!v.on; keepIt(); draw();
+        el('volName').textContent=v.on?'踏むと入切':'今は素通り';
+      });
+      el('volAuto').addEventListener('click',function(){
+        v.auto=!v.auto; keepIt(); draw();
+        el('volAutoName').textContent=v.auto?'オート 入':'オート';
+      });
+
+      /* オートの間は板そのものを上下させる。両手が空いた状態で確かめられる */
+      function tick(){
+        if(!document.body.contains(pedal)){ if(anim) clearInterval(anim); anim=null; return; }
+        if(!v.auto) return;
+        var t=(Date.now()/1000)*AUTO_HZ;
+        var ph=(t-Math.floor(t))*2*Math.PI;
+        v.pos=0.5-0.5*Math.cos(ph);
+        draw();
+      }
+      if(anim) clearInterval(anim);
+      if(!reduce) anim=setInterval(tick,40);
+
+      el('volName').textContent=v.on?'踏むと入切':'今は素通り';
+      el('volAutoName').textContent=v.auto?'オート 入':'オート';
+      draw();
+    }
+
+    definePedal({
+      id:'vol', name:'ボリュームペダル', plate:'VOLUME',
+      blurb:'踏み板で音量を上げ下げする',
+      theme:{top:'#4a4136',mid:'#3a332a',bot:'#1f1b15',led:'#ffd166'},
+      mini:'<svg viewBox="0 0 74 104"><g class="mm">'+
+             '<g class="trd" transform="rotate(-6 37 38)">'+
+             '<rect class="tread" x="10" y="10" width="54" height="56" rx="5"/>'+
+             '<g class="trl">'+
+             '<line x1="16" y1="20" x2="58" y2="20"/><line x1="16" y1="28" x2="58" y2="28"/>'+
+             '<line x1="16" y1="36" x2="58" y2="36"/><line x1="16" y1="44" x2="58" y2="44"/>'+
+             '<line x1="16" y1="52" x2="58" y2="52"/><line x1="16" y1="60" x2="58" y2="60"/></g>'+
+             '</g>'+
+             '<text class="pl" x="37" y="82" text-anchor="middle" font-size="6.2">VOLUME</text>'+
+             '<circle class="ld" cx="37" cy="93" r="2.4"/>'+
+           '</g></svg>',
+      help:[
+        '<span class="lead">踏み板で音量そのものを上げ下げする台です。</span>'+
+        'かかと側へ倒すと音が小さくなり、つま先側へ踏み込むと大きくなります。'+
+        '音色は変わりません。大きさだけが変わります。<br>'+
+        '手元のボリュームつまみと働きは同じですが、'+
+        '足で操れるので、弾きながら両手を使ったまま音量を動かせます。'+
+        '<span class="hn">使う場面</span>'+
+        '一つは、曲の中での音量の切り替えです。'+
+        '静かなところで絞り、サビで踏み込む。歌の後ろで一段下げる。'+
+        'つまみに手を伸ばさずに済むのが利点です。<br>'+
+        'もう一つが<b>ボリューム奏法</b>です。'+
+        'かかと側へ倒したまま弦を弾き、音が鳴っている間につま先側へ踏み込みます。'+
+        '弾いた瞬間の音の頭が消え、音がふわりと湧き上がるように聞こえます。'+
+        'ギターらしい輪郭がなくなり、弓で弾いた楽器に近い響きになります。',
+        '<span class="hn">確かめ方</span>'+
+        '<b>踏み板を上下にドラッグ</b>してください。指を離した位置に留まります。'+
+        '右のスイッチで<b>オート</b>にすると、板がゆっくり上下します。'+
+        'フレーズを鳴らしながら見ていると、音の頭が消えて湧き上がる感じが掴めます。<br>'+
+        '図の上でも動かせます。絵の<b>上半分</b>を上下にドラッグしてください。'+
+        '下半分は台の並べ替えに使います。'+
+        '<span class="hn">置く場所</span>'+
+        'この板では歪みの後ろに置いています。'+
+        'ここなら歪み方を変えずに、音量だけを動かせます。<br>'+
+        '一番前に置くと働きが変わります。'+
+        '絞ると歪みへ入る音そのものが小さくなるので、'+
+        '音量と一緒に歪みも減り、絞ると澄んだ音になります。'+
+        'これを狙って前に置く人もいます。'+
+        'どちらが正しいということはなく、欲しい変化で決めます。<br>'+
+        '空間系より前に置くのが普通です。'+
+        '後ろに置くと、絞った時に返り音や残響まで一緒に消えてしまいます。'
+      ],
+      isOn:function(){ return !!v.on; },
+      setOn:function(x){ v.on=!!x; keepIt(); apply(); },
+      render:render, rebuild:rebuild, apply:apply, hush:hush,
+      detach:detachAudio,
+      /* 板の上からも踏み板を動かせるようにする */
+      treadle:{
+        get:function(){ return v.pos; },
+        set:function(x){ v.pos=Math.max(0,Math.min(1,x)); v.auto=false; keepIt(); apply(); },
+        text:function(){
+          var db=dbAt(v.pos);
+          return Math.round(v.pos*100)+'% ・ '+((db<=-79)?'−∞':(Math.round(db*10)/10).toFixed(1))+'dB';
+        }
+      },
+      state:v, gainAt:gainAt, dbAt:dbAt
+    });
+  })();
+
   /* ══════ 道の並び ══════
-     アンプの前に置くもの、後に置くもの。実際の繋ぎ順に沿って並べる。 */
-  /* ══ 区画 ══
-     この教材では、音の変化を追いやすい代表的な並びを一つ示している。
-     置き場所は固定の決まりではなく、入れ替えることも普通にある。 */
-  var ZONES=[
-    {id:'pre',  name:'アンプの前段', note:'ここでは音の形と大きさを整える台を置いた',
-     ids:['wah','comp','drive','eq']},
-    {id:'post', name:'アンプの後段', note:'ここでは揺らす・広げる台を置いた（FX LOOPを想定）',
-     ids:['chorus','flanger','phaser','tremolo','pitch','delay','reverb']}
-  ];
+     台とアンプを一列に並べる。この列がそのまま音の道になる。
+     アンプより左（先）にある台はアンプへ入る前を通り、
+     右（後）にある台はアンプの後ろ、つまりFXループの中を通る。
+     台は横へドラッグして入れ替えられる。アンプ自身も動かせる。
+     アンプを右端まで送れば、全台がアンプの前を通る一本道になる。 */
+  var SEND='amp-send', RET='amp-ret';
+  function isAmp(id){ return id===SEND||id===RET; }
+  var DEFAULT_LINE=['wah','comp','drive',SEND,'gate','vol','eq',
+                    'chorus','flanger','phaser','tremolo','pitch','delay','reverb',RET];
+  var LINE=DEFAULT_LINE.slice();
+  try{
+    var svl=JSON.parse(localStorage.getItem('efbook.line')||'null');
+    if(svl&&svl.length) LINE=svl;
+  }catch(e){}
+  function keepLine(){ try{ localStorage.setItem('efbook.line',JSON.stringify(LINE)); }catch(e){} }
   function pedalOf(id){
     for(var i=0;i<PEDALS.length;i++) if(PEDALS[i].id===id) return PEDALS[i];
     return null;
   }
-  function chainOrder(){
+  /* 覚えていた並びが古くても壊れないように、毎回作り直す。
+     知らない名前は捨て、足りない台は末尾に足し、送り口と戻り口を一つずつ置く。
+     戻り口は列の最後に固定する。アンプへ戻った先はスピーカーなので、
+     そこに台は入らず、末尾以外の位置は成り立たないため。 */
+  function fixLine(){
     var out=[],seen={};
-    ZONES.forEach(function(z){
-      z.ids.forEach(function(id){ if(pedalOf(id)){ out.push(id); seen[id]=1; } });
+    LINE.forEach(function(id){
+      if(id==='amp') id=SEND;                 /* 以前の一枚札からの引き継ぎ */
+      if(seen[id]) return;
+      if(isAmp(id)||pedalOf(id)){ out.push(id); seen[id]=1; }
     });
+    if(!seen[SEND]) out.push(SEND);
     PEDALS.forEach(function(p){ if(!seen[p.id]) out.push(p.id); });
-    return out;
+    out=out.filter(function(id){ return id!==RET; });
+    out.push(RET);
+    LINE=out;
+  }
+  fixLine();
+  function sendIndex(){ return LINE.indexOf(SEND); }
+  function isPre(id){
+    var i=LINE.indexOf(id);
+    return i>=0 && i<sendIndex();
+  }
+  /* 送り口と戻り口に挟まれた台が、ループの中を通る台 */
+  function loopIds(){ return LINE.slice(sendIndex()+1,LINE.length-1); }
+  function chainOrder(){
+    return LINE.filter(function(id){ return !isAmp(id); });
   }
   function zoneOf(id){
-    for(var i=0;i<ZONES.length;i++) if(ZONES[i].ids.indexOf(id)>=0) return ZONES[i];
-    return null;
+    return isPre(id)
+      ? {id:'pre',  name:'アンプの前'}
+      : {id:'post', name:'FXループの中'};
+  }
+  function lineStateText(){
+    var pre=sendIndex(), loop=LINE.length-pre-2;
+    if(loop===0) return '一本道・全'+pre+'台';
+    if(pre===0)  return '全'+loop+'台がループの中';
+    return 'アンプの前 '+pre+'台 ／ ループ '+loop+'台';
+  }
+  /* 一台を、別の台の位置へ移す。
+     右へ動かした時はその台の後ろ、左へ動かした時は前に入れる。
+     戻り口より後ろには置けないので、動かした後で末尾へ戻す */
+  function moveInLine(id,targetId){
+    if(id===RET) return false;
+    var from=LINE.indexOf(id), to=LINE.indexOf(targetId);
+    if(from<0||to<0||from===to) return false;
+    LINE.splice(from,1);
+    var t=LINE.indexOf(targetId);
+    LINE.splice(from<to?t+1:t,0,id);
+    LINE=LINE.filter(function(x){ return x!==RET; });
+    LINE.push(RET);
+    keepLine();
+    return true;
+  }
+  /* 指定した隙間へ入れる。k は今の並びの中で「この台の手前」を指す。
+     自分の元の場所と同じ隙間なら、動かさない */
+  function moveToGap(id,k){
+    if(id===RET) return false;
+    var from=LINE.indexOf(id);
+    if(from<0||k<0) return false;
+    if(k===from||k===from+1) return false;
+    var arr=LINE.slice();
+    arr.splice(from,1);
+    arr.splice(k>from?k-1:k,0,id);
+    arr=arr.filter(function(x){ return x!==RET; });
+    arr.push(RET);
+    LINE=arr; keepLine();
+    return true;
+  }
+  /* 二台の場所をそっくり交換する。割り込みと違い、周りの並びは動かない */
+  function swapInLine(a,b){
+    if(!a||!b||a===b||a===RET||b===RET) return false;
+    var i=LINE.indexOf(a), j=LINE.indexOf(b);
+    if(i<0||j<0) return false;
+    LINE[i]=b; LINE[j]=a;
+    keepLine();
+    return true;
+  }
+  function resetLine(){
+    LINE=DEFAULT_LINE.slice(); fixLine(); keepLine();
   }
   function miniOf(p){
     var m=document.createElement('div');
@@ -3679,7 +4341,7 @@
     var pre=[],post=[];
     ids.forEach(function(id){
       var p=pedalOf(id);
-      (p.stage==='pre'?pre:post).push(p);
+      (isPre(id)?pre:post).push(p);
     });
     /* アンプの前 */
     var node=BUS;
@@ -3710,17 +4372,210 @@
        ギターは右端。上段を右から左へ通し、左端で下段の右端へ折り返し、
        下段も右から左へ。最後にアンプへ入る。
        上下をまたぐのは折り返しの一本だけで、直列であることが目で追える。 */
-    var order=chainOrder(), half=Math.ceil(order.length/2);
+    var line=LINE.slice(), half=Math.ceil(line.length/2);
     return {
-      top:order.slice(0,half),        /* 右から左へ並べる（描画側で反転）*/
-      bottom:order.slice(half),
-      order:order,
+      top:line.slice(0,half),         /* 右から左へ並べる（描画側で反転）*/
+      bottom:line.slice(half),
+      order:line,
       cols:half
     };
   }
+  /* ══════ 並べ替え ══════
+     絵を横へドラッグすると、台と台の<隙間>へ入る。
+     指を近づけた隙間が実際に開き、そこへ入ることが見て分かる。
+     踏み板のある台は、指を置いた場所で用途が決まる（上半分は踏み板）。
+
+     位置の割り出しには、掴んだ時点で測った座標を使う。
+     隙間が開くと絵の位置が動くので、その都度測り直すと
+     開いたり閉じたりを繰り返してしまうため。 */
+  var dragId=null, dropAt=-1, swapId=null, gapEl=null, snap=null;
+
+  function takeSnapshot(){
+    var board=el('board');
+    if(!board) return null;
+    var rows=[], all=[];
+    var rowEls=board.querySelectorAll('.rows .row');
+    for(var i=0;i<rowEls.length;i++){
+      var rr=rowEls[i].getBoundingClientRect();
+      var its=rowEls[i].querySelectorAll('.slot[data-pedal]');
+      var list=[];
+      for(var j=0;j<its.length;j++){
+        var r=its[j].getBoundingClientRect();
+        list.push({el:its[j], id:its[j].getAttribute('data-pedal'),
+                   l:r.left, r:r.right, cx:(r.left+r.right)/2});
+        all.push(its[j]);
+      }
+      if(list.length) rows.push({el:rowEls[i], mid:(rr.top+rr.bottom)/2, items:list});
+    }
+    return rows.length?{rows:rows, all:all}:null;
+  }
+
+  /* 指の位置から、落とし先を割り出す。二通りある。
+       台の真ん中あたりに重ねた時  → その台と入れ替える
+       台と台の隙間に寄せた時      → その隙間へ割り込む
+     段は縦の位置で選ぶ。段の中は右から左へ並んでいるので、
+     指より左に中心がある最初の台が、その隙間の左隣にあたる */
+  var SWAP_BAND=0.3;                           /* 真ん中の六割を入れ替えの的にする */
+  function aimAt(x,y){
+    if(!snap) return null;
+    var row=snap.rows[0], bd=Infinity, i;
+    for(i=0;i<snap.rows.length;i++){
+      var d=Math.abs(y-snap.rows[i].mid);
+      if(d<bd){ bd=d; row=snap.rows[i]; }
+    }
+    for(i=0;i<row.items.length;i++){
+      var it=row.items[i];
+      if(x>=it.l&&x<=it.r){
+        if(Math.abs(x-it.cx)<(it.r-it.l)*SWAP_BAND&&it.id!==dragId&&it.id!==RET)
+          return {kind:'swap', id:it.id, el:it.el};
+        break;
+      }
+    }
+    var base=snap.all.indexOf(row.items[0].el);
+    var k=base+row.items.length;               /* 既定はその段の左端＝一番後ろ */
+    for(i=0;i<row.items.length;i++){
+      if(x>row.items[i].cx){ k=base+i; break; }
+    }
+    if(k>snap.all.length-1) k=snap.all.length-1;   /* 戻り口より後ろへは入れない */
+    return {kind:'gap', index:k, row:row};
+  }
+
+  /* 入れ替えの的。その台に枠を出す */
+  function markSwap(el){
+    var ss=document.querySelectorAll('.slot[data-pedal]');
+    for(var i=0;i<ss.length;i++) ss[i].classList.remove('drop');
+    swapId=null;
+    if(el){ el.classList.add('drop'); swapId=el.getAttribute('data-pedal'); }
+  }
+  function showAim(aim){
+    if(!aim){ markSwap(null); hideGap(); return; }
+    if(aim.kind==='swap'){
+      if(gapEl&&gapEl.parentNode){ hideGap(); drawWire(); }
+      markSwap(aim.el);
+      return;
+    }
+    markSwap(null);
+    showGap(aim);
+  }
+  function showGap(spot){
+    if(!spot){ hideGap(); return; }
+    if(spot.index===dropAt&&gapEl&&gapEl.parentNode) return;
+    if(!gapEl){
+      gapEl=document.createElement('div');
+      gapEl.className='drop-gap';
+      gapEl.setAttribute('aria-hidden','true');
+    }
+    var ref=snap.all[spot.index];
+    if(ref&&ref.parentNode===spot.row.el) spot.row.el.insertBefore(gapEl,ref);
+    else{
+      var last=spot.row.items[spot.row.items.length-1].el;
+      spot.row.el.insertBefore(gapEl,last.nextSibling);
+    }
+    dropAt=spot.index;
+    gapEl.classList.add('open');
+    drawWire();                                 /* 線も隙間に合わせて引き直す */
+  }
+  function hideGap(){
+    if(gapEl&&gapEl.parentNode) gapEl.parentNode.removeChild(gapEl);
+    dropAt=-1;
+  }
+  function clearDrag(){
+    var ss=document.querySelectorAll('.slot[data-pedal]');
+    for(var i=0;i<ss.length;i++){
+      ss[i].classList.remove('lift'); ss[i].classList.remove('drop');
+    }
+    hideGap(); gapEl=null; snap=null; dragId=null; swapId=null;
+  }
+
+  /* 絵に、押す・傾ける・並べ替えるの三つをまとめて付ける */
+  function wireHandle(box,handle,id,p){
+    var down=false, mode=null, sx=0, sy=0, lastY=0;
+    var moved={v:false};
+    var zone=null;
+    handle.addEventListener('pointerdown',function(e){
+      down=true; mode=null; moved.v=false; zone=null;
+      sx=e.clientX; sy=e.clientY; lastY=e.clientY;
+      if(p&&p.treadle&&e.target&&e.target.closest){
+        if(e.target.closest('.tread-zone')) zone='tread';
+        else if(e.target.closest('.order-zone')) zone='move';
+      }
+      if(handle.setPointerCapture) handle.setPointerCapture(e.pointerId);
+    });
+    handle.addEventListener('pointermove',function(e){
+      if(!down) return;
+      var dx=e.clientX-sx, dy=e.clientY-sy;
+      if(mode===null){
+        if(Math.abs(dx)<6&&Math.abs(dy)<6) return;
+        /* 踏み板のある台は、指を置いた場所で決める。
+           絵の上半分なら踏み板、下半分なら並べ替え。
+           それ以外の台は、絵のどこを持っても並べ替えになる */
+        mode=zone||'move';
+        if(mode==='move'){
+          dragId=id; snap=takeSnapshot(); box.classList.add('lift');
+        }
+        moved.v=true;
+      }
+      if(mode==='move'){
+        showAim(aimAt(e.clientX,e.clientY));
+        e.preventDefault();
+      }else if(mode==='tread'){
+        p.treadle.set(p.treadle.get()+(lastY-e.clientY)*0.012);
+        lastY=e.clientY;
+        paintTreadle(box,p);
+        e.preventDefault();
+      }
+    });
+    function finish(){
+      down=false;
+      if(mode==='move'){
+        var who=dragId, at=dropAt, sw=swapId;
+        clearDrag();
+        var done=sw ? swapInLine(who,sw)
+                    : (who&&at>=0&&moveToGap(who,at));
+        if(done){
+          buildMap();
+          if(AC) rewire();
+        }else{
+          drawWire();
+        }
+      }
+      mode=null;
+    }
+    handle.addEventListener('pointerup',finish);
+    handle.addEventListener('pointercancel',function(){
+      down=false; mode=null; clearDrag(); drawWire();
+    });
+    /* 指を使わずに済むよう、鍵盤からも動かせるようにする */
+    handle.addEventListener('keydown',function(e){
+      var big=e.shiftKey;
+      if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+        if(!big&&p&&p.treadle){
+          p.treadle.set(p.treadle.get()+(e.key==='ArrowRight'?0.05:-0.05));
+          paintTreadle(box,p); e.preventDefault(); return;
+        }
+        /* Shift＋左右で並べ替え。図の並びは右から左なので、左キーで後ろへ送る */
+        var i=LINE.indexOf(id), j=i+(e.key==='ArrowLeft'?1:-1);
+        if(i<0||j<0||j>=LINE.length) return;
+        if(moveInLine(id,LINE[j])){
+          buildMap();
+          if(AC) rewire();
+          var again=document.querySelector('.slot[data-pedal="'+id+'"] .slot-open');
+          if(again) again.focus();
+        }
+        e.preventDefault(); return;
+      }
+      if(p&&p.treadle&&(e.key==='ArrowUp'||e.key==='ArrowDown')){
+        p.treadle.set(p.treadle.get()+(e.key==='ArrowUp'?0.05:-0.05));
+        paintTreadle(box,p); e.preventDefault();
+      }
+    });
+    return moved;
+  }
+
   function slotOf(p,n){
     var b=document.createElement('div');
     b.className='slot'; b.setAttribute('data-pedal',p.id);
+    if(p.treadle) b.classList.add('trd');
     var no=document.createElement('div');
     no.className='no'; no.textContent=(n<10?'0':'')+n;
     var nm=document.createElement('div');
@@ -3732,12 +4587,18 @@
     jk.innerHTML='<span class="jk in"></span><span class="jk-lbl in">IN</span>'+
                  '<span class="jk out"></span><span class="jk-lbl out">OUT</span>';
     m.appendChild(jk);
-    /* 絵を押すと開く。下の踏みスイッチで音の道へ挿す */
+    /* 絵を押すと開く。横へドラッグすると並べ替え。下の踏みスイッチで音の道へ挿す */
     var open=document.createElement('button');
     open.className='slot-open'; open.type='button';
-    open.setAttribute('aria-label',p.name+'を開く');
+    open.setAttribute('aria-label', p.name+'を開く（'+
+      (p.treadle?'絵の上半分を上下にドラッグで踏み板、下半分を横にドラッグで並べ替え'
+                :'絵を横にドラッグで並べ替え')+'）');
     open.appendChild(m);
-    open.addEventListener('click',function(){ openPedal(p.id); });
+    var moved=wireHandle(b,open,p.id,p);
+    open.addEventListener('click',function(){
+      if(moved.v){ moved.v=false; return; }   /* ドラッグの後は開かない */
+      openPedal(p.id);
+    });
     var sw=document.createElement('button');
     sw.className='slot-sw'; sw.type='button';
     sw.setAttribute('role','switch');
@@ -3749,7 +4610,90 @@
       paintSwitches(); updateOnCount(); rewire();
     });
     b.appendChild(no); b.appendChild(open); b.appendChild(nm); b.appendChild(sw);
+    if(p.treadle){
+      /* 上半分は踏み板、下半分は並べ替え。指を置いた場所で用途が決まる */
+      var zt=document.createElement('div');
+      zt.className='grab tread-zone'; zt.setAttribute('aria-hidden','true');
+      var zo=document.createElement('div');
+      zo.className='grab order-zone'; zo.setAttribute('aria-hidden','true');
+      m.appendChild(zt); m.appendChild(zo);
+      var val=document.createElement('div');
+      val.className='slot-val';
+      b.appendChild(val);
+      paintTreadle(b,p);
+    }
     return b;
+  }
+
+  /* ══ 列の中のアンプ ══
+     アンプは送り口（SEND）と戻り口（RETURN）の二枚に分けて置く。
+     この二枚に挟まれた台が、FXループの中を通る台である。
+     動かせるのは送り口だけ。戻り口の先はスピーカーなので末尾から動かない。
+     送り口を戻り口の隣まで送れば、ループに何も入らない一本道になる。 */
+  function ampArt(label,lamp){
+    return '<svg viewBox="0 0 74 104">'+
+      '<rect class="ln" x="8" y="16" width="58" height="60" rx="4"/>'+
+      '<line class="ln" x1="8" y1="32" x2="66" y2="32"/>'+
+      (lamp?'<circle class="lamp" cx="16" cy="24" r="2.4"/>'
+           :'<circle class="ln" cx="16" cy="24" r="2.2"/>')+
+      '<line class="thin" x1="24" y1="24" x2="58" y2="24"/>'+
+      '<line class="thin" x1="16" y1="42" x2="58" y2="56"/>'+
+      '<line class="thin" x1="16" y1="50" x2="58" y2="64"/>'+
+      '<line class="thin" x1="16" y1="58" x2="50" y2="70"/>'+
+      '<text x="37" y="90" text-anchor="middle">'+label+'</text>'+
+      '<text class="sm" x="37" y="99" text-anchor="middle">AMP</text>'+
+    '</svg>';
+  }
+  function ampCard(which){
+    var out=(which===SEND);
+    var b=document.createElement('div');
+    b.className='slot amp-slot '+(out?'amp-send':'amp-ret');
+    b.setAttribute('data-pedal',which);
+    var no=document.createElement('div');
+    no.className='no'; no.textContent='──';
+    var nm=document.createElement('div');
+    nm.className='name'; nm.textContent=out?'アンプ・送り':'アンプ・戻り';
+    var m=document.createElement('div');
+    m.className='mini amp-mini';
+    m.innerHTML=ampArt(out?'SEND':'RETURN',out);
+    var jk=document.createElement('div');
+    jk.className='jacks';
+    jk.innerHTML=out
+      ? '<span class="jk in"></span><span class="jk-lbl in">IN</span>'+
+        '<span class="jk out"></span><span class="jk-lbl out">SEND</span>'
+      : '<span class="jk in"></span><span class="jk-lbl in">RET</span>'+
+        '<span class="jk out"></span><span class="jk-lbl out">OUT</span>';
+    m.appendChild(jk);
+    var open=document.createElement('button');
+    open.className='slot-open'; open.type='button';
+    open.setAttribute('aria-label',out
+      ? 'アンプの送り口（横にドラッグでループの入口を動かす）'
+      : 'アンプの戻り口（位置は変えられません）');
+    open.appendChild(m);
+    var moved={v:false};
+    if(out) moved=wireHandle(b,open,SEND,null);
+    open.addEventListener('click',function(){
+      if(moved.v){ moved.v=false; return; }
+      openGuide(2);
+    });
+    var note=document.createElement('div');
+    note.className='amp-note';
+    note.textContent=out?'ここから先がループ':'ここでアンプへ戻る';
+    b.appendChild(no); b.appendChild(open); b.appendChild(nm); b.appendChild(note);
+    return b;
+  }
+  /* 踏み板の傾きと読みを塗り直す */
+  function paintTreadle(slot,p){
+    if(!slot||!p||!p.treadle) return;
+    var g=slot.querySelector('.mini .trd');
+    if(g) g.setAttribute('transform','rotate('+(-2-12*p.treadle.get()).toFixed(1)+' 37 38)');
+    var v=slot.querySelector('.slot-val');
+    if(v) v.textContent=p.treadle.text();
+  }
+  function paintTreadles(){
+    var ss=document.querySelectorAll('.slot.trd');
+    for(var i=0;i<ss.length;i++)
+      paintTreadle(ss[i],pedalOf(ss[i].getAttribute('data-pedal')));
   }
   /* 踏みスイッチと、線の明るさを塗り直す */
   function paintSwitches(){
@@ -3825,22 +4769,31 @@
     var rowT=document.createElement('div'); rowT.className='row';
     var rowB=document.createElement('div'); rowB.className='row';
     /* 段は右から左へ並ぶ（row-reverse）。先頭を先に足せば右端に来る */
+    var ord=chainOrder();
+    function itemOf(id){
+      return isAmp(id)?ampCard(id):slotOf(pedalOf(id),ord.indexOf(id)+1);
+    }
     rowT.appendChild(jack('ギター','ここから<br>出る','in'));
-    L.top.forEach(function(id){
-      rowT.appendChild(slotOf(pedalOf(id),L.order.indexOf(id)+1));
-    });
-    L.bottom.forEach(function(id){
-      rowB.appendChild(slotOf(pedalOf(id),L.order.indexOf(id)+1));
-    });
-    rowB.appendChild(jack('アンプ','ここへ<br>入る','out'));   /* 下段の左端 */
+    L.top.forEach(function(id){ rowT.appendChild(itemOf(id)); });
+    L.bottom.forEach(function(id){ rowB.appendChild(itemOf(id)); });
+    rowB.appendChild(jack('スピーカー','ここから<br>鳴る','out'));  /* 下段の左端 */
+    rowB.appendChild(guideSlot());                                 /* その隣に解説の札 */
     body.appendChild(rowT); body.appendChild(rowB);
-    el('count').textContent='全'+L.order.length+'台';
+    el('count').textContent='全'+chainOrder().length+'台';
+    var ls=el('lineState');
+    if(ls) ls.textContent=lineStateText();
     paintSwitches(); updateOnCount();
     var note=el('boardNote');
     if(note) note.innerHTML=
-      '右のギターから左へ、十一台を順に通ってアンプへ入ります。'+
-      'ここでは音の変化を追いやすい<b>代表的な並び</b>にしています。'+
-      '実際のボードでは順番を入れ替えて音を作ることもあり、正解は一つではありません。<br>'+
+      '右のギターから左へ、十三台とアンプを順に通って音が出ます。'+
+      '列の中には<b>アンプの送り口と戻り口</b>があり、'+
+      'その二枚に挟まれた台が青い枠の<b>FXループ</b>の中を通ります。<br>'+
+      '<b>絵を横にドラッグすると並べ替えられます。</b>'+
+      '隙間に寄せればそこへ割り込み、台の真ん中に重ねればその台と入れ替わります。'+
+      '送り口も動かせますので、ループに入れる台を増やしたり減らしたりできます。'+
+      'ワウとボリュームだけは、絵の<b>上半分が踏み板</b>、<b>下半分が並べ替え</b>です。'+
+      '順番を変えると音も変わりますので、置き場所による違いを聞き比べてください。'+
+      '板の左端に、考え方をまとめた<b>解説</b>を置いています。<br>'+
       '各台の踏みスイッチで入切し、下の帯から鳴らします。'+
       '試し弾きの音は、ギターの物理模型ではなく、聴き比べのために作った<b>簡易な音源</b>です。';
     drawWire();
@@ -3880,6 +4833,7 @@
       var r=j.getBoundingClientRect();
       return {x:r.left-base.left+r.width/2, y:r.top-base.top+r.height/2};
     }
+    drawLoopBand(svg,board,base);
     var L=layout(), jacks=board.querySelectorAll('.jack');
     var nodes=[];
     if(jacks[0]) nodes.push({el:jacks[0], kind:'jack'});
@@ -3935,6 +4889,44 @@
     }
     startFlow();
   }
+  /* ══════ ループの囲み ══════
+     送り口から戻り口までを破線で囲い、区間を目で分かるようにする。
+     段をまたぐ時は段ごとに一つずつ。ループが空の時は描かない。 */
+  function drawLoopBand(svg,board,base){
+    var inner=loopIds();
+    if(!inner.length) return;
+    var rowEls=board.querySelectorAll('.row');
+    var ids=[SEND].concat(inner).concat([RET]), rows={};
+    ids.forEach(function(id){
+      var n=board.querySelector('.slot[data-pedal="'+id+'"]');
+      if(!n) return;
+      var k=Array.prototype.indexOf.call(rowEls,n.parentNode);
+      var r=n.getBoundingClientRect();
+      var g=rows[k]||(rows[k]={l:1e9,r:-1e9,t:1e9,b:-1e9});
+      g.l=Math.min(g.l,r.left-base.left);  g.r=Math.max(g.r,r.right-base.left);
+      g.t=Math.min(g.t,r.top-base.top);    g.b=Math.max(g.b,r.bottom-base.top);
+    });
+    var pad=10;
+    Object.keys(rows).forEach(function(k){
+      var g=rows[k];
+      if(g.r<g.l) return;
+      var rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      rect.setAttribute('class','loopband');
+      rect.setAttribute('x',(g.l-pad).toFixed(1));
+      rect.setAttribute('y',(g.t-pad).toFixed(1));
+      rect.setAttribute('width',(g.r-g.l+pad*2).toFixed(1));
+      rect.setAttribute('height',(g.b-g.t+pad*2).toFixed(1));
+      rect.setAttribute('rx','7');
+      svg.appendChild(rect);
+      var t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('class','looplbl');
+      t.setAttribute('x',(g.r+pad-4).toFixed(1));
+      t.setAttribute('y',(g.b+pad-3).toFixed(1));
+      t.setAttribute('text-anchor','end');
+      t.textContent='FX LOOP';
+      svg.appendChild(t);
+    });
+  }
   /* 音が通っている印。繋いだ順に流れる */
   function startFlow(){
     if(flow) clearInterval(flow);
@@ -3953,6 +4945,212 @@
       });
     },40);
   }
+  /* ══════ 繋ぐ順の解説 ══════
+     台の中ではなく、板そのものについての読み物。
+     どの台をどこに置くか、なぜその順なのかをまとめる。
+     板に載せなかった台と、音を出さない備品もここで扱う。 */
+  var GUIDE=[
+    /* 一枚目：順番が音を決める、という話 */
+    '<div class="guide-h">なぜ順番で音が変わるのか</div>'+
+    '<span class="lead">それぞれの台は、前の台が出した音を受け取って加工します。</span>'+
+    'ですから同じ二台でも、どちらが先かで結果が変わります。'+
+    'たとえば歪みの前で音量を絞ると、歪みへ入る音そのものが小さくなり、歪み方まで変わります。'+
+    '歪みの後で絞れば、歪み方はそのままで音量だけが下がります。'+
+    '同じ「絞る」でも、置く場所で意味が違います。'+
+    '<span class="hn">よく使われる並び</span>'+
+    '<div class="chain-line">'+
+      '<i class="out">チューナー</i><s>→</s><i>ワウ</i><s>→</s><i>コンプ</i><s>→</s>'+
+      '<i>歪み</i><s>→</s><i class="amp">アンプ</i><s>→</s>'+
+      '<i>ノイズゲート</i><s>→</s><i>ボリューム</i><s>→</s><i>EQ</i>'+
+    '</div>'+
+    '<div class="chain-line">'+
+      '<s>→</s><i>コーラス</i><s>→</s><i>フランジャー</i><s>→</s><i>フェイザー</i><s>→</s>'+
+      '<i>トレモロ</i><s>→</s><i>ピッチ</i><s>→</s><i>ディレイ</i><s>→</s><i>リバーブ</i>'+
+    '</div>'+
+    '大きく分けると、<b>音の形と大きさを整える台</b>が先、'+
+    '<b>揺らす台</b>が中ほど、<b>広げる台</b>が最後です。'+
+    'この板もこの並びで始まります。'+
+    'ただしこれは決まりではなく、多くの人が試した結果として残った出発点にすぎません。'+
+    '<span class="hn">動かして確かめる</span>'+
+    '板の絵を<b>横にドラッグする</b>と、台の位置を入れ替えられます。'+
+    '列の中にあるアンプも動かせます。'+
+    '入れ替えると音の道もその通りに繋ぎ直りますので、'+
+    'この先の話はすべて、実際に耳で確かめられます。'+
+    '元に戻したい時は、画面右上の「並びを戻す」を押してください。',
+
+    /* 二枚目：前段 */
+    '<div class="guide-h">アンプの前段</div>'+
+    '<span class="hn">チューナー</span>'+
+    '一番前、ギターのすぐ後ろに置きます。'+
+    '他の台を通った後の音は加工されていて、音程が読み取りにくくなるためです。'+
+    '踏むと音が消える機種が多く、曲の合間に音を出さずに合わせられます。'+
+    'この板には台として載せていませんが、実際のボードではほぼ必ず一台目にあります。'+
+    '<span class="hn">ワウ</span>'+
+    '歪みの前が一般的です。'+
+    '素の音の山を動かしてから歪ませたほうが、動きが素直に出ます。'+
+    '<span class="hn">コンプ</span>'+
+    '音量の凸凹をならす台なので、歪みより前に置いて入り口をそろえます。'+
+    '歪みの後に置くと、歪みが作った音量差まで潰してしまいます。'+
+    '<span class="hn">歪み</span>'+
+    '複数を並べる時は、後ろほど全体の性格を決めます。'+
+    '前の台が出した音を後ろの台が受け取って、さらに歪ませるからです。'+
+    '軽いものを後ろに置いて重ねる、という組み方がよく使われます。'+
+    '<span class="hn">ノイズゲート</span>'+
+    '雑音を出す台の直後に置きます。'+
+    '出どころより前に置いても、その後で足された雑音は通り抜けてしまいます。'+
+    '<span class="hn">ボリューム</span>'+
+    '歪みの後、空間系の前が基本です。'+
+    'ここなら歪み方を変えずに、音量だけを動かせます。'+
+    '<span class="hn">EQ</span>'+
+    '歪みの後なら仕上げの調整、前なら歪み方そのものを変える道具になります。'+
+    '同じ台が、置く場所で役目を変える良い例です。',
+
+    /* 三枚目：後段と空間系 */
+    '<div class="guide-h">揺らす台と、広げる台</div>'+
+    '<span class="lead">揺れ物は歪みの後です。</span>'+
+    'コーラス、フランジャー、フェイザー、トレモロは、いずれも音量や音程を細かく上下させます。'+
+    'これを歪みの前に置くと、その上下を歪みが潰してしまい、動きが薄くなります。'+
+    '<span class="hn">最後は空間系</span>'+
+    'ディレイとリバーブは最後に置きます。'+
+    '返ってきた音や残響をさらに歪ませたり揺らしたりすると、輪郭がぼやけるためです。'+
+    'この二つの中では、ディレイが先、リバーブが後が一般的です。'+
+    '返した音の一つひとつに残響が付き、自然な奥行きになります。'+
+    '<span class="hn">FXループ</span>'+
+    'アンプ側で歪ませる場合、空間系をギターとアンプの間に置くと、残響ごと歪んでしまいます。'+
+    'これを避けるため、アンプの歪みの後ろへ台を差し込める口が付いている機種があります。'+
+    'これがFXループ（センド／リターン）です。'+
+    'センドから出た音が台を通り、リターンから戻ります。'+
+    '音はアンプの中をいったん抜けて、また戻ってくることになります。'+
+    '<span class="hn">板の上での見方</span>'+
+    '列の中に、アンプの札が二枚あります。'+
+    '<b>送り（SEND）</b>がループの入口、<b>戻り（RETURN）</b>が出口です。'+
+    'この二枚に挟まれた台が、青い破線で囲まれたループの中を通ります。'+
+    '始めの並びでは、ワウ・コンプ・歪みがアンプの前、残り十台がループの中です。<br>'+
+    '送りの札は動かせます。左へ送るほどループに入る台が増え、'+
+    '戻りの隣まで送れば、ループを使わない<b>一本道</b>になります。'+
+    '戻りの札は動きません。アンプへ戻った先はスピーカーで、'+
+    'そこに台を挟むことはないからです。'+
+    '一本道にしてハイゲインの音色を選び、リバーブを掛けてみてください。'+
+    '残響ごと歪んで濁ります。ループが要る理由が、そのまま耳で分かります。',
+
+    /* 四枚目：入れ替え */
+    '<div class="guide-h">入れ替えてみる</div>'+
+    '<span class="lead">定石は出発点であって、正解ではありません。</span>'+
+    '狙いがあれば、どこに置いても構いません。よく使われる入れ替えを挙げます。'+
+    '<span class="hn">ワウを歪みの後ろへ</span>'+
+    '歪んだ音の一部だけが持ち上がるので、掛かり方が派手になります。'+
+    'ファンクやハードロックで聞かれる、動きのはっきりしたワウはこの繋ぎ方です。'+
+    '<span class="hn">ボリュームを一番前へ</span>'+
+    '絞ると歪みへ入る音が小さくなり、音量と一緒に歪みも減ります。'+
+    '手元のボリュームつまみと同じ働きになるので、これを狙って前に置く人もいます。'+
+    '<span class="hn">リバーブをディレイより前へ</span>'+
+    'ひとまとまりになった残響が、そのまま返ってきます。'+
+    '自然さは薄れますが、独特の空気感が出ます。'+
+    '<span class="hn">歪みを空間系の後ろへ</span>'+
+    '返り音ごと歪んで混ざり合い、濁ります。'+
+    '普通は避けますが、これを効果として使う場面もあります。'+
+    '<span class="hn">確かめ方</span>'+
+    '板の絵を<b>横にドラッグ</b>して、実際に入れ替えてください。'+
+    '台と台の隙間に寄せると、そこが開いて割り込みます。'+
+    '台の真ん中に重ねると、その台と場所を交換します。'+
+    '二台とも入れた状態で、順番だけを入れ替えて聞き比べるのが確実です。'+
+    'キーボードなら、絵にフォーカスを当ててShiftを押しながら左右の矢印でも動きます。<br>'+
+    '入れ替えた並びは次に開いた時も残ります。'+
+    '始めの並びに戻したい時は、画面右上の「並びを戻す」を押してください。',
+
+    /* 五枚目：載せなかった台 */
+    '<div class="guide-h">この板に載せなかった台</div>'+
+    '<span class="hn">ブースター</span>'+
+    '音色を変えず、音量だけを持ち上げる台です。'+
+    '歪みの前に置けば歪みが深くなり、後ろに置けば音量だけが上がります。'+
+    'ソロで一段前に出る時に使います。'+
+    '<span class="hn">オートワウ</span>'+
+    '踏み板の代わりに、弾いた強さで山が動きます。'+
+    '強く弾くと山が高いほうへ跳ね、弱く弾くと動きません。'+
+    '足を使わずにワウの動きが得られます。'+
+    '<span class="hn">オクターバー</span>'+
+    '1オクターブ下の音を足して、太さを出します。'+
+    'この板ではピッチシフターに1オクターブ下の設定がありますので、そちらで確かめられます。'+
+    '<span class="hn">ロータリー</span>'+
+    '回転するスピーカーの音を写した台です。'+
+    'コーラスに似ていますが、回転の速さが切り替わる途中の変化に持ち味があります。'+
+    '<span class="hn">ルーパー</span>'+
+    '弾いた音を録って繰り返します。音そのものは変えません。'+
+    '伴奏を重ねて一人で練習する道具として使います。板では一番最後に置きます。',
+
+    /* 六枚目：チューナーと備品 */
+    '<div class="guide-h">チューナーと、板の備品</div>'+
+    '<span class="hn">チューナーの繋ぎ方</span>'+
+    '二通りあります。'+
+    '一つは音の道に割り込ませる繋ぎ方で、踏むと音が止まり、その間に合わせます。'+
+    'もう一つは、ボリュームペダルなどに付いた出口から分けて送る繋ぎ方です。'+
+    '後者なら音の道にチューナーが入りませんので、音そのものが変わりません。'+
+    '<span class="hn">パワーサプライ</span>'+
+    '台へ電気を配る箱です。'+
+    '一つの口から分岐させると台どうしが干渉して雑音が出ることがあるため、'+
+    '口が独立しているものが好まれます。'+
+    '<span class="hn">スイッチャー</span>'+
+    '複数の台をまとめて入切する箱です。'+
+    '曲の切り替えで三台四台を同時に踏み替える場面で使います。'+
+    '使わない台を音の道から完全に外せるので、通り道が短くなる利点もあります。'+
+    '<span class="hn">パッチケーブル</span>'+
+    '台と台を繋ぐ短いケーブルです。'+
+    '長さと本数が増えるほど、高い成分から失われていきます。'+
+    '板の上で台を詰めて並べるのは、見た目のためだけではありません。'
+  ];
+  var gPage=0;
+  function paintGuide(){
+    el('guideDoc').innerHTML=GUIDE[gPage]||'';
+    el('gPos').textContent=(gPage+1)+' / '+GUIDE.length;
+    el('gMid').textContent=(gPage+1)+' / '+GUIDE.length;
+    el('gPrev').disabled=(gPage<=0);
+    el('gNext').disabled=(gPage>=GUIDE.length-1);
+    el('guide').scrollTop=0;
+  }
+  function openGuide(page){
+    if(current) closePedal();
+    gPage=(typeof page==='number'&&page>=0&&page<GUIDE.length)?page:0;
+    paintGuide();
+    el('guide').classList.add('on');
+    el('map').classList.add('dim');
+    document.body.style.overflow='hidden';
+  }
+  function closeGuide(){
+    el('guide').classList.remove('on');
+    el('map').classList.remove('dim');
+    document.body.style.overflow='';
+  }
+  el('gClose').addEventListener('click',closeGuide);
+  el('lineReset').addEventListener('click',function(){
+    resetLine(); buildMap(); if(AC) rewire();
+  });
+  el('gPrev').addEventListener('click',function(){ if(gPage>0){ gPage--; paintGuide(); } });
+  el('gNext').addEventListener('click',function(){ if(gPage<GUIDE.length-1){ gPage++; paintGuide(); } });
+  document.addEventListener('keydown',function(e){
+    if(!el('guide').classList.contains('on')) return;
+    if(e.key==='Escape'){ closeGuide(); e.preventDefault(); }
+    if(e.key==='ArrowLeft'&&gPage>0){ gPage--; paintGuide(); e.preventDefault(); }
+    if(e.key==='ArrowRight'&&gPage<GUIDE.length-1){ gPage++; paintGuide(); e.preventDefault(); }
+  });
+  /* 板の左端、アンプの隣に置く札 */
+  function guideSlot(){
+    var d=document.createElement('div');
+    d.className='guide-slot';
+    var b=document.createElement('button');
+    b.className='guide-btn'; b.type='button';
+    b.setAttribute('aria-label','繋ぐ順の解説を読む');
+    b.innerHTML='<svg viewBox="0 0 34 26" width="34" height="26">'+
+        '<path d="M3 4h12v18H3z"/><path d="M19 4h12v18H19z"/><line x1="17" y1="3" x2="17" y2="23"/>'+
+        '<line class="thin" x1="6" y1="9" x2="12" y2="9"/><line class="thin" x1="6" y1="13" x2="12" y2="13"/>'+
+        '<line class="thin" x1="22" y1="9" x2="28" y2="9"/><line class="thin" x1="22" y1="13" x2="28" y2="13"/>'+
+      '</svg><span>解説</span>';
+    b.addEventListener('click',function(){ openGuide(0); });
+    var c=document.createElement('div');
+    c.className='cap'; c.textContent='繋ぐ順';
+    d.appendChild(b); d.appendChild(c);
+    return d;
+  }
+
   /* ══════ 一台を開く ══════ */
   var docPage=0;                       /* 0=解説を出していない、1以上=解説の枚数 */
   function helpParts(p){
@@ -4009,6 +5207,7 @@
     el('stage').innerHTML='';
     var slots=document.querySelectorAll('.slot');
     for(var s=0;s<slots.length;s++) slots[s].classList.remove('lit');
+    paintTreadles();                    /* 面で動かした踏み板を板にも映す */
   }
   function step(dir){
     var order=chainOrder(), i=order.indexOf(st.pedal), j=i+dir;
@@ -4052,8 +5251,8 @@
   window.addEventListener('resize',function(){ drawWire(); });
   if(window.requestAnimationFrame) window.requestAnimationFrame(drawWire);
 
-  window.__map={st:st,PEDALS:PEDALS,ZONES:ZONES,TONES:TONES,ARTS:ARTS,PHRASES:PHRASES,
-                chainOrder:chainOrder,zoneOf:zoneOf,layout:layout,drawWire:function(){ drawWire(); },
+  window.__map={st:st,PEDALS:PEDALS,LINE:function(){ return LINE.slice(); },TONES:TONES,ARTS:ARTS,PHRASES:PHRASES,
+                chainOrder:chainOrder,zoneOf:zoneOf,paintTreadles:paintTreadles,moveInLine:function(a,b){ return moveInLine(a,b); },moveToGap:function(a,k){ return moveToGap(a,k); },swapInLine:function(a,b){ return swapInLine(a,b); },resetLine:resetLine,sendIndex:sendIndex,loopIds:loopIds,layout:layout,drawWire:function(){ drawWire(); },
                 openPedal:openPedal,closePedal:closePedal,
                 activeIds:function(){ return activeIds(); },rewire:function(){ rewire(); },
                 soloId:function(){ return soloId; },
