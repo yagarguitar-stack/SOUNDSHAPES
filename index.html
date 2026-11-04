@@ -953,6 +953,74 @@
 /* トレモロの窓：入っている時だけ灯る */
 .mini rect.lamp{ fill:url(#rgLedOff); }
 .slot.on .mini rect.lamp{ fill:var(--led,#ffb13d); filter:url(#rgGlow); }
+
+  /* ══ 繋ぎ方（機材と端子） ══ */
+  #sys .doc,#ends .doc{display:block;}
+  #sys .panel-inner,#ends .panel-inner,#guide .panel-inner,#panel .panel-inner{padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+  .sys-tabs{display:flex;flex-wrap:wrap;gap:6px;}
+  .sys-tab.on{color:var(--sig);border-color:rgba(90,209,255,.55);background:rgba(90,209,255,.07);}
+  .sys-list{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+  .sys-card,.end-opt{
+    display:flex;flex-direction:column;gap:3px;text-align:left;width:100%;cursor:pointer;
+    border:1px solid var(--ink-faint);border-radius:2px;background:rgba(232,237,241,.03);
+    color:var(--ink);font-family:inherit;padding:10px 12px;
+  }
+  .sys-card:active,.end-opt:active{background:rgba(232,237,241,.08);}
+  .sys-card:focus-visible,.end-opt:focus-visible{outline:1px solid var(--sig);outline-offset:2px;}
+  .sc-n,.eo-n{font-size:13px;font-weight:600;letter-spacing:.04em;}
+  .sc-s,.eo-s{font-size:11px;color:var(--ink-dim);line-height:1.6;}
+  .end-opt.on{border-color:rgba(90,209,255,.6);background:rgba(90,209,255,.07);}
+  .end-opt.on .eo-n{color:var(--sig);}
+  .end-opts{display:flex;flex-direction:column;gap:6px;}
+  .sys-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .sys-act{margin-top:10px;}
+  .sys-apply{color:var(--sig);border-color:rgba(90,209,255,.55);}
+  .sys-src a{display:block;font-size:10.5px;line-height:1.6;color:var(--ink-dim);word-break:break-all;margin-bottom:4px;}
+  .sys-find{
+    width:100%;margin:4px 0 2px;padding:8px 10px;border-radius:2px;
+    border:1px solid var(--ink-faint);background:rgba(232,237,241,.04);color:var(--ink);
+    font-family:inherit;font-size:13px;-webkit-user-select:text;user-select:text;
+  }
+  .sys-find:focus{outline:1px solid var(--sig);}
+  .sys-ul{margin:2px 0 0;padding-left:1.2em;}
+  .sys-ul li{margin:2px 0;}
+  .sys-now{display:block;font-size:10.5px;color:var(--ink-dim);border:1px solid var(--ink-faint);border-radius:2px;padding:2px 7px;width:max-content;max-width:100%;margin-bottom:4px;}
+  .gear-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;}
+  .gear-chip{border:1px solid var(--ink-faint);background:transparent;color:var(--ink-dim);font-family:inherit;
+    font-size:12px;border-radius:2px;padding:6px 10px;cursor:pointer;line-height:1.4;text-align:left;}
+  .gear-chip.on{color:var(--sig);border-color:rgba(90,209,255,.6);background:rgba(90,209,255,.08);}
+  .gear-chip:focus-visible{outline:1px solid var(--sig);outline-offset:2px;}
+  .gear-item{display:inline-flex;align-items:center;gap:4px;}
+  .term.gear-q{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+    border-radius:50%;border:1px solid rgba(90,209,255,.45);color:var(--sig);font-size:11px;line-height:1;flex:none;}
+  .gear-empty{font-size:12px;color:var(--ink-dim);margin-top:12px;}
+  .gear-cat{font-size:11px;color:var(--ink-dim);margin:10px 0 0;letter-spacing:.06em;}
+  .gear-row{flex-direction:row;align-items:center;justify-content:space-between;gap:10px;}
+  .gear-st{flex:none;font-size:10.5px;border-radius:2px;padding:2px 7px;border:1px solid var(--ink-faint);color:var(--ink-dim);}
+  .gear-st.st-ok,.gj-h.st-ok{color:#7fe0a8;border-color:rgba(127,224,168,.5);}
+  .gear-st.st-miss,.gj-h.st-miss{color:#ffc46b;border-color:rgba(255,196,107,.5);}
+  .buy-card{display:flex;flex-direction:column;gap:3px;border:1px solid rgba(90,209,255,.35);border-radius:2px;padding:10px 12px;background:rgba(90,209,255,.04);}
+  .gear-judge{border:1px solid var(--ink-faint);border-radius:2px;padding:10px 12px;margin:4px 0 6px;background:rgba(232,237,241,.03);}
+  .gj-h{font-size:13px;font-weight:600;}
+  .gj-sub{font-size:10.5px;font-weight:600;letter-spacing:.12em;color:var(--sig);margin:10px 0 2px;}
+  .gl-item{padding:7px 0;border-bottom:1px solid rgba(232,237,241,.08);}
+  .gl-name{font-size:12.5px;font-weight:600;}
+  .gl-def{font-size:12px;line-height:1.8;color:var(--ink-dim);}
+  .gl-none{font-size:12px;color:var(--ink-dim);margin-top:10px;}
+  /* 用語の下線と、意味を出す小窓 */
+  .term{text-decoration:underline;text-decoration-style:dotted;text-decoration-color:rgba(90,209,255,.75);
+    text-underline-offset:3px;text-decoration-thickness:1px;cursor:pointer;}
+  .term:focus-visible{outline:1px solid var(--sig);outline-offset:1px;}
+  .term-pop{
+    position:fixed;z-index:60;display:none;padding:10px 12px;border-radius:3px;
+    background:#11171c;border:1px solid rgba(90,209,255,.45);
+    box-shadow:0 8px 24px rgba(0,0,0,.6);color:var(--ink);
+  }
+  .term-pop .tp-h{font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--sig);margin-bottom:4px;}
+  .term-pop .tp-d{font-size:12px;line-height:1.8;}
+  /* 板の両端は押すと種類を選べる */
+  .jack.pickable{cursor:pointer;}
+  .jack.pickable:focus-visible{outline:1px solid var(--sig);outline-offset:3px;border-radius:3px;}
 </style>
 </head>
 <body>
@@ -1029,6 +1097,37 @@
       <span class="mid" id="gMid"></span>
       <button class="icon-btn" id="gNext">次へ →</button>
     </div>
+  </div>
+</div>
+
+
+<!-- 機材の繋ぎ方。基本・組み方の型・ギタリスト・用語集 -->
+<div class="panel" id="sys">
+  <div class="panel-inner">
+    <div class="panel-head">
+      <button class="icon-btn" id="sClose">← 図へ</button>
+      <span class="name">繋ぎ方</span>
+      <span class="where" id="sPos"></span>
+    </div>
+    <div class="sys-tabs" id="sTabs"></div>
+    <div class="doc on" id="sysDoc"></div>
+    <div class="foot-nav" id="sNav">
+      <button class="icon-btn" id="sPrev">← 前へ</button>
+      <span class="mid" id="sMid"></span>
+      <button class="icon-btn" id="sNext">次へ →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 板の両端の種類を選ぶ -->
+<div class="panel" id="ends">
+  <div class="panel-inner">
+    <div class="panel-head">
+      <button class="icon-btn" id="eClose">← 図へ</button>
+      <span class="name" id="eName"></span>
+    </div>
+    <div class="end-opts" id="eOpts"></div>
+    <div class="doc on" id="eDoc"></div>
   </div>
 </div>
 
@@ -4924,6 +5023,7 @@
     L.bottom.forEach(function(id){ rowB.appendChild(itemOf(id)); });
     rowB.appendChild(jack('スピーカー','ここから<br>鳴る','out'));  /* 下段の左端 */
     rowB.appendChild(guideSlot());                                 /* その隣に解説の札 */
+    rowB.appendChild(sysSlot());                                   /* さらに隣に繋ぎ方の札 */
     body.appendChild(rowT); body.appendChild(rowB);
     el('count').textContent='全'+chainOrder().length+'台';
     var ls=el('lineState');
@@ -4939,9 +5039,13 @@
       '送り口も動かせますので、ループに入れる台を増やしたり減らしたりできます。'+
       'ワウとボリュームだけは、絵の<b>上半分が踏み板</b>、<b>下半分が並べ替え</b>です。'+
       '順番を変えると音も変わりますので、置き場所による違いを聞き比べてください。'+
-      '板の左端に、考え方をまとめた<b>解説</b>を置いています。<br>'+
+      '板の左端に、考え方をまとめた<b>解説</b>を置いています。'+
+      'その隣の<b>繋ぎ方</b>では、端子やアンプの仕組み、やりたいことからの逆引き、手持ちの機材で何ができるか、組み方の型、ギタリストの組み方を見られます。'+
+      '右端のギターと左端のスピーカーの絵を押すと、<b>手持ちの機材の種類</b>を選べます。'+
+      '点線の下線が付いた言葉は、押すと意味が出ます。<br>'+
       '各台の踏みスイッチで入切し、下の帯から鳴らします。'+
       '試し弾きの音は、ギターの物理模型ではなく、聴き比べのために作った<b>簡易な音源</b>です。';
+    paintEnds();
     drawWire();
     var wrap=el('map');
     if(wrap) wrap.scrollLeft=wrap.scrollWidth;   /* 繋ぎ始めの右端を見せる */
@@ -5247,6 +5351,7 @@
   var gPage=0;
   function paintGuide(){
     el('guideDoc').innerHTML=GUIDE[gPage]||'';
+    markTerms(el('guideDoc')); hideTerm();
     el('gPos').textContent=(gPage+1)+' / '+GUIDE.length;
     el('gMid').textContent=(gPage+1)+' / '+GUIDE.length;
     el('gPrev').disabled=(gPage<=0);
@@ -5255,6 +5360,8 @@
   }
   function openGuide(page){
     if(current) closePedal();
+    if(el('sys')) el('sys').classList.remove('on');
+    if(el('ends')) el('ends').classList.remove('on');
     gPage=(typeof page==='number'&&page>=0&&page<GUIDE.length)?page:0;
     paintGuide();
     el('guide').classList.add('on');
@@ -5366,6 +5473,7 @@
     var on=(docPage>0);
     el('doc').classList.toggle('on',on);
     el('doc').innerHTML=on?(parts[docPage-1]||''):'';
+    if(on) markTerms(el('doc'));
     el('stage').parentNode.style.display=on?'none':'';
     el('docPos').textContent=on?(docPage+' / '+parts.length):'';
     el('docBtn').textContent=on?
@@ -5390,6 +5498,1207 @@
     if(e.key==='ArrowLeft'){ step(-1); e.preventDefault(); }
     if(e.key==='ArrowRight'){ step(1); e.preventDefault(); }
   });
+
+  /* ══════════════════════════════════════
+     繋ぎ方（システムの組み方）
+     板の両端（ギター・鳴らす側）の種類の選択、
+     基本の読み物、組み方の型、ギタリストの組み方、用語の確認。
+     ══════════════════════════════════════ */
+
+  /* ── 用語。本文の中の初出に下線を引き、押すと意味を出す ── */
+  var TERMS=[
+    {n:'インピーダンス',r:'いんぴーだんす',m:['インピーダンス'],d:'電気の流れにくさを表す言葉。ギターの場合は「ケーブルの影響を受けやすいかどうか」と考えると分かりやすくなります。'},
+    {n:'ハイインピーダンス',r:'はいいんぴーだんす',m:['ハイインピーダンス','Hi-Z'],d:'ケーブルの影響を受けやすい、弱い信号の状態。普通のギターの出力がこれです。ケーブルが長いと、高い音から減っていきます。Hi-Z とも書きます。'},
+    {n:'ローインピーダンス',r:'ろーいんぴーだんす',m:['ローインピーダンス'],d:'ケーブルの影響を受けにくい、強い信号の状態。長いケーブルでも高い音が減りにくくなります。バッファーの出力、アクティブのギター、多くのギタープロセッサーの出力がこれです。'},
+    {n:'バッファー',r:'ばっふぁー',m:['バッファー'],d:'音色を変えずに、ギターの信号をケーブルに強い状態に変える回路。長いケーブルや、たくさんの台を通しても、高い音が減りにくくなります。単体の台のほか、多くのペダルの中にも入っています。'},
+    {n:'トゥルーバイパス',r:'とぅるーばいぱす',m:['トゥルーバイパス'],d:'踏んで切っている時に、中の回路を通さない方式。1台なら音は変わりません。ただ、この方式の台ばかりを長いケーブルで繋ぐと、全体として高い音が減ることがあります。'},
+    {n:'プリアンプ',r:'ぷりあんぷ',m:['プリアンプ'],d:'アンプの中で、音色と歪みを作る部分。これだけを取り出した単体の機材もあり、足元に置くペダル型と、ラックに収める型があります。出す信号はまだ小さく、スピーカーを鳴らすにはパワーアンプが要ります。キャビネットシミュレーター付きの出力を持つ機種なら、PAやパソコンへ直接送れます。'},
+    {n:'パワーアンプ',r:'ぱわーあんぷ',m:['パワーアンプ'],d:'プリアンプが作った音を、スピーカーを鳴らせるほど大きくする部分。スピーカーを鳴らすには、その手前に必ず1台要ります。'},
+    {n:'キャビネット',r:'きゃびねっと',m:['キャビネット','キャビ'],d:'スピーカーを収めた箱。音を大きくする部分を持たないので、ヘッドかパワーアンプから音を受け取って鳴らします。'},
+    {n:'ヘッド',r:'へっど',m:['ヘッド'],d:'アンプの部分だけを収めた箱。スピーカーを持たないので、キャビネットと組み合わせて使います。'},
+    {n:'コンボアンプ',r:'こんぼあんぷ',m:['コンボアンプ','コンボ'],d:'アンプとスピーカーを、一つの箱に収めたもの。ケーブル1本で鳴らせます。'},
+    {n:'FXループ',r:'えふえっくするーぷ',m:['FXループ','エフェクトループ'],d:'アンプの中の、プリアンプとパワーアンプの間に機材を挟む口。センドから出して、リターンへ戻します。アンプで歪ませた後ろに、空間系を置きたい時に使います。'},
+    {n:'センド',r:'せんど',m:['センド','SEND'],d:'FXループの「送り口」。プリアンプで作った音が、ここから出ます。'},
+    {n:'リターン',r:'りたーん',m:['リターン','RETURN'],d:'FXループの「戻り口」。多くのアンプでは、ここに入れた音はプリアンプを通らず、そのままパワーアンプへ進みます。そのため、パワーアンプの入口として使うこともできます。'},
+    {n:'楽器レベル',r:'がっきれべる',m:['楽器レベル'],d:'ギターが出す、弱い信号の強さ。アンプの入力やペダルは、この強さに合わせて作られています。'},
+    {n:'ラインレベル',r:'らいんれべる',m:['ラインレベル','ライン出力','ラインの信号'],d:'ミキサーや録音機器、FXループが使う、楽器レベルより強い信号。ギタープロセッサーの出力は、機種によって楽器レベルとラインレベルを切り替えられます。'},
+    {n:'マイクレベル',r:'まいくれべる',m:['マイクレベル','マイク入力'],d:'マイクが出す、一番弱い信号。ミキサーのマイク入力は、この強さに合わせて作られています。'},
+    {n:'DI',r:'でぃーあい',m:['DI','ダイレクトボックス'],d:'ギターの信号を、ミキサーのマイク入力に合う信号に変える箱。PAへ送る時、長いケーブルでも雑音が入りにくくなります。'},
+    {n:'バランス接続',r:'ばらんすせつぞく',m:['バランス接続','バランス出力','バランスの信号'],d:'雑音を打ち消す仕組みを持った繋ぎ方。2本の線で同じ音を逆向きに送り、途中で入った雑音を消します。XLR や TRS の端子で使います。'},
+    {n:'アンバランス接続',r:'あんばらんすせつぞく',m:['アンバランス接続','アンバランス'],d:'雑音を打ち消す仕組みを持たない、普通の繋ぎ方。ギターケーブル（TS）がこれで、長くすると雑音が入りやすくなります。'},
+    {n:'TS',r:'てぃーえす',m:['TS'],d:'先の金属が2つに分かれたフォンプラグ。1本の音（モノラル）を送ります。ギターケーブルはこれです。'},
+    {n:'TRS',r:'てぃーあーるえす',m:['TRS'],d:'先の金属が3つに分かれたフォンプラグ。左右2本の音（ステレオ）や、雑音に強い繋ぎ方（バランス接続）などに使います。TS と形が似ているので、差す口がどちらを使うのかを確かめます。'},
+    {n:'フォン端子',r:'ふぉんたんし',m:['フォン端子','フォンプラグ','標準プラグ'],d:'直径6.3mmの、差し込む形の端子。ギターケーブルやペダルの入出力に使います。'},
+    {n:'XLR',r:'えっくすえるあーる',m:['XLR'],d:'3本のピンが付いた、外れにくい端子。マイクや、PAへ音を送る時に使います。キャノンとも呼ばれます。'},
+    {n:'MIDI',r:'みでぃ',m:['MIDI'],d:'機材どうしで「この音色に切り替えて」などの命令を送る仕組み。音そのものは送りません。端子は丸い5ピンのほか、TRS や USB の機種もあります。'},
+    {n:'スピーカーケーブル',r:'すぴーかーけーぶる',m:['スピーカーケーブル'],d:'パワーアンプとキャビネットを繋ぐケーブル。強い電気を流すので、線が太く作られています。端子がギターケーブルと同じ形のこともありますが、入れ替えて使ってはいけません。'},
+    {n:'シールドケーブル',r:'しーるどけーぶる',m:['シールドケーブル','ギターケーブル'],d:'雑音を防ぐ網で、中の線を包んだ楽器用のケーブル。ギター・ペダル・アンプの入力を繋ぎます。'},
+    {n:'パッチケーブル',r:'ぱっちけーぶる',m:['パッチケーブル'],d:'台と台を繋ぐ、短いギターケーブル。'},
+    {n:'オーム（Ω）',r:'おーむ',m:['Ω','オーム'],d:'スピーカーの電気の流れにくさを表す数字。ヘッドの出力とキャビネットに書かれた数字を合わせて繋ぎます。真空管アンプでは、特に大切です。'},
+    {n:'ロードボックス',r:'ろーどぼっくす',m:['ロードボックス','ダミーロード'],d:'スピーカーの代わりに、パワーアンプの音を受け止める機材。音を出さずにアンプを鳴らしたり、録音用の信号を取り出したりできます。ダミーロードとも呼びます。'},
+    {n:'真空管アンプ',r:'しんくうかんあんぷ',m:['真空管アンプ','真空管'],d:'真空管という部品で音を大きくするアンプ。スピーカーかロードボックスを繋がずに音を出すと、壊れることがあります。'},
+    {n:'アンプシミュレーター',r:'あんぷしみゅれーたー',m:['アンプシミュレーター','アンプシミュ','アンプモデル'],d:'アンプの音を、計算で作り出す仕組み。ギタープロセッサーの中心になる機能です。'},
+    {n:'キャビネットシミュレーター',r:'きゃびねっとしみゅれーたー',m:['キャビネットシミュレーター','キャビシミュ'],d:'キャビネットとマイクの響きを、計算で作り出す機能。PA やヘッドホンへ送る時は入れます。本物のキャビネットを鳴らす時は切ります。'},
+    {n:'マルチエフェクター',r:'まるちえふぇくたー',m:['マルチエフェクター','マルチ'],d:'いくつものエフェクトを、1台にまとめた機材。アンプの音まで作れる機種も多く、その働きを持つものはギタープロセッサーとも呼びます。'},
+    {n:'ギタープロセッサー',r:'ぎたーぷろせっさー',m:['ギタープロセッサー','モデラー'],d:'エフェクトに加えて、アンプとスピーカーの音まで作れる機材。モデラーとも呼ばれます。Line 6 Helix、Fractal Audio Axe-Fx、Neural DSP Quad Cortex、Kemper Profiler、BOSS GT-1000 などがこれにあたります。多くはパワーアンプを持たないので、スピーカーを鳴らす時は手前にパワーアンプが要ります。'},
+    {n:'ペダル（エフェクター）',r:'ぺだる',m:['コンパクトエフェクター','エフェクター'],d:'音に効果を加える箱。足で踏んで入切します。一台に一つの効果が基本です。'},
+    {n:'IR',r:'あいあーる',m:['IR','インパルスレスポンス'],d:'キャビネットにマイクを立てて録った響きを、そのまま写し取ったデータ。ギタープロセッサーなどに読み込むと、スピーカーから録ったような音になります。インパルスレスポンスの略です。'},
+    {n:'プロファイリング',r:'ぷろふぁいりんぐ',m:['プロファイリング','キャプチャー'],d:'本物のアンプに測るための音を通して、そのアンプの音を写し取る方法。Kemper の「プロファイリング」や、Neural DSP の「キャプチャー」が知られています。'},
+    {n:'FRFR',r:'えふあーるえふあーる',m:['FRFR'],d:'音に色を付けず、低い音から高い音までそのまま鳴らすスピーカー。キャビネットの響きまで作ったギタープロセッサーの音を鳴らすのに向いています。Full Range Flat Response の頭文字です。'},
+    {n:'PA',r:'ぴーえー',m:['PA'],d:'会場の音響設備。ミキサーで各楽器の音をまとめ、大きなスピーカーからお客さんへ届けます。'},
+    {n:'ミキサー',r:'みきさー',m:['ミキサー'],d:'いくつもの音を受け取り、音量や音色を整えて、一つにまとめる機材。'},
+    {n:'モニター',r:'もにたー',m:['イヤーモニター','モニター'],d:'演奏する人が、自分や他の楽器の音を聞くためのスピーカーやイヤホン。アンプを鳴らさない組み方では、自分の音を聞く大事な手段になります。'},
+    {n:'4ケーブル方式',r:'よんけーぶるほうしき',m:['4ケーブル方式'],d:'マルチエフェクターやギタープロセッサーのセンド・リターンと、アンプのFXループを、4本のケーブルで繋ぐ方法。その機材の中のエフェクトを、アンプの前と後ろの両方に置けます。'},
+    {n:'ABYボックス',r:'えーびーわいぼっくす',m:['ABYボックス','ABY'],d:'1つの音を、A と B のどちらか、または両方へ分ける箱。2台のアンプを切り替えたり、同時に鳴らしたりする時に使います。'},
+    {n:'グラウンドループ',r:'ぐらうんどるーぷ',m:['グラウンドループ','グラウンドリフト'],d:'2台以上の機材がアースで輪のように繋がり、ブーンという雑音が出る状態。グラウンドリフトのスイッチで、信号のアースを切ると減ることがあります。電源コードのアースを外すのは危ないので、してはいけません。'},
+    {n:'位相',r:'いそう',m:['位相'],d:'音の波の、山と谷の位置。2つに分けた音の位相がずれると、重ねた時に打ち消し合って、音が細くなることがあります。'},
+    {n:'スイッチャー',r:'すいっちゃー',m:['スイッチャー','切り替え装置'],d:'何台もの台の入切や、音の行き先を、まとめて切り替える機材。使わない台を、音の通り道から外せます。'},
+    {n:'エクスプレッションペダル',r:'えくすぷれっしょんぺだる',m:['エクスプレッションペダル'],d:'踏み込む深さで、別の機材のつまみを動かすペダル。音そのものは通しません。'},
+    {n:'オーディオインターフェイス',r:'おーでぃおいんたーふぇいす',m:['オーディオインターフェイス','インターフェイス'],d:'ギターの音をパソコンに入れたり、パソコンの音を出したりする機器。ギターは「Hi-Z」や「INST」と書かれた入力に差します。'},
+    {n:'USBオーディオ',r:'ゆーえすびーおーでぃお',m:['USBオーディオ'],d:'ギタープロセッサーなどが、オーディオインターフェイスの代わりをする機能。USBケーブル1本で録音できます。'},
+    {n:'レイテンシー',r:'れいてんしー',m:['レイテンシー'],d:'音が遅れて聞こえる時間。パソコンを通して聞くと起き、遅れが大きいと弾きにくくなります。'},
+    {n:'DAW',r:'だう',m:['DAW'],d:'パソコンで録音や編集をするソフト。Logic などがこれにあたります。'},
+    {n:'パワーサプライ',r:'ぱわーさぷらい',m:['パワーサプライ'],d:'ペダルに電気を配る箱。出口ごとに電気が分かれた機種を選ぶと、ペダルどうしの雑音が出にくくなります。'},
+    {n:'センターマイナス',r:'せんたーまいなす',m:['センターマイナス'],d:'DCプラグの中心がマイナスになっている形。9Vのペダルの多くはこの形ですが、逆の機種もあるので表示を確かめます。'},
+    {n:'電流（mA）',r:'でんりゅう',m:['mA'],d:'ペダルが使う電気の量。電源の出口が出せる量より多いと、正しく動きません。デジタルのペダルほど多く使います。'},
+    {n:'アクティブ',r:'あくてぃぶ',m:['アクティブ'],d:'電池などの電気で動く部品を持っていること。アクティブのギターは信号が強く、ケーブルの影響を受けにくくなります。パワーアンプ入りのスピーカーも、アクティブ（パワード）と呼びます。'},
+    {n:'パッシブ',r:'ぱっしぶ',m:['パッシブ'],d:'電気で動く部品を持っていないこと。普通のギターのピックアップはこれです。'},
+    {n:'ワイヤレス',r:'わいやれす',m:['ワイヤレス'],d:'ギターの音を電波で送る機材。ケーブルが無いので、ケーブルの長さで高い音が減ることがありません。受信機から出る音は、バッファーを通した状態になります。'},
+    {n:'ステレオ',r:'すてれお',m:['ステレオ'],d:'左右2つに分けて音を送ること。ディレイやリバーブの響きを、2台のアンプや左右のスピーカーで広げられます。'},
+    {n:'ウェット／ドライ',r:'うぇっと',m:['ウェット','ドライ'],d:'エフェクトがかかった音を「ウェット」、かかっていない元の音を「ドライ」と呼びます。'},
+    {n:'ラック',r:'らっく',m:['ラック'],d:'幅19インチに決められた機材を、棚のように重ねて収めるケース。1980〜90年代の、大がかりな組み方でよく使われました。'},
+    {n:'AUX入力',r:'おーくすにゅうりょく',m:['AUX入力','AUX'],d:'スマホやパソコンの曲を流し込むための入力。ギターの入力とは別の口です。'},
+    {n:'ファンタム電源',r:'ふぁんたむでんげん',m:['ファンタム電源'],d:'XLRケーブルを通して、ミキサーやインターフェイスからマイクへ送る電気。コンデンサーマイクの多くが必要とし、ダイナミックマイクには要りません。'},
+    {n:'ダイナミックマイク',r:'だいなみっくまいく',m:['ダイナミックマイク'],d:'電気を使わずに音を拾う、丈夫なマイク。大きな音に強く、ギターアンプの収録によく使われます。'},
+    {n:'コンデンサーマイク',r:'こんでんさーまいく',m:['コンデンサーマイク'],d:'細かな音まで拾う感度の高いマイク。多くはファンタム電源が要ります。'},
+    {n:'リアンプ',r:'りあんぷ',m:['リアンプ'],d:'録っておいた素のギターの音を、後からアンプやアンプシミュレーターに通し直して、音作りをやり直すこと。'},
+    {n:'ハム',r:'はむ',m:['ハム'],d:'電源から入り込む、ブーンという低い雑音。'}
+  ];
+  /* 似た綴りで別の意味になる語。ここに当たった所は下線を引かない */
+  var TERM_SKIP=['ヘッドホン','ヘッドフォン','ドライブ','ドライバー','ハムバッカー','マルチチャンネル'];
+  var termRe=null, termOf={};
+  (function(){
+    var all=[];
+    TERMS.forEach(function(t,i){
+      t.id='t'+i;
+      t.m.forEach(function(w){ termOf[w]=t; all.push(w); });
+    });
+    TERM_SKIP.forEach(function(w){ termOf[w]=null; all.push(w); });
+    all.sort(function(a,b){ return b.length-a.length; });
+    termRe=new RegExp(all.map(function(w){
+      return w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    }).join('|'),'g');
+  })();
+  function termById(id){
+    for(var i=0;i<TERMS.length;i++) if(TERMS[i].id===id) return TERMS[i];
+    return null;
+  }
+  /* 文中の初出だけに下線を引く。見出しやボタンの中は触らない */
+  function markTerms(root,skipId){
+    if(!root) return;
+    var seen={}; if(skipId) seen[skipId]=1;
+    var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null,false);
+    var list=[], n;
+    while((n=walker.nextNode())) list.push(n);
+    list.forEach(function(node){
+      var p=node.parentNode;
+      if(!p||!p.closest) return;
+      if(p.closest('.term,button,a,input,.guide-h,.hn,.chain-line,.gl-name,.no-term,.sys-now')) return;
+      var s=node.nodeValue, out=[], last=0, m, hit=false;
+      termRe.lastIndex=0;
+      while((m=termRe.exec(s))){
+        var w=m[0], t=termOf[w];
+        if(!t||seen[t.id]) continue;
+        if(/^[A-Za-z]/.test(w)){
+          var pc=s.charAt(m.index-1), nc=s.charAt(m.index+w.length);
+          if(/[A-Za-z0-9\-]/.test(pc)||/[A-Za-z0-9\-]/.test(nc)) continue;
+        }
+        seen[t.id]=1; hit=true;
+        if(m.index>last) out.push(document.createTextNode(s.slice(last,m.index)));
+        var sp=document.createElement('span');
+        sp.className='term'; sp.setAttribute('data-t',t.id);
+        sp.setAttribute('role','button'); sp.setAttribute('tabindex','0');
+        sp.textContent=w;
+        out.push(sp);
+        last=m.index+w.length;
+      }
+      if(!hit) return;
+      if(last<s.length) out.push(document.createTextNode(s.slice(last)));
+      var f=document.createDocumentFragment();
+      out.forEach(function(x){ f.appendChild(x); });
+      p.replaceChild(f,node);
+    });
+  }
+  /* 意味を出す小窓 */
+  var pop=null;
+  function showTerm(anchor){
+    var t=termById(anchor.getAttribute('data-t'));
+    if(!t) return;
+    if(!pop){
+      pop=document.createElement('div');
+      pop.className='term-pop'; pop.setAttribute('role','dialog');
+      document.body.appendChild(pop);
+    }
+    pop.innerHTML='<div class="tp-h">'+t.n+'</div><div class="tp-d"></div>';
+    pop.querySelector('.tp-d').textContent=t.d;
+    markTerms(pop.querySelector('.tp-d'),t.id);
+    pop.style.display='block';
+    var r=anchor.getBoundingClientRect(), W=window.innerWidth, H=window.innerHeight;
+    var w=Math.min(300,W-24);
+    pop.style.width=w+'px';
+    var x=Math.max(12,Math.min(W-w-12,r.left+r.width/2-w/2));
+    pop.style.left=x+'px';
+    var ph=pop.offsetHeight;
+    var y=(r.bottom+8+ph<H-12)?(r.bottom+8):Math.max(12,r.top-8-ph);
+    pop.style.top=y+'px';
+  }
+  function hideTerm(){ if(pop) pop.style.display='none'; }
+  document.addEventListener('click',function(e){
+    var t=e.target&&e.target.closest?e.target.closest('.term'):null;
+    if(t){ showTerm(t); e.stopPropagation(); return; }
+    if(pop&&e.target&&e.target.closest&&e.target.closest('.term-pop')) return;
+    hideTerm();
+  },true);
+  document.addEventListener('keydown',function(e){
+    var t=e.target;
+    if(t&&t.classList&&t.classList.contains('term')&&(e.key==='Enter'||e.key===' ')){
+      showTerm(t); e.preventDefault();
+    }
+    if(e.key==='Escape') hideTerm();
+  });
+  window.addEventListener('scroll',hideTerm,true);
+
+  /* ── 板の両端。ギター側と鳴らす側の種類 ── */
+  var ENDS={
+    in:[
+      {id:'none',label:'ギター',name:'選ばない',short:'種類を決めずに見る',body:''},
+      {id:'passive',label:'ギター',name:'パッシブのギター',short:'電池を使わない一般的なギター',
+       body:'<span class="lead">電池を使わない、普通のピックアップのギターです。</span>出る信号は弱く、ケーブルの影響を受けやすい信号です（ハイインピーダンス）。ケーブルが長いほど、繋ぐ台が多いほど、高い音が減っていきます。<span class="hn">補い方</span>ボードの前の方にバッファーを1台置くと、その後ろは高い音が減りにくくなります。<span class="hn">気をつけること</span>ファズの中には、ギターから直接音を受け取るように作られた機種があります。その機種は、バッファーより前に置きます。'},
+      {id:'active',label:'アクティブ',name:'アクティブのギター',short:'電池で動く回路を持つギター',
+       body:'<span class="lead">ギターの中に、電池で動く部品が入ったギターです。</span>出る信号が強く、長いケーブルでも高い音が減りにくくなります。<span class="hn">気をつけること</span>電池が減ると、音が歪んだり、途切れたりします。ケーブルを差している間は電池を使い続ける機種が多いので、弾かない時は抜いておきます。信号が強いため、歪みの少ないペダルやアンプでも、思ったより歪むことがあります。'},
+      {id:'wireless',label:'ワイヤレス',name:'ワイヤレス',short:'音を電波で送る',
+       body:'<span class="lead">ギターに送信機を差し、足元の受信機から音を出します。</span>ケーブルが無いので、ケーブルの長さで高い音が減ることはありません。受信機から出る音は、バッファーを通した状態になります。<span class="hn">気をつけること</span>受信機の後ろにファズを置くと、反応が変わることがあります。送信機の電池切れと、会場の電波の混み具合にも気を配ります。'}
+    ],
+    out:[
+      {id:'none',label:'スピーカー',name:'選ばない',short:'種類を決めずに見る',body:''},
+      {id:'combo',label:'コンボアンプ',name:'コンボアンプ',short:'アンプとスピーカーが一つの箱',
+       body:'<span class="lead">プリアンプ、パワーアンプ、スピーカーが、一つの箱に入ったアンプです。</span>ギターケーブル1本で鳴らせる、一番手軽な形です。<span class="hn">要る物</span>ギターケーブル。FXループを使うなら、さらにケーブル2本。<span class="hn">確かめること</span>背面に FXループ（SEND・RETURN）の口があるかどうか。口が無い時は、すべての台をアンプの入力の前に並べます。<span class="hn">板の上での見方</span>板の送り（SEND）と戻り（RETURN）の札が、このアンプの FXループにあたります。'},
+      {id:'head',label:'ヘッド＋キャビ',name:'ヘッド＋キャビネット',short:'アンプ部とスピーカーが別の箱',
+       body:'<span class="lead">アンプの部分（ヘッド）と、スピーカーの箱（キャビネット）を組み合わせて使います。</span>ヘッドの中にパワーアンプがあるので、キャビネットを繋げば鳴ります。<span class="hn">要る物</span>スピーカーケーブル、ギターケーブル。<span class="hn">気をつけること</span>ヘッドとキャビネットに書かれた Ω の数字を合わせます。真空管アンプは、キャビネットかロードボックスを繋がずに音を出すと、壊れることがあります。電源を入れる前に、必ず先に繋ぎます。ヘッドとキャビネットの間に、ギターケーブルを使ってはいけません。'},
+      {id:'rack',label:'プリ＋パワー',name:'プリアンプ＋パワーアンプ＋キャビネット',short:'アンプの中身を2台に分けた形',
+       body:'<span class="lead">アンプの中身を、プリアンプとパワーアンプの2台に分けた形です。</span>ラックに収めることが多く、2台の間に好きな機材を挟めます。この間が、アンプの FXループにあたります。<span class="hn">要る物</span>プリアンプ、パワーアンプ、キャビネット、2台の間を繋ぐケーブル、スピーカーケーブル。<span class="hn">気をつけること</span>プリアンプから出る信号はラインレベルです。パワーアンプの入力へ繋ぎます。パワーアンプの出力は、キャビネットにだけ繋ぎます。'},
+      {id:'pa',label:'PA',name:'ギタープロセッサー → PA',short:'アンプを使わず会場の設備で鳴らす',
+       body:'<span class="lead">アンプとスピーカーの音をギタープロセッサーで作り、会場の PA へ送ります。</span><span class="hn">要る物</span>XLRケーブル（ギタープロセッサーに XLR の口が無ければ DI）。自分の音を聞くためのモニター。<span class="hn">気をつけること</span>キャビネットシミュレーターを必ず入れます。切ったまま送ると、耳に痛い細い音になります。ステージにアンプが無いので、自分の音はモニターで聞きます。<span class="hn">板の上での見方</span>板の送り（SEND）と戻り（RETURN）の札は、ギタープロセッサーの中でアンプシミュレーターを置いた位置にあたります。'},
+      {id:'power',label:'パワー＋キャビ',name:'ギタープロセッサー → パワーアンプ＋キャビネット',short:'音作りはギタープロセッサー、鳴らすのは実物',
+       body:'<span class="lead">音作りはギタープロセッサーで行い、本物のキャビネットを鳴らします。</span>ギタープロセッサーの多くはパワーアンプを持たないので、キャビネットの手前にパワーアンプが要ります。手持ちのアンプのリターンへ入れれば、そのアンプのパワーアンプを使えます。<span class="hn">要る物</span>パワーアンプ（またはリターンの付いたアンプ）、キャビネット、スピーカーケーブル。<span class="hn">気をつけること</span>キャビネットへ送る出力では、キャビネットシミュレーターを切ります。入れたままだと、箱の響きが二重になってこもります。ギタープロセッサーの出力を、キャビネットへ直接繋いではいけません。鳴らないうえ、機材を傷めます。'},
+      {id:'frfr',label:'FRFR',name:'ギタープロセッサー → FRFRスピーカー',short:'ギタープロセッサーの音をそのまま鳴らす',
+       body:'<span class="lead">音に色を付けない FRFR スピーカーで、ギタープロセッサーの音をそのまま鳴らします。</span>パワーアンプ入り（アクティブ）の機種なら、ギタープロセッサーからケーブル1本で繋げます。<span class="hn">気をつけること</span>キャビネットシミュレーターを入れます。FRFR には、ギター用のキャビネットの響きが無いためです。'},
+      {id:'daw',label:'パソコン',name:'オーディオインターフェイス → パソコン',short:'録音・自宅練習',
+       body:'<span class="lead">ギターの音をパソコンに入れて、録音や練習をします。</span>ギターは、オーディオインターフェイスの「Hi-Z」や「INST」と書かれた入力に差します。USBオーディオの付いたギタープロセッサーなら、オーディオインターフェイスの代わりになります。<span class="hn">気をつけること</span>パソコンのアンプシミュレーターを通すと、音が少し遅れて聞こえます（レイテンシー）。遅れが気になる時は、オーディオインターフェイスの設定で遅れを短くするか、ギタープロセッサーの音を直接聞きます。'},
+      {id:'phones',label:'ヘッドホン',name:'ヘッドホン',short:'音を出さずに練習する',
+       body:'<span class="lead">ギタープロセッサーやヘッドホンアンプの、ヘッドホン端子で聞きます。</span>キャビネットシミュレーターを入れた音でないと、耳に痛い音になります。<span class="hn">気をつけること</span>アンプのスピーカーの口に、ヘッドホンを差してはいけません。アンプにヘッドホン端子があれば、そちらを使います。'}
+    ]
+  };
+  var ends={in:'none',out:'none'};
+  try{
+    var sve=JSON.parse(localStorage.getItem('efbook.ends')||'null');
+    if(sve){ if(sve.in) ends.in=sve.in; if(sve.out) ends.out=sve.out; }
+  }catch(e){}
+  function keepEnds(){ try{ localStorage.setItem('efbook.ends',JSON.stringify(ends)); }catch(e){} }
+  function endOf(side,id){
+    var L=ENDS[side];
+    for(var i=0;i<L.length;i++) if(L[i].id===(id||ends[side])) return L[i];
+    return L[0];
+  }
+  /* 板の両端の札を、選んだ種類の名前に塗り直す。押せば種類を選べる */
+  function paintEnds(){
+    var js=document.querySelectorAll('#board .jack');
+    [['in',js[0]],['out',js[1]]].forEach(function(pr){
+      var j=pr[1]; if(!j) return;
+      var e=endOf(pr[0]);
+      var l=j.querySelector('.lbl'); if(l) l.textContent=e.label;
+      j.classList.add('pickable');
+      j.setAttribute('role','button'); j.setAttribute('tabindex','0');
+      j.setAttribute('aria-label',(pr[0]==='in'?'ギター側':'鳴らす側')+'の種類を選ぶ（いまは'+e.name+'）');
+      if(!j.__end){
+        j.__end=1;
+        j.addEventListener('click',function(){ openEnds(pr[0]); });
+        j.addEventListener('keydown',function(ev){
+          if(ev.key==='Enter'||ev.key===' '){ openEnds(pr[0]); ev.preventDefault(); }
+        });
+      }
+    });
+  }
+  var endSide='out';
+  function paintEndPanel(){
+    var side=endSide, cur=endOf(side);
+    el('eName').textContent=(side==='in')?'ギター側の種類':'鳴らす側の種類';
+    var box=el('eOpts'); box.innerHTML='';
+    ENDS[side].forEach(function(o){
+      var b=document.createElement('button');
+      b.type='button'; b.className='end-opt'+(o.id===cur.id?' on':'');
+      b.setAttribute('aria-pressed',o.id===cur.id?'true':'false');
+      b.innerHTML='<span class="eo-n"></span><span class="eo-s"></span>';
+      b.querySelector('.eo-n').textContent=o.name;
+      b.querySelector('.eo-s').textContent=o.short;
+      b.addEventListener('click',function(){
+        ends[side]=o.id; keepEnds(); paintEnds(); paintEndPanel();
+        var dd=el('eDoc'); if(dd&&dd.scrollIntoView) dd.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+      box.appendChild(b);
+    });
+    var d=el('eDoc');
+    d.innerHTML=cur.body||'<span class="lead">種類を選ぶと、何が要るか、何に気をつけるかを示します。</span>';
+    markTerms(d);
+  }
+  function openEnds(side){
+    closeAllPanels();
+    endSide=side; paintEndPanel();
+    el('ends').classList.add('on'); el('ends').scrollTop=0;
+    el('map').classList.add('dim');
+    document.body.style.overflow='hidden';
+  }
+  function closeEnds(){
+    el('ends').classList.remove('on');
+    el('map').classList.remove('dim');
+    document.body.style.overflow='';
+    hideTerm();
+  }
+  el('eClose').addEventListener('click',closeEnds);
+
+  /* ── 基本の読み物 ── */
+  var BASICS=[
+    '<div class="guide-h">音の流れと、入る口・出る口</div>'+
+    '<span class="lead">音はギターから出て、いくつかの機材を通り、最後にスピーカーから鳴ります。</span>'+
+    '<div class="chain-line"><i class="out">ギター</i><s>→</s><i>ペダル</i><s>→</s>'+
+      '<i class="amp">プリアンプ</i><s>→</s><i class="amp">パワーアンプ</i><s>→</s><i class="out">スピーカー</i></div>'+
+    '機材には、音が入る口と、音が出る口があります。'+
+    '入る口には IN（INPUT）、出る口には OUT（OUTPUT）と書かれています。'+
+    'ケーブルは、前の機材の OUT から、次の機材の IN へ繋ぎます。'+
+    'この板では、台の右が IN、左が OUT です。'+
+    '<span class="hn">迷ったら</span>'+
+    'ギターからスピーカーまで、音の通り道を一本の線で描いてみます。'+
+    '線が途中で切れていなければ、繋ぎ方は合っています。'+
+    '<span class="hn">覚えておくこと</span>'+
+    'スピーカーに届くまで、音は電気の信号として流れています。'+
+    'この信号の強さは、途中の機材で変わります。この先の頁で、その話をします。',
+
+    '<div class="guide-h">機材の種類</div>'+
+    '<span class="lead">ギターの音は、おおむね次の順に機材を通って鳴ります。</span>'+
+    '<div class="chain-line"><i class="out">ギター</i><s>→</s><i>ペダル</i><s>→</s>'+
+      '<i class="amp">プリアンプ</i><s>→</s><i class="amp">パワーアンプ</i><s>→</s><i class="out">キャビネット</i></div>'+
+    '<span class="hn">ペダル（エフェクター）</span>'+
+    '音に効果を一つ加える箱です。歪み・ディレイ・リバーブなど、一台に一つの効果が基本です。'+
+    '<span class="hn">マルチエフェクター</span>'+
+    'いくつものエフェクトを、一台にまとめた機材です。'+
+    '<span class="hn">ギタープロセッサー</span>'+
+    'エフェクトに加えて、アンプとスピーカーの音まで作れる機材です。モデラーとも呼ばれます。'+
+    'Line 6 Helix、Fractal Audio Axe-Fx、Neural DSP Quad Cortex、Kemper Profiler、BOSS GT-1000 などがこれにあたります。'+
+    'いま売られているマルチエフェクターの多くは、この働きも持っています。'+
+    '見分け方は、アンプの種類を選ぶ画面があるかどうかです。'+
+    '<span class="hn">プリアンプ</span>'+
+    'アンプの中で、音色と歪みを作る部分です。'+
+    'これだけを取り出した単体の機材もあります。足元に置くペダルの形と、ラックに収める形があります。'+
+    '出す信号はまだ弱く、これだけではスピーカーを鳴らせません。'+
+    '<span class="hn">パワーアンプ</span>'+
+    'プリアンプが作った音を、スピーカーを鳴らせるほど大きくする機材です。'+
+    '<span class="hn">アンプ（コンボアンプ・ヘッド）</span>'+
+    'プリアンプとパワーアンプを、一つにまとめた機材です。'+
+    'スピーカーまで入ったものがコンボアンプ、スピーカーを別の箱にしたものがヘッドです。'+
+    '<span class="hn">キャビネット</span>'+
+    'スピーカーを収めた箱です。これだけでは鳴らず、ヘッドかパワーアンプから音を受け取ります。'+
+    '<span class="hn">まとめると</span>'+
+    'ヘッドは「プリアンプ＋パワーアンプ」です。'+
+    'コンボアンプは「プリアンプ＋パワーアンプ＋スピーカー」です。'+
+    'ギタープロセッサーは「エフェクト＋プリアンプ＋スピーカーの響き」を一台で作ります。ただし、パワーアンプを持たない機種がほとんどです。',
+
+    '<div class="guide-h">信号の強さは4段階</div>'+
+    '<span class="lead">機材から出る信号の強さは、機材によって違います。</span>'+
+    '弱い順に並べると、次のとおりです。'+
+    '<div class="chain-line"><i>マイクレベル</i><s>＜</s><i>楽器レベル</i><s>＜</s><i>ラインレベル</i><s>＜</s><i class="amp">スピーカーへの出力</i></div>'+
+    '<span class="hn">強さをそろえて繋ぐ</span>'+
+    '弱い信号を、強い信号用の口へ入れると、音が小さく細くなります。'+
+    '強い信号を、弱い信号用の口へ入れると、音が割れます。'+
+    'ギタープロセッサーの出力に「楽器レベル」と「ラインレベル」の切り替えがあるのは、繋ぐ先に合わせるためです。'+
+    'アンプの入力には楽器レベル、FXループのリターンやミキサーにはラインレベルを入れます。'+
+    '<span class="hn">スピーカーへの出力は特別</span>'+
+    'パワーアンプの出力は、とても強い信号です。スピーカーかロードボックスにだけ繋ぎます。'+
+    'ペダルやギタープロセッサーの入力に入れると、機材が壊れます。'+
+    'アンプのヘッドホン端子は、スピーカーへの出力とは別の、弱い信号の口です。',
+
+    '<div class="guide-h">アンプの中身</div>'+
+    '<span class="lead">アンプの中は、音を作るプリアンプと、音を大きくするパワーアンプの2つに分かれています。</span>'+
+    '<div class="chain-line"><i>入力</i><s>→</s><i class="amp">プリアンプ</i><s>→</s>'+
+      '<i class="out">センド／リターン</i><s>→</s><i class="amp">パワーアンプ</i><s>→</s><i>スピーカー</i></div>'+
+    'この2つの間に、機材を挟む口を付けたものが FXループです。'+
+    '<span class="hn">箱の分け方</span>'+
+    '全部が一つの箱に入ったものが、コンボアンプです。'+
+    'スピーカーを別の箱にしたものが、ヘッドとキャビネットです。'+
+    'キャビネットは音を大きくする部分を持たないので、それだけでは鳴りません。'+
+    '<span class="hn">ヘッドとキャビネットを繋ぐ時</span>'+
+    'スピーカーケーブルで繋ぎます。ギターケーブルは使いません。'+
+    'ヘッドとキャビネットに書かれた Ω（オーム）の数字を合わせます。'+
+    '真空管アンプは、スピーカーを繋がずに音を出すと、壊れることがあります。'+
+    '<span class="hn">FXループが無いアンプ</span>'+
+    '小さなアンプや古いアンプには、FXループが無いものがあります。'+
+    'その時は、すべての台をアンプの入力の前に並べます。',
+
+    '<div class="guide-h">端子とケーブル</div>'+
+    '<span class="hn">フォン端子</span>'+
+    'ギターやペダルで、一番よく使う端子です。プラグには2種類あります。'+
+    '先の金属が2つに分かれたものが TS、3つに分かれたものが TRS です。'+
+    'TS は1本の音（モノラル）を送ります。TRS は左右2本の音（ステレオ）などを送ります。'+
+    '形がよく似ているので、差す口がどちらを使うのかを確かめます。'+
+    '<span class="hn">XLR</span>'+
+    '3本のピンが付いた、外れにくい端子です。マイクや、PAへ音を送る時に使います。'+
+    '<span class="hn">MIDI</span>'+
+    '音色の切り替えなどの「命令」を送る端子です。音そのものは送りません。'+
+    '丸い5ピンのほか、TRS や USB を使う機種もあります。'+
+    '<span class="hn">USB</span>'+
+    'パソコンと繋いで、録音したり、機材の設定を変えたりします。'+
+    '<span class="hn">DCジャック</span>'+
+    'ペダルに電気を入れる口です。合う電気は機種ごとに決まっています（電源の頁で説明します）。'+
+    '<span class="hn">取り違えに注意</span>'+
+    'ギターケーブルとスピーカーケーブルは、端子の形が同じことがあります。'+
+    '役目がまったく違うので、入れ替えて使ってはいけません。',
+
+    '<div class="guide-h">インピーダンスとバッファー</div>'+
+    '<span class="lead">普通のギターから出る信号は弱く、ケーブルの影響を受けやすい信号です。</span>'+
+    'この性質を「ハイインピーダンス」と呼びます。'+
+    'ケーブルが長いほど、繋ぐ台が多いほど、高い音から少しずつ減っていきます。'+
+    '<span class="hn">バッファーの役目</span>'+
+    'バッファーは、音色を変えずに、信号をケーブルに強い状態に変える回路です。'+
+    'バッファーの後ろなら、ケーブルを長くしても高い音が減りにくくなります。'+
+    'そのため、ボードの前の方にバッファーを1台置く組み方がよく使われます。'+
+    '多くのペダルは、踏んで切っている時も、中のバッファーを通ります。'+
+    '<span class="hn">トゥルーバイパス</span>'+
+    '踏んで切っている時に、中の回路を通さない方式です。'+
+    '1台だけなら、音は変わりません。'+
+    'ただ、この方式の台ばかりを長いケーブルで繋ぐと、全体として高い音が減ることがあります。'+
+    'どちらが良いかではなく、組み合わせて考えます。'+
+    '<span class="hn">ファズの置き場所</span>'+
+    'ファズの中には、ギターから直接音を受け取るように作られた機種があります。'+
+    'その機種をバッファーの後ろに置くと、反応が変わります。バッファーより前に置きます。',
+
+    '<div class="guide-h">ペダルの電源</div>'+
+    '<span class="lead">ペダルの電源は、「電圧」「プラグの向き」「電気の量」の3つを確かめます。</span>'+
+    '<span class="hn">電圧</span>'+
+    '多くのペダルは 9V です。ただし、12V や 18V の機種もあります。'+
+    '合わない電圧は与えません。'+
+    '<span class="hn">プラグの向き</span>'+
+    '多くのペダルは、プラグの中心がマイナスの「センターマイナス」です。'+
+    '逆の機種もあるので、本体や説明書の表示を確かめます。'+
+    '<span class="hn">電気の量</span>'+
+    'ペダルごとに、必要な電気の量（mA）が決まっています。'+
+    '電源が出せる量より多いと、正しく動きません。デジタルのペダルほど多く使います。'+
+    '<span class="hn">雑音を減らす</span>'+
+    '一つの出口から分けて何台も繋ぐと、雑音が出ることがあります。'+
+    '出口ごとに電気が分かれたパワーサプライを使うと、雑音が減ります。',
+
+    '<div class="guide-h">パワーアンプはどこにあるか</div>'+
+    '<span class="lead">スピーカーを鳴らす直前には、パワーアンプが1台だけ必要です。</span>'+
+    '1台も無ければ鳴りません。2台を続けて繋ぐと、機材が壊れます。'+
+    '<span class="hn">パワーアンプが入っている機材</span>'+
+    'コンボアンプ、ヘッド、単体のパワーアンプです。'+
+    '<span class="hn">入っていない機材</span>'+
+    'キャビネット、プリアンプ、多くのマルチエフェクターとギタープロセッサーです。'+
+    'ギタープロセッサーには入っている機種もあるので、仕様を確かめます。'+
+    '<span class="hn">機種によって違う物</span>'+
+    'FRFR や PA のスピーカーです。パワーアンプ入りのものを「アクティブ」や「パワード」と呼びます。'+
+    '<span class="hn">例</span>'+
+    'ギタープロセッサーでキャビネットを鳴らすなら、間にパワーアンプが要ります。'+
+    '手持ちのアンプのリターンへ入れれば、そのアンプのパワーアンプを使えます。'+
+    'ギタープロセッサーから PA やアクティブの FRFR へ送るなら、パワーアンプは要りません。'+
+    'その代わり、キャビネットシミュレーターを入れます。'+
+    '<span class="hn">手持ちで確かめる</span>'+
+    '「手持ちで確かめる」で持っている機材を選ぶと、足りない物を示します。'
+  ];
+
+  /* ── 組み方の型 ── */
+  var RIG_TYPES=[
+    {id:'front',name:'足元だけで繋ぐ',sum:'すべての台を、アンプの入力の前に並べる形です。一番基本の繋ぎ方です。',
+     chain:['ギター','ペダル（全部）','*アンプの入力','スピーカー'],
+     good:'ケーブルが少なく、どのアンプでも使えます。ペダルとアンプの関係が分かりやすく、最初に覚えたい形です。',
+     care:'アンプで強く歪ませると、ディレイやリバーブの響きまで歪んで濁ります。歪みの少ないアンプに向いています。',
+     need:'ギターケーブル2本、パッチケーブル、パワーサプライ。',
+     who:['srv'],
+     preset:{line:['wah','comp','drive','gate','vol','eq','chorus','flanger','phaser','tremolo','pitch','delay','reverb','amp-send','amp-ret'],on:['drive','delay','reverb']}},
+    {id:'loop',name:'FXループを使う',sum:'歪みの台まではアンプの前に置きます。揺らす台と響きを足す台は、FXループに入れます。',
+     chain:['ギター','ワウ・コンプ・歪み','*アンプの入力','*センド','揺れ物・空間系','*リターン','スピーカー'],
+     good:'アンプで強く歪ませても、ディレイやリバーブの響きが濁りません。',
+     care:'FXループの付いたアンプが要ります。ループの中の信号は強いので、台によっては音が割れることがあります。ループの強さを切り替えられるアンプなら、台に合わせます。',
+     need:'足元とアンプを行き来するケーブル4本。ギターから足元、足元からアンプの入力、センドから足元、足元からリターンの4本です。',
+     who:[],
+     preset:{line:null,on:['comp','drive','delay','reverb']}},
+    {id:'4cm',name:'4ケーブル方式',sum:'マルチエフェクターやギタープロセッサーを、アンプの前と後ろの両方で効かせる繋ぎ方です。',
+     chain:['ギター','マルチの入力','マルチのセンド','*アンプの入力','*アンプのセンド','マルチのリターン','マルチの出力','*アンプのリターン'],
+     good:'歪みはアンプ、空間系はマルチと、それぞれの得意を生かせます。一度踏むだけで、アンプの前と後ろの台をまとめて切り替えられます。',
+     care:'ギタープロセッサーを使う時は、中のアンプシミュレーターとキャビネットシミュレーターを切ります。4本のケーブルは取り違えやすいので、印を付けておきます。センドとリターンの信号の強さを、繋ぐ先に合わせます。',
+     need:'センド・リターン付きのマルチエフェクターかギタープロセッサー、FXループ付きのアンプ、ケーブル4本。',
+     note:'図の「マルチ」は、マルチエフェクターかギタープロセッサーのことです。板では、ワウ・コンプ・歪みがその前半、ループの中の台が後半にあたります。',
+     who:[],
+     preset:{line:null,on:['drive','chorus','delay','reverb']}},
+    {id:'aby',name:'2台のアンプへ分ける',sum:'一つの音を2台のアンプへ送り、切り替えたり、同時に鳴らしたりします。',
+     chain:['ギター','ペダル','ABYボックス','*アンプA','*アンプB'],
+     good:'性格の違うアンプを重ねると、太さと抜けを両方得られます。曲ごとにアンプを使い分けることもできます。',
+     care:'2台を同時に鳴らすと、ブーンという雑音が出たり、音が細くなったりすることがあります。グラウンドリフトや位相の切り替えが付いた箱を使います。',
+     need:'ABYボックス、アンプ2台、ケーブル。',
+     who:['srv','edge']},
+    {id:'stereo',name:'ステレオで鳴らす',sum:'左右2つに音を分けて出す空間系から、左右2台のアンプやスピーカーへ送ります。',
+     chain:['ギター','歪みまで（1本の道）','ステレオのディレイ・リバーブ','*左のアンプ','*右のアンプ'],
+     good:'ディレイやリバーブの響きが左右に広がり、奥行きが出ます。',
+     care:'左右に分けた所から後ろは、すべての台を左右2つの道にそろえます。途中に1本の道の台を挟むと、また一つの音にまとまってしまいます。FXループを使うなら、アンプ2台分の口が要ります。',
+     need:'ステレオで出せる空間系、アンプ2台（またはステレオのパワーアンプとキャビネット2台）、ケーブル。',
+     who:[]},
+    {id:'wdw',name:'ウェット・ドライ・ウェット',sum:'真ん中のアンプからは元の音、左右のスピーカーからはエフェクトの響きだけを鳴らします。',
+     chain:['ギター','歪み','*中央のアンプ（ドライ）','ロードボックス等','空間系（ウェットだけ）','*パワーアンプ','*左右のキャビネット'],
+     good:'元の音が響きに埋もれません。芯のある音と、広がる響きを両方得られます。',
+     care:'機材が多く、大がかりになります。真ん中と左右の音量のつり合いを取るのが難しい組み方です。',
+     need:'ロードボックス（またはアンプから信号を取り出す口）、パワーアンプ、追加のキャビネット。',
+     who:['lukather']},
+    {id:'rack',name:'ラックとスイッチャーで組む',sum:'たくさんの機材を棚や大きな板にまとめ、足元の切り替え装置で操作します。',
+     chain:['ギター','バッファー','スイッチャー（各台へ送り分け）','*アンプ（またはプリアンプ＋パワーアンプ）','スピーカー'],
+     good:'一度踏むだけで、何台もの入切やアンプの切り替えを同時にできます。使わない台を音の通り道から外せるので、台が多くても音がやせにくくなります。',
+     care:'大きく重く、お金もかかります。音が出なくなった時に、どこが原因かを探すのが難しくなります。',
+     need:'スイッチャー、バッファー、ラックケースや大きな板、たくさんのケーブル。',
+     who:['lukather','gilmour','edge']},
+    {id:'pa',name:'ギタープロセッサーを中心に組む（PAへ）',sum:'アンプとスピーカーの音を一台のギタープロセッサーで作り、PAへ直接送ります。',
+     chain:['ギター','ギタープロセッサー（アンプ・キャビネットの再現）','XLR（またはDI）','*PA','モニター'],
+     good:'どの会場でも同じ音を出しやすくなります。運ぶ機材も少なくて済みます。',
+     care:'キャビネットシミュレーターを必ず入れます。自分の音はモニターで聞くので、アンプほどの手応えを感じにくいことがあります。',
+     need:'XLRケーブル（または DI）、イヤーモニターかモニタースピーカー。',
+     who:['metallica'],
+     preset:{line:null,on:['comp','drive','delay','reverb'],out:'pa'}},
+    {id:'power',name:'ギタープロセッサー＋パワーアンプ＋キャビネット',sum:'音作りはギタープロセッサーで行い、鳴らすのは本物のキャビネットです。',
+     chain:['ギター','ギタープロセッサー（キャビネットシミュは切る）','*パワーアンプ（またはアンプのリターン）','キャビネット'],
+     good:'いつものアンプのように、空気を震わせる音が出せます。PAへは、別の出力からキャビネットシミュレーター入りの音を送れる機種が多くあります。',
+     care:'パワーアンプが要ります。キャビネットシミュレーターを切り忘れると、こもった音になります。',
+     need:'パワーアンプ（またはリターンの付いたアンプ）、キャビネット、スピーカーケーブル。',
+     who:[],
+     preset:{line:null,on:['comp','drive','delay','reverb'],out:'power'}},
+    {id:'home',name:'自宅と録音',sum:'ヘッドホンやパソコンを使って、音量を気にせず弾いたり録ったりする形です。',
+     chain:['ギター','オーディオインターフェイス（Hi-Z）','*パソコン（DAW・アンプシミュ）','ヘッドホン'],
+     good:'夜でも練習や録音ができます。USBオーディオの付いたギタープロセッサーなら、ケーブル一本で録音できます。',
+     care:'パソコンを通すと、音が少し遅れて聞こえます（レイテンシー）。アンプのスピーカーの口に、ヘッドホンを差してはいけません。',
+     need:'オーディオインターフェイス（または USBオーディオ付きのギタープロセッサー）、ヘッドホン。',
+     who:[],
+     preset:{line:null,on:['comp','drive','delay','reverb'],out:'daw'}}
+  ];
+  function typeOf(id){ for(var i=0;i<RIG_TYPES.length;i++) if(RIG_TYPES[i].id===id) return RIG_TYPES[i]; return null; }
+
+  /* ── ギタリストの組み方。取材記事で確かめられる時期だけを載せる ── */
+  var PLAYERS=[
+    {id:'srv',name:'スティーヴィー・レイ・ヴォーン',era:'1980年代',types:['front','aby'],
+     body:'足元はワウとアイバニーズのチューブスクリーマーなど少数でした。'+
+       '1980年代前半はフェンダーのVibroverbを2台使い、後にはDumbleやマーシャル、フェンダーの別のアンプを組み合わせ、複数のアンプを同時に鳴らしています。',
+     merit:'ペダルで深く歪ませるより、アンプそのものの歪みを生かす組み方です。複数のアンプを重ね、太さと抜けを両立しています。',
+     src:['https://www.guitarworld.com/magazine/blues-power-depth-guide-amps-and-effect-pedals-stevie-ray-vaughan-s-arsenal',
+          'https://guitarworld.com/features/stevie-ray-vaughans-sound-amps']},
+    {id:'lukather',name:'スティーヴ・ルカサー',era:'1985〜1992年ごろ',types:['wdw','rack'],
+     body:'ボブ・ブラッドショウが組んだラックシステムで、音ごとに3台のアンプを使っていました。リードはソルダーノのSLO-100、ほかに改造したマーシャルとメサ・ブギーです。'+
+       'ウェット・ドライ・ウェットの組み方で、ダミーロードを使って信号を取り出していたと伝えられています。'+
+       '3台のアンプを運ぶ手間を減らすため、ブラッドショウの発案で、ラックに収まる3チャンネルの真空管プリアンプ（ソルダーノX88R）が生まれました。',
+     merit:'曲の中で音色を瞬時に切り替えつつ、空間系をアンプの歪みと切り離して、澄んだまま広げられます。',
+     src:['https://guitar.com/features/interviews/shop-talk-bob-bradshaw/',
+          'https://soldano.com/?p=221662']},
+    {id:'gilmour',name:'デヴィッド・ギルモア',era:'長年にわたって',types:['rack'],
+     body:'ピート・コーニッシュが手がけたボードと切り替え装置を使ってきたことで知られます。'+
+       'コーニッシュの組み方は、ギターの信号を入口でいったんバッファーに受け、そこから各台やアンプへ、ローインピーダンスで配るものです。',
+     merit:'台が多くても高い音が痩せにくく、どの台を入れても切っても、音量と音色がそろいます。',
+     src:['https://www.musicradar.com/news/pete-cornish-pedals-interview',
+          'https://petecornish.co.uk/jptt.html',
+          'https://petecornish.co.uk/bfst2.html']},
+    {id:'edge',name:'ジ・エッジ（U2）',era:'初期から2010年代のツアーまで',types:['rack','aby'],
+     body:'初期からVoxのAC30を音の柱にし、ツアーではAC30を複数台並べ、フェンダーやマーシャルも加えています。'+
+       '多数の台をカスタムの切り替え装置でまとめ、ブラッドショウの会社（Custom Audio Electronics）製の分配器やループの箱も使っています。'+
+       '付点8分のディレイを曲のテンポに合わせる使い方が有名です。',
+     merit:'複数のアンプとディレイを組み合わせ、返り音そのものを伴奏のリズムとして使えます。',
+     src:['https://www.premierguitar.com/articles/27653-rig-rundown-u2s-the-edge',
+          'https://www.premierguitar.com/articles/22230-electric-etudes-u2s-the-edge']},
+    {id:'metallica',name:'メタリカ（ジェイムズ・ヘットフィールド、カーク・ハメット）',era:'2013年ごろから',types:['pa'],
+     body:'2013年ごろにフラクタル・オーディオのAxe-Fxへ切り替え、リハーサルでも本番でも同じ音を出せるようになったと語っています。'+
+       'ハメットの音は、愛用してきたFortin MeatheadとMesa/Boogie Dual Rectifierを元に作られています。',
+     merit:'会場ごとの音の差が小さく、真空管アンプとペダルの雑音対策にかけていた手間が減ったと、ギターテクニシャンが話しています。',
+     src:['https://www.guitarworld.com/gear/amps/why-metallica-ditched-tube-amps-and-embraced-amp-modelers-for-their-live-show',
+          'https://guitarworld.com/news/kirk-hammett-tech-justin-crew-on-why-metallica-use-fractal-axe-fx',
+          'https://www.guitarplayer.com/players/metallicas-james-hetfield-and-kirk-hammett-talk-axe-fx-rigs-censored-songs-and-making-hardwired']}
+  ];
+  function playerOf(id){ for(var i=0;i<PLAYERS.length;i++) if(PLAYERS[i].id===id) return PLAYERS[i]; return null; }
+
+  /* ── やりたいことから逆引き ── */
+  var SCN_CATS=['練習・録音','ライブ','音作り','困りごと'];
+  var SCN=[
+    {id:'phones',cat:0,q:'夜にヘッドホンで練習したい',
+     chain:['ギター','*ギタープロセッサー（キャビネットシミュ入り）','ヘッドホン'],
+     need:['ヘッドホン端子の付いたギタープロセッサー','または、ギターに直接差す小型のヘッドホンアンプ','または、ヘッドホン端子の付いたアンプ'],
+     cable:['ギターケーブル1本','ヘッドホンの差し込みが3.5mmなら、6.3mmへの変換プラグ'],
+     care:'アンプのスピーカー出力にヘッドホンを差してはいけません。ヘッドホン端子の無い真空管アンプで音を出さずに弾くには、ヘッドホン出力付きのロードボックスが要ります。',
+     fit:{combo:'アンプにヘッドホン端子があるかを確かめます。無ければ、ギタープロセッサーかヘッドホンアンプを足します。',
+          head:'ヘッドにヘッドホン端子が無ければ、ギタープロセッサーかヘッドホンアンプを足します。真空管のヘッドは、キャビネットかロードボックスを繋がずに鳴らしません。',
+          phones:'いまの組み方のままで弾けます。'},
+     types:['home']},
+    {id:'aux',cat:0,q:'スマホやパソコンの曲に合わせて弾きたい',
+     chain:['スマホ・パソコン','*AUX入力（外部入力）','ヘッドホン・スピーカー'],
+     need:['AUX入力の付いたアンプやギタープロセッサー','または、オーディオインターフェイス（パソコンの曲とギターを一緒に聞ける）','Bluetoothで曲を受けられる機種もあります'],
+     cable:['3.5mmのステレオミニケーブル（機種によっては6.3mmやRCA）'],
+     care:'AUX入力は曲を流すための口で、ギターの入力とは別です。多くの機種で、AUXの音はアンプの歪みやエフェクトを通らずに混ざります。',
+     types:['home']},
+    {id:'rec',cat:0,q:'パソコンで録音したい',
+     chain:['ギター','*オーディオインターフェイス（Hi-Z）','パソコン（DAW）','ヘッドホン'],
+     need:['オーディオインターフェイス、またはUSBオーディオ付きのギタープロセッサー','DAW（Logic など）','ヘッドホンかモニタースピーカー'],
+     cable:['ギターケーブル','USBケーブル'],
+     care:'パソコンのアンプシミュレーターを通して聞くとレイテンシーが生じます。素の音も一緒に録っておけば、後から音作りをやり直せます（リアンプ）。',
+     fit:{daw:'いまの組み方のままで録音できます。',pa:'USBオーディオの付いたギタープロセッサーなら、そのままパソコンと繋いで録音できます。',frfr:'USBオーディオの付いたギタープロセッサーなら、そのままパソコンと繋いで録音できます。'},
+     types:['home']},
+    {id:'mic',cat:0,q:'アンプの音をマイクで録りたい',
+     chain:['ギター','*アンプ','マイク','*オーディオインターフェイス（マイク入力）','パソコン'],
+     need:['マイク（ギターアンプにはダイナミックマイクがよく使われます）','マイクスタンド','マイク入力の付いたオーディオインターフェイス'],
+     cable:['XLRケーブル'],
+     care:'ダイナミックマイクなら、ファンタム電源は要りません。コンデンサーマイクの多くはファンタム電源が要ります。音量が大きくなるので、時間帯や部屋に気を配ります。',
+     types:['home']},
+    {id:'load',cat:0,q:'アンプを鳴らした音を、音量を上げずに録りたい',
+     chain:['ギター','*アンプ','*ロードボックス','オーディオインターフェイス','パソコン'],
+     need:['ライン出力（できればIR付き）のロードボックス','オーディオインターフェイス'],
+     cable:['スピーカーケーブル（アンプからロードボックスへ）','ライン出力からインターフェイスへのケーブル'],
+     care:'ロードボックスのΩをアンプの出力に合わせ、受けられる出力（W）がアンプ以上のものを選びます。ライン出力の音はキャビネットの響きを含まないので、IRを通して整えます。',
+     fit:{combo:'コンボアンプは、内蔵スピーカーへの線を外してロードボックスへ繋ぎます。外せる作りかを確かめます。',head:'ヘッドの出力をキャビネットの代わりにロードボックスへ繋ぎます。'},
+     types:['home']},
+
+    {id:'house',cat:1,q:'ライブハウスのアンプで、足元だけ持って行って鳴らしたい',
+     chain:['ギター','ボード','*会場のアンプ'],
+     need:['ボード','パワーサプライと、会場のコンセントまで届く延長コード'],
+     cable:['長めのギターケーブル2本（ギターからボード、ボードからアンプ）'],
+     care:'ステージではケーブルが長くなるので、ボードの前の方にバッファーがあると高い音が痩せにくくなります。会場のアンプのFXループを使う時は、口があるかを前もって確かめます。',
+     types:['front','loop']},
+    {id:'pa',cat:1,q:'ギタープロセッサーの音を、PAへ直接送りたい',
+     chain:['ギター','*ギタープロセッサー（アンプ・キャビネットの再現）','XLR（またはDI）','*PA'],
+     need:['XLR出力の付いたギタープロセッサー（無ければDI）','自分の音を聞くためのモニター'],
+     cable:['XLRケーブル'],
+     care:'キャビネットシミュレーターを必ず入れます。ステージにアンプを置かない時は、モニターの返しを会場の担当の方と相談しておきます。',
+     fit:{pa:'いまの組み方のままで送れます。',combo:'アンプを鳴らさず、ギタープロセッサーから直接送る形に変わります。',head:'アンプを鳴らさず、ギタープロセッサーから直接送る形に変わります。'},
+     types:['pa']},
+    {id:'multiamp',cat:1,q:'ギタープロセッサーの音を、会場のアンプで鳴らしたい',
+     chain:['ギター','*ギタープロセッサー','*アンプのリターン（またはアンプの入力）','スピーカー'],
+     need:['ギタープロセッサー','リターンの付いたアンプ（リターンへ入れる場合）'],
+     cable:['ギターケーブル2本'],
+     care:'繋ぐ先で、ギタープロセッサーの設定が変わります。アンプのリターンへ入れる時は、アンプシミュレーターを入れ、キャビネットシミュレーターを切ります。アンプの入力へ入れる時は、アンプシミュレーターもキャビネットシミュレーターも切り、エフェクトだけを使います。入れたままアンプの入力へ送ると、二重に歪んで濁ります。',
+     types:['power','4cm']},
+    {id:'mixpedal',cat:1,q:'手持ちのペダルとギタープロセッサーを一緒に使いたい',
+     chain:['ギター','歪み・ワウのペダル','*ギタープロセッサー'],
+     need:['ギタープロセッサー','パワーサプライ（ペダル用）'],
+     cable:['パッチケーブル','ギタープロセッサーにセンド・リターンがあれば、ペダルをその途中に挟むケーブル2本'],
+     care:'歪みやワウのペダルはギタープロセッサーの前に置くのが分かりやすい形です。センド・リターンがあれば、ペダルをその中の好きな位置に挟めます。その時はセンド・リターンのレベルを楽器レベルに合わせます。',
+     types:['4cm']},
+
+    {id:'loopfx',cat:2,q:'歪みはアンプで作り、空間系は濁らせたくない',
+     chain:['ギター','歪みまで','*アンプの入力','*センド','空間系','*リターン'],
+     need:['FXループの付いたアンプ'],
+     cable:['足元とアンプを行き来するケーブル4本'],
+     care:'アンプにFXループが無い時は、空間系を歪みの前に置くしかなく、残響まで歪みます。その場合はアンプの歪みを控えめにし、歪みはペダルで作ります。',
+     fit:{combo:'アンプの背面に SEND・RETURN の口があるかを確かめます。',head:'ヘッドの背面に SEND・RETURN の口があるかを確かめます。',pa:'ギタープロセッサーの中で、空間系をアンプシミュレーターの後ろに置けば同じことになります。',frfr:'ギタープロセッサーの中で、空間系をアンプシミュレーターの後ろに置けば同じことになります。'},
+     types:['loop','4cm']},
+    {id:'twoamps',cat:2,q:'2台のアンプを切り替えたい・同時に鳴らしたい',
+     chain:['ギター','ペダル','ABYボックス','*アンプA','*アンプB'],
+     need:['ABYボックス（グラウンドリフト付きが安心）','アンプ2台'],
+     cable:['ギターケーブル（ボックスからそれぞれのアンプへ）'],
+     care:'同時に鳴らすとハムが出たり、位相のずれで音が細くなったりすることがあります。',
+     types:['aby']},
+    {id:'stereo',cat:2,q:'ステレオで広げたい',
+     chain:['ギター','歪みまで','ステレオのディレイ・リバーブ','*左','*右'],
+     need:['ステレオ出力の空間系','アンプ2台、または左右のスピーカー'],
+     cable:['ステレオにした所から後ろは、左右それぞれのケーブル'],
+     care:'ステレオにした所から後ろに、モノラルの台を挟まないようにします。',
+     types:['stereo','wdw']},
+    {id:'switch',cat:2,q:'何台もの入切を、一度でまとめて切り替えたい',
+     chain:['ギター','*スイッチャー（またはマルチエフェクター）','各台','アンプ'],
+     need:['スイッチャー、またはマルチエフェクター・ギタープロセッサー','MIDIで切り替えられる台なら、MIDIの付いたスイッチャー'],
+     cable:['台の数に合わせたパッチケーブル（送りと戻りで2本ずつ）','MIDIケーブル（使う場合）'],
+     care:'スイッチャーは音の道を組み替える分、ケーブルが増えます。入口にバッファーを置く組み方がよく使われます。',
+     types:['rack']},
+    {id:'exp',cat:2,q:'マルチエフェクターなどで、踏み込みで音を動かしたい（ワウ・音量など）',
+     chain:['エクスプレッションペダル','*マルチエフェクターなどのEXP端子'],
+     need:['エクスプレッションペダル（踏み板の付いた機種なら不要）'],
+     cable:['多くはTRSのケーブル（機種ごとに確かめます）'],
+     care:'エクスプレッションペダルは音を通しません。繋いだ機材の中で、どのつまみを動かすかを決めます。',
+     types:[]},
+
+    {id:'hum',cat:3,q:'ブーンという雑音が出る',
+     chain:['電源','ケーブル','アース','ピックアップ'],
+     need:['出口ごとに電気が独立したパワーサプライ','必要ならグラウンドリフト付きの機材'],
+     cable:['傷んだケーブルは取り替えます'],
+     care:'一つずつ確かめます。①ペダルを外してギターとアンプだけにする。②電源を一つの出口から分岐させていないか。③2台のアンプやパソコンと繋いだ時だけ出るならグラウンドループ。④シングルコイルのピックアップは、照明やパソコンの画面の近くで雑音を拾いやすく、向きを変えると減ることがあります。電源コードのアースを外すのは危険なので行いません。',
+     types:[]},
+    {id:'dull',cat:3,q:'ボードを繋ぐと、高い音がこもる',
+     chain:['ギター','*バッファー','ボード','アンプ'],
+     need:['バッファー（単体、またはバッファー入りのペダル）'],
+     cable:['ケーブルを短くまとめる'],
+     care:'ギターの信号は、ケーブルが長いほど高い音から削られます。トゥルーバイパスの台ばかりだと、切っていても長いケーブルと同じことになります。前の方にバッファーを一台置きます。ファズの中にはバッファーの後ろで反応が変わる機種があるので、その台はバッファーより前に置きます。',
+     fit:{passive:'パッシブのギターは、この影響を最も受けます。',
+          active:'アクティブのギターは出力がローインピーダンスに近く、こもりは出にくい形です。原因はケーブルや台の側を確かめます。',
+          wireless:'ワイヤレスの受信機はバッファーの役目をするので、受信機より後ろのケーブルや台を確かめます。'},
+     types:['rack']},
+    {id:'power',cat:3,q:'ペダルの電源をひとつにまとめたい',
+     chain:['コンセント','*パワーサプライ','各ペダル'],
+     need:['パワーサプライ（出口ごとに電気が独立したものが安心）'],
+     cable:['DCケーブル（プラグの太さと極性をペダルに合わせる）'],
+     care:'台ごとに、電圧（9V・12V・18Vなど）・極性・必要な電流（mA）を確かめ、それに合う出口へ繋ぎます。電圧を上げて使える台もありますが、表示に無い電圧は与えません。',
+     types:[]}
+  ];
+  function scnOf(id){ for(var i=0;i<SCN.length;i++) if(SCN[i].id===id) return SCN[i]; return null; }
+  function scnListHtml(){
+    var h='<div class="guide-h">やりたいことから探す</div>'+
+      '<span class="lead">したいことを選ぶと、繋ぐ順・要る物・ケーブルを示します。</span>'+
+      '板の両端で手持ちの種類を選んでおくと、それに合わせた一言も添えます。';
+    SCN_CATS.forEach(function(c,ci){
+      h+='<span class="hn">'+esc(c)+'</span><div class="sys-list" style="margin-top:4px">';
+      SCN.forEach(function(s){
+        if(s.cat!==ci) return;
+        h+='<button type="button" class="sys-card" data-scn="'+s.id+'"><span class="sc-n">'+esc(s.q)+'</span></button>';
+      });
+      h+='</div>';
+    });
+    return h;
+  }
+  function scnFit(s){
+    if(!s.fit) return '';
+    var o=s.fit[ends.out], g=s.fit[ends.in];
+    var t=[];
+    if(o) t.push(esc(o));
+    if(g) t.push(esc(g));
+    if(!t.length) return '';
+    var who=[];
+    if(o) who.push(endOf('out').name);
+    if(g) who.push(endOf('in').name);
+    return '<span class="hn">いま選んでいる機材では</span>'+
+      '<span class="sys-now">'+esc(who.join('・'))+'</span>'+t.join('');
+  }
+  function bullets(list){
+    return '<ul class="sys-ul">'+list.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
+  }
+  function scnHtml(s){
+    if(!s) return '';
+    var h='<button type="button" class="icon-btn tiny" data-back="1">'+(sys.from==='mine'?'← 手持ちの結果へ':'← やりたいことの一覧へ')+'</button>'+
+      '<div class="guide-h" style="margin-top:12px">'+esc(s.q)+'</div>'+
+      scnGearHtml(s)+
+      '<span class="hn">繋ぐ順</span>'+chainHtml(s.chain)+
+      '<span class="hn">要る物</span>'+bullets(s.need)+
+      '<span class="hn">ケーブルと端子</span>'+bullets(s.cable)+
+      '<span class="hn">気をつけること</span>'+esc(s.care)+
+      scnFit(s);
+    if(s.types&&s.types.length){
+      h+='<span class="hn">組み方の型で見る</span><div class="sys-chips">'+s.types.map(function(id){
+        var t=typeOf(id); return t?'<button type="button" class="icon-btn tiny" data-type="'+id+'">'+esc(t.name)+'</button>':'';
+      }).join('')+'</div>';
+    }
+    if(ends.out==='none'&&ends.in==='none'&&s.fit){
+      h+='<span class="hn">手持ちに合わせて見る</span>'+
+        '板の右端のギターと左端のスピーカーの絵を押して種類を選ぶと、ここに手持ちの機材に合わせた一言が出ます。';
+    }
+    return h;
+  }
+
+  /* ── 手持ちの機材で確かめる ──
+     持っている機材を選ぶと、やりたいことごとに「できるか」「何が足りないか」を示す。 */
+  var GEAR_GROUPS=[
+    {n:'ギター',items:[
+      {id:'activeg',n:'アクティブのギター'},
+      {id:'wireless',n:'ワイヤレス'}]},
+    {n:'アンプ',items:[
+      {id:'combo',n:'コンボアンプ',buy:1},
+      {id:'head',n:'ヘッド',buy:1},
+      {id:'cab',n:'キャビネット',buy:1},
+      {id:'preamp',n:'プリアンプ（単体）',buy:1},
+      {id:'poweramp',n:'パワーアンプ（単体）',buy:1},
+      {id:'twoamps',n:'アンプが2台以上ある',buy:1,bn:'もう1台のアンプ'}]},
+    {n:'アンプに付いている物',when:['combo','head'],items:[
+      {id:'loop',n:'FXループ（SEND・RETURN）'},
+      {id:'ampphones',n:'ヘッドホン端子'},
+      {id:'ampaux',n:'AUX入力（曲を流し込む口）'},
+      {id:'tube',n:'真空管アンプである'}]},
+    {n:'マルチエフェクター・ギタープロセッサー',items:[
+      {id:'fxmulti',n:'マルチエフェクター（エフェクトだけ）',buy:1,t:'マルチエフェクター'},
+      {id:'multi',n:'ギタープロセッサー（アンプの音まで作れる）',buy:1,bn:'ギタープロセッサー',t:'ギタープロセッサー'}]},
+    {n:'プリアンプに付いている物',when:['preamp'],items:[
+      {id:'pcab',n:'キャビネットシミュレーター付きの出力',t:'キャビネットシミュレーター'},
+      {id:'pphones',n:'ヘッドホン端子'}]},
+    {n:'マルチエフェクター・ギタープロセッサーに付いている物',when:['multi','fxmulti'],items:[
+      {id:'mphones',n:'ヘッドホン端子'},
+      {id:'mxlr',n:'XLR出力'},
+      {id:'musb',n:'USBで録音できる'},
+      {id:'mloop',n:'センド・リターン'},
+      {id:'maux',n:'AUX入力（曲を流し込む口）'}]},
+    {n:'足元',items:[
+      {id:'pedals',n:'ペダル（歪み・空間系など）'},
+      {id:'psu',n:'パワーサプライ',buy:1},
+      {id:'buffer',n:'バッファー',buy:1},
+      {id:'stereofx',n:'ステレオ出力の空間系',buy:1},
+      {id:'exp',n:'エクスプレッションペダル',buy:1},
+      {id:'switcher',n:'スイッチャー',buy:1},
+      {id:'aby',n:'ABYボックス',buy:1}]},
+    {n:'録音・そのほか',items:[
+      {id:'pc',n:'パソコン',buy:1},
+      {id:'iface',n:'オーディオインターフェイス',buy:1},
+      {id:'phones',n:'ヘッドホン',buy:1},
+      {id:'hpamp',n:'ヘッドホンアンプ（ギターに直接差す物）',buy:1},
+      {id:'mic',n:'マイク',buy:1},
+      {id:'load',n:'ロードボックス',buy:1},
+      {id:'di',n:'DI',buy:1},
+      {id:'frfr',n:'FRFRスピーカー（アクティブ）',buy:1}]}
+  ];
+  var GEAR_TERM={activeg:'アクティブ',wireless:'ワイヤレス',combo:'コンボアンプ',head:'ヘッド',cab:'キャビネット',
+    preamp:'プリアンプ',poweramp:'パワーアンプ',loop:'FXループ',tube:'真空管アンプ',ampaux:'AUX入力',maux:'AUX入力',
+    mxlr:'XLR',musb:'USBオーディオ',mloop:'センド',pedals:'ペダル（エフェクター）',psu:'パワーサプライ',buffer:'バッファー',
+    stereofx:'ステレオ',exp:'エクスプレッションペダル',switcher:'スイッチャー',aby:'ABYボックス',iface:'オーディオインターフェイス',
+    load:'ロードボックス',di:'DI',frfr:'FRFR'};
+  function termByName(n){ if(!n) return null; for(var i=0;i<TERMS.length;i++) if(TERMS[i].n===n) return TERMS[i]; return null; }
+  var GEAR_ITEM={}, GEAR_PARENT={};
+  GEAR_GROUPS.forEach(function(g){ g.items.forEach(function(it){ GEAR_ITEM[it.id]=it; if(g.when) GEAR_PARENT[it.id]=g.when; }); });
+  var gear={};
+  try{ var svg=JSON.parse(localStorage.getItem('efbook.gear')||'null'); if(svg) gear=svg; }catch(e){}
+  function keepGear(){ try{ localStorage.setItem('efbook.gear',JSON.stringify(gear)); }catch(e){} }
+  /* 付いている物は、本体を選んでいる時だけ数える */
+  function hasIn(set,id){
+    if(!set[id]) return false;
+    var par=GEAR_PARENT[id];
+    if(par&&!par.some(function(p){ return set[p]; })) return false;
+    return true;
+  }
+  /* 'a&b' は両方、配列はどれか一つ */
+  function okAny(set,list){
+    return list.some(function(x){
+      return x.split('&').every(function(id){ return hasIn(set,id); });
+    });
+  }
+  var SOUND=['combo','head&cab','head&load','preamp&poweramp&cab'];
+  /* やりたいことごとに要る物。soft は「あると安心」 */
+  var NEEDS={
+    phones:[{l:'ヘッドホン',any:['phones'],why:'音を聞くために使います。'},
+            {l:'ヘッドホンを差せる機材',any:['multi&mphones','ampphones','preamp&pphones','hpamp','iface&pc'],why:'ヘッドホンはアンプのスピーカーの口には差せません。ヘッドホン専用の口が要ります。'}],
+    aux:[{l:'曲を流し込める口',any:['ampaux','multi&maux','iface&pc'],why:'スマホやパソコンの曲を、ギターの音と一緒に聞くための口です。'},
+         {l:'音を聞く物',any:['phones'].concat(SOUND).concat(['frfr']),why:'曲とギターを一緒に鳴らす先です。'}],
+    rec:[{l:'パソコン',any:['pc'],why:'録音する先です。'},
+         {l:'ギターをパソコンへ入れる機材',any:['iface','multi&musb'],why:'ギターはパソコンに直接差せません。間に入れる機材が要ります。'},
+         {l:'ヘッドホン',any:['phones'],why:'録りながら自分の音を聞きます。',soft:1}],
+    mic:[{l:'鳴らせるアンプ',any:SOUND,why:'マイクで録る音を出すアンプです。'},
+         {l:'マイク',any:['mic'],why:'アンプの音を拾います。'},
+         {l:'オーディオインターフェイス',any:['iface'],why:'マイクの音をパソコンへ入れます。'},
+         {l:'パソコン',any:['pc'],why:'録音する先です。'}],
+    load:[{l:'パワーアンプを持つアンプ',any:['combo','head','preamp&poweramp'],why:'ロードボックスは、パワーアンプの出力を受け止める機材です。'},
+          {l:'ロードボックス',any:['load'],why:'スピーカーの代わりに音を受け止め、小さな音で録れる信号に変えます。'},
+          {l:'オーディオインターフェイス',any:['iface'],why:'ロードボックスから出た信号を、パソコンへ入れます。'},
+          {l:'パソコン',any:['pc'],why:'録音する先です。'}],
+    house:[{l:'ペダル',any:['pedals'],why:'会場へ持って行く足元です。'},
+           {l:'パワーサプライ',any:['psu'],why:'ペダルの電気をまとめて取ります。電池だけでは途中で切れる心配があります。',soft:1},
+           {l:'バッファー',any:['buffer','wireless','activeg'],why:'ステージではケーブルが長くなります。高い音が痩せるのを防ぎます。',soft:1}],
+    pa:[{l:'アンプの音を作る機材',any:['multi','preamp&pcab'],why:'PAへ送る前に、アンプとスピーカーの音を作ります。ギタープロセッサーか、キャビネットシミュレーター付きの出力を持つプリアンプが使えます。'},
+        {l:'PAへ送る口',any:['multi&mxlr','di'],why:'PAへは、XLRで送るのが基本です。ギタープロセッサーにXLRの口が無ければ、DIで変えます。'}],
+    multiamp:[{l:'ギタープロセッサー',any:['multi'],why:'音を作る機材です。'}],
+    mixpedal:[{l:'ギタープロセッサー',any:['multi'],why:'ペダルの後ろに繋ぐ機材です。'},
+              {l:'ペダル',any:['pedals'],why:'ギタープロセッサーと一緒に使う足元です。'},
+              {l:'パワーサプライ',any:['psu'],why:'ペダルの電気をまとめて取ります。',soft:1}],
+    loopfx:[{l:'空間系を歪みの後ろに置ける機材',any:['loop','preamp&poweramp','multi'],why:'アンプで歪ませた後ろに、空間系を入れる口です。ギタープロセッサーなら、中で並べ替えられます。'}],
+    twoamps:[{l:'アンプ2台',any:['twoamps'],why:'切り替える・重ねる、2台のアンプです。'},
+             {l:'ABYボックス',any:['aby'],why:'一つの音を、2台へ分けます。'}],
+    stereo:[{l:'ステレオで出せる機材',any:['stereofx','multi','fxmulti'],why:'左右2つに分けて音を出す機材です。マルチエフェクターやギタープロセッサーの多くはステレオで出せます。'},
+            {l:'左右で鳴らす2台',any:['twoamps','phones'],why:'左右それぞれの音を鳴らす先です。ヘッドホンなら1つで左右に分かれます。'}],
+    'switch':[{l:'まとめて切り替える機材',any:['switcher','multi','fxmulti'],why:'一度踏むだけで、何台もの入切を変えます。'}],
+    exp:[{l:'マルチエフェクターかギタープロセッサー',any:['multi','fxmulti'],why:'踏み込みで動かす相手です。'},
+         {l:'エクスプレッションペダル',any:['exp'],why:'踏み込み具合を、その機材に伝えます。'}],
+    hum:[],
+    dull:[{l:'バッファー',any:['buffer','wireless','activeg'],why:'ギターの弱い信号を、長いケーブルに強い信号に変えます。'}],
+    power:[{l:'パワーサプライ',any:['psu'],why:'ペダルの電気を、一つの箱から配ります。'}]
+  };
+  var ONLY={dull:['pedals'],power:['pedals'],mixpedal:['pedals'],house:['pedals']};
+  function judge(set,id){
+    if(ONLY[id]&&!okAny(set,ONLY[id])) return {na:true,miss:[],soft:[],have:[]};
+    var list=NEEDS[id]||[], miss=[], soft=[], have=[];
+    list.forEach(function(nd){
+      if(okAny(set,nd.any)) have.push(nd);
+      else (nd.soft?soft:miss).push(nd);
+    });
+    return {miss:miss,soft:soft,have:have,diag:!list.length};
+  }
+  function anyGear(){ for(var k in gear) if(gear[k]) return true; return false; }
+  /* 組み合わせで気になる点。鳴らすための道が途切れていないか */
+  function gearFix(){
+    var f=[], h=function(id){ return hasIn(gear,id); };
+    if(h('cab')&&!h('head')&&!h('poweramp')&&!(h('multi')&&h('loop')))
+      f.push({id:'poweramp',why:h('multi')?'ギタープロセッサーの音で、持っているキャビネットを鳴らせるようになります。':'持っているキャビネットを鳴らせるようになります。'});
+    if(h('head')&&!h('cab')&&!h('load')) f.push({id:'cab',why:'持っているヘッドを鳴らせるようになります。'});
+    if(h('preamp')&&!h('poweramp')&&!h('pcab')) f.push({id:'poweramp',why:'持っているプリアンプで、スピーカーを鳴らせるようになります。'});
+    if(h('poweramp')&&!h('cab')) f.push({id:'cab',why:'持っているパワーアンプの音を出せるようになります。'});
+    return f;
+  }
+  function gearWarn(){
+    var w=[], h=function(id){ return hasIn(gear,id); };
+    if(h('head')&&!h('cab')&&!h('load')) w.push('ヘッドだけでは鳴りません。キャビネットを繋ぎます。');
+    if(h('cab')&&!h('head')&&!h('poweramp'))
+      w.push(h('combo')?'キャビネットを鳴らすには、ヘッドかパワーアンプが要ります。コンボアンプに外部スピーカーの口があれば、そこから鳴らせることもあります。'
+                       :'キャビネットだけでは鳴りません。手前に、ヘッドかパワーアンプが要ります。');
+    if(h('preamp')&&!h('poweramp')&&!h('pcab')) w.push('プリアンプだけではスピーカーを鳴らせません。先に、パワーアンプが要ります。');
+    if(h('poweramp')&&!h('cab')) w.push('パワーアンプの先に、キャビネットが要ります。');
+    if(h('multi')&&h('cab')&&!h('poweramp')&&!h('head')) w.push('ギタープロセッサーからキャビネットを鳴らすには、間にパワーアンプが要ります。キャビネットへ直接は繋げません。');
+    if(h('multi')&&h('cab')&&h('head')&&h('loop')) w.push('ギタープロセッサーをヘッドのリターンへ入れれば、ヘッドの力でキャビネットを鳴らせます。このとき、キャビネットシミュレーターは切ります。');
+    if(h('fxmulti')&&!h('multi')&&!h('combo')&&!h('head')&&!h('preamp'))
+      w.push('エフェクトだけのマルチエフェクターは、アンプに繋いで使います。アンプが無い時は、アンプの音まで作れるギタープロセッサーが要ります。');
+    if(h('tube')&&h('head')&&!h('cab')&&!h('load')) w.push('真空管のヘッドは、キャビネットかロードボックスを繋がずに音を出すと壊れることがあります。');
+    return w;
+  }
+  /* 一つ足すと、できることがいくつ増えるか */
+  function bestBuys(){
+    var base={}, out=[];
+    SCN.forEach(function(s){ var j=judge(gear,s.id); base[s.id]=(!j.na&&!j.diag&&!j.miss.length); });
+    Object.keys(GEAR_ITEM).forEach(function(id){
+      var it=GEAR_ITEM[id];
+      if(!it.buy||hasIn(gear,id)) return;
+      var t={}; for(var k in gear) t[k]=gear[k]; t[id]=true;
+      var gain=[];
+      SCN.forEach(function(s){
+        if(base[s.id]||judge(gear,s.id).na) return;
+        var j=judge(t,s.id);
+        if(!j.diag&&!j.miss.length) gain.push(s.q);
+      });
+      if(gain.length) out.push({id:id,n:it.bn||it.n,gain:gain});
+    });
+    out.sort(function(a,b){ return b.gain.length-a.gain.length; });
+    var fx=gearFix(), seen={}, top=[];
+    fx.forEach(function(x){
+      if(seen[x.id]) return; seen[x.id]=1;
+      var o=null; out.forEach(function(y){ if(y.id===x.id) o=y; });
+      top.push({id:x.id,n:GEAR_ITEM[x.id].bn||GEAR_ITEM[x.id].n,first:x.why,gain:o?o.gain:[]});
+    });
+    out.forEach(function(y){ if(!seen[y.id]){ seen[y.id]=1; top.push(y); } });
+    return top.slice(0,3);
+  }
+  function statusText(j){
+    if(j.na) return {t:'ペダルを使う時の話',c:'st-diag'};
+    if(j.diag) return {t:'確かめ方',c:'st-diag'};
+    if(!j.miss.length) return {t:'できます',c:'st-ok'};
+    return {t:'あと'+j.miss.length+'つ',c:'st-miss'};
+  }
+  function gearHtml(){
+    var h='<div class="guide-h">手持ちで確かめる</div>'+
+      '<span class="lead">持っている機材を押して選んでください。</span>'+
+      'やりたいことごとに、できるかどうかと、足りない物を示します。';
+    GEAR_GROUPS.forEach(function(g){
+      if(g.when&&!g.when.some(function(p){ return gear[p]; })) return;
+      h+='<span class="hn">'+esc(g.n)+'</span><div class="gear-chips">'+g.items.map(function(it){
+        var on=!!gear[it.id];
+        var t=termByName(it.t||GEAR_TERM[it.id]);
+        return '<span class="gear-item"><button type="button" class="gear-chip'+(on?' on':'')+'" aria-pressed="'+on+'" data-gear="'+it.id+'">'+esc(it.n)+'</button>'+
+          (t?'<span class="term gear-q" data-t="'+t.id+'" role="button" tabindex="0" aria-label="'+esc(it.n)+'の説明">？</span>':'')+'</span>';
+      }).join('')+'</div>';
+    });
+    if(!anyGear()){
+      h+='<div class="gear-empty">まだ何も選んでいません。</div>';
+      return h;
+    }
+    var w=gearWarn();
+    if(w.length){
+      h+='<span class="hn">組み合わせで足りない物</span><ul class="sys-ul">'+
+        w.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
+    }
+    var bb=bestBuys();
+    if(bb.length){
+      h+='<span class="hn">足すと、できることが増える物</span><div class="sys-list" style="margin-top:4px">'+
+        bb.map(function(b){
+          return '<div class="buy-card"><span class="sc-n">'+esc(b.n)+'</span>'+
+            (b.first?'<span class="sc-s">'+esc(b.first)+'</span>':'')+
+            (b.gain.length?'<span class="sc-s">できるようになること：'+esc(b.gain.join('／'))+'</span>':'')+'</div>';
+        }).join('')+'</div>';
+    }
+    h+='<span class="hn">やりたいことごとの結果</span>';
+    SCN_CATS.forEach(function(c,ci){
+      h+='<div class="gear-cat">'+esc(c)+'</div><div class="sys-list" style="margin-top:4px">';
+      SCN.forEach(function(s){
+        if(s.cat!==ci) return;
+        var st=statusText(judge(gear,s.id));
+        h+='<button type="button" class="sys-card gear-row" data-scn="'+s.id+'" data-from="mine">'+
+          '<span class="sc-n">'+esc(s.q)+'</span><span class="gear-st '+st.c+'">'+st.t+'</span></button>';
+      });
+      h+='</div>';
+    });
+    return h;
+  }
+  /* やりたいことの頁に添える、手持ちの判定 */
+  function scnGearHtml(s){
+    if(!anyGear()) return '';
+    var j=judge(gear,s.id), h='<div class="gear-judge">';
+    if(j.na) return h+'<div class="gj-h">ペダルを使う時の話です</div>手持ちの機材でペダルを選ぶと、ここに結果が出ます。</div>';
+    if(j.diag){
+      h+='<div class="gj-h">手持ちの機材では</div>';
+      var tips=[];
+      if(!hasIn(gear,'psu')) tips.push('ペダルを電池やばらばらの電源で動かしているなら、パワーサプライでまとめると減ることがあります。');
+      if(hasIn(gear,'twoamps')) tips.push('2台のアンプを同時に鳴らした時だけ出るなら、アースの輪（グラウンドループ）が原因かもしれません。');
+      if(hasIn(gear,'pc')) tips.push('パソコンと繋いだ時だけ出るなら、USBを通したアースの輪が原因かもしれません。');
+      if(!tips.length) tips.push('下の「気をつけること」の順に確かめてください。');
+      h+='<ul class="sys-ul">'+tips.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul></div>';
+      return h;
+    }
+    if(!j.miss.length) h+='<div class="gj-h st-ok">いまの手持ちでできます</div>';
+    else h+='<div class="gj-h st-miss">あと'+j.miss.length+'つそろえるとできます</div>';
+    if(j.miss.length){
+      h+='<div class="gj-sub">足りない物</div><ul class="sys-ul">'+j.miss.map(function(nd){
+        return '<li><b>'+esc(nd.l)+'</b>　'+esc(nd.why)+'</li>';
+      }).join('')+'</ul>';
+    }
+    if(j.soft.length){
+      h+='<div class="gj-sub">あると安心な物</div><ul class="sys-ul">'+j.soft.map(function(nd){
+        return '<li><b>'+esc(nd.l)+'</b>　'+esc(nd.why)+'</li>';
+      }).join('')+'</ul>';
+    }
+    if(j.have.length){
+      h+='<div class="gj-sub">そろっている物</div><ul class="sys-ul">'+j.have.map(function(nd){
+        return '<li>'+esc(nd.l)+'</li>';
+      }).join('')+'</ul>';
+    }
+    if(s.id==='multiamp'&&hasIn(gear,'multi')){
+      h+='<div class="gj-sub">ひとこと</div>'+(hasIn(gear,'loop')
+        ?'手持ちのアンプにリターンがあるので、ギタープロセッサーのアンプの音をそのまま鳴らせます。'
+        :'アンプにリターンが無い時は、アンプの入力へ入れ、ギタープロセッサーのアンプシミュレーターとキャビネットシミュレーターを切ります。');
+    }
+    return h+'</div>';
+  }
+  function wireGear(d){
+    d.querySelectorAll('[data-gear]').forEach(function(b){
+      b.addEventListener('click',function(){
+        var id=b.getAttribute('data-gear');
+        gear[id]=!gear[id]; if(!gear[id]) delete gear[id];
+        keepGear();
+        var y=el('sys').scrollTop;
+        paintSys();
+        el('sys').scrollTop=y;
+      });
+    });
+  }
+
+  /* ── 繋ぎ方の画面 ── */
+  var sys={tab:'basic',page:0,item:null};
+  var TABS=[{id:'basic',label:'基本'},{id:'want',label:'やりたいこと'},{id:'mine',label:'手持ちで確かめる'},{id:'types',label:'組み方の型'},{id:'players',label:'ギタリスト'},{id:'words',label:'用語集'}];
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function chainHtml(list){
+    return '<div class="chain-line">'+list.map(function(x,i){
+      var amp=x.charAt(0)==='*', t=amp?x.slice(1):x;
+      return (i?'<s>→</s>':'')+'<i'+(amp?' class="amp"':'')+'>'+esc(t)+'</i>';
+    }).join('')+'</div>';
+  }
+  function paintSysTabs(){
+    var box=el('sTabs'); box.innerHTML='';
+    TABS.forEach(function(t){
+      var b=document.createElement('button');
+      var cur=(sys.tab==='want'&&sys.from==='mine')?'mine':sys.tab;
+      b.type='button'; b.className='icon-btn sys-tab'+(cur===t.id?' on':'');
+      b.textContent=t.label;
+      b.setAttribute('aria-pressed',cur===t.id?'true':'false');
+      b.addEventListener('click',function(){ sys.tab=t.id; sys.item=null; sys.from=null; sys.page=0; paintSys(); });
+      box.appendChild(b);
+    });
+  }
+  function paintSys(){
+    paintSysTabs();
+    var d=el('sysDoc'), html='', nav=el('sNav');
+    nav.style.display='none';
+    if(sys.tab==='basic'){
+      html=BASICS[sys.page]||'';
+      nav.style.display='';
+      el('sMid').textContent=(sys.page+1)+' / '+BASICS.length;
+      el('sPrev').disabled=(sys.page<=0);
+      el('sNext').disabled=(sys.page>=BASICS.length-1);
+      el('sPos').textContent='基本 '+(sys.page+1)+' / '+BASICS.length;
+    }else if(sys.tab==='want'){
+      el('sPos').textContent='やりたいこと';
+      html=sys.item?scnHtml(scnOf(sys.item)):scnListHtml();
+    }else if(sys.tab==='mine'){
+      el('sPos').textContent='手持ちで確かめる';
+      html=gearHtml();
+    }else if(sys.tab==='types'){
+      el('sPos').textContent='組み方の型';
+      html=sys.item?typeHtml(typeOf(sys.item)):typeListHtml();
+    }else if(sys.tab==='players'){
+      el('sPos').textContent='ギタリスト';
+      html=sys.item?playerHtml(playerOf(sys.item)):playerListHtml();
+    }else{
+      el('sPos').textContent='用語集';
+      html=wordsHtml();
+    }
+    d.innerHTML=html;
+    if(sys.tab!=='words') markTerms(d);
+    wireSysDoc(d);
+    wireGear(d);
+    el('sys').scrollTop=0;
+    hideTerm();
+  }
+  function typeListHtml(){
+    return '<div class="guide-h">組み方の型</div>'+
+      '<span class="lead">よく使われる組み方を、型として並べました。</span>'+
+      '押すと、繋ぎ方・利点・気をつけること・要る物を示します。'+
+      '<div class="sys-list">'+RIG_TYPES.map(function(t){
+        return '<button type="button" class="sys-card" data-type="'+t.id+'">'+
+          '<span class="sc-n">'+esc(t.name)+'</span><span class="sc-s">'+esc(t.sum)+'</span></button>';
+      }).join('')+'</div>';
+  }
+  function typeHtml(t){
+    if(!t) return '';
+    var h='<button type="button" class="icon-btn tiny" data-back="1">← 型の一覧へ</button>'+
+      '<div class="guide-h" style="margin-top:12px">'+esc(t.name)+'</div>'+
+      '<span class="lead">'+esc(t.sum)+'</span>'+chainHtml(t.chain)+
+      '<span class="hn">利点</span>'+esc(t.good)+
+      '<span class="hn">気をつけること</span>'+esc(t.care)+
+      '<span class="hn">要る物</span>'+esc(t.need);
+    if(t.note) h+='<span class="hn">板の上での見方</span>'+esc(t.note);
+    if(t.who&&t.who.length){
+      h+='<span class="hn">この型の例</span><div class="sys-chips">'+t.who.map(function(id){
+        var p=playerOf(id); return p?'<button type="button" class="icon-btn tiny" data-player="'+id+'">'+esc(p.name)+'</button>':'';
+      }).join('')+'</div>';
+    }
+    if(t.preset){
+      h+='<span class="hn">板で確かめる</span>'+
+        '板の並びと入切を、この型に合わせて組み替えます。'+
+        (t.preset.out?'鳴らす側の種類も「'+esc(endOf('out',t.preset.out).name)+'」に変えます。':'')+
+        '元の並びには、画面右上の「並びを戻す」で戻せます。'+
+        '<div class="sys-act"><button type="button" class="icon-btn sys-apply" data-apply="'+t.id+'">この型で板に並べる</button></div>';
+    }
+    return h;
+  }
+  function playerListHtml(){
+    return '<div class="guide-h">ギタリストの組み方</div>'+
+      '<span class="lead">機材は時期によって変わります。</span>'+
+      'ここでは、取材記事で確かめられる時期の組み方を載せ、出どころを添えています。'+
+      '<div class="sys-list">'+PLAYERS.map(function(p){
+        return '<button type="button" class="sys-card" data-player="'+p.id+'">'+
+          '<span class="sc-n">'+esc(p.name)+'</span><span class="sc-s">'+esc(p.era)+'・'+
+          p.types.map(function(id){ var t=typeOf(id); return t?esc(t.name):''; }).join('、')+'</span></button>';
+      }).join('')+'</div>';
+  }
+  function playerHtml(p){
+    if(!p) return '';
+    return '<button type="button" class="icon-btn tiny" data-back="1">← ギタリストの一覧へ</button>'+
+      '<div class="guide-h" style="margin-top:12px">'+esc(p.name)+'</div>'+
+      '<span class="lead">'+esc(p.era)+'</span>'+
+      '<span class="hn">組み方</span>'+esc(p.body)+
+      '<span class="hn">この組み方の利点</span>'+esc(p.merit)+
+      '<span class="hn">型で見る</span><div class="sys-chips">'+p.types.map(function(id){
+        var t=typeOf(id); return t?'<button type="button" class="icon-btn tiny" data-type="'+id+'">'+esc(t.name)+'</button>':'';
+      }).join('')+'</div>'+
+      '<span class="hn">出どころ</span><div class="sys-src no-term">'+p.src.map(function(u){
+        return '<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a>';
+      }).join('')+'</div>';
+  }
+  var ROWS=[['ア','あいうえお'],['カ','かきくけこがぎぐげご'],['サ','さしすせそざじずぜぞ'],['タ','たちつてとだぢづでど'],
+            ['ナ','なにぬねの'],['ハ','はひふへほばびぶべぼぱぴぷぺぽ'],['マ','まみむめも'],['ヤ','やゆよ'],
+            ['ラ','らりるれろ'],['ワ','わをん']];
+  function rowOf(t){
+    if(/^[A-Za-z0-9]/.test(t.n)) return '英字・数字';
+    var c=t.r.charAt(0);
+    for(var i=0;i<ROWS.length;i++) if(ROWS[i][1].indexOf(c)>=0) return ROWS[i][0]+'行';
+    return 'その他';
+  }
+  var wordQuery='';
+  function wordsHtml(){
+    var list=TERMS.slice().sort(function(a,b){
+      var ea=/^[A-Za-z0-9]/.test(a.n), eb=/^[A-Za-z0-9]/.test(b.n);
+      if(ea!==eb) return ea?1:-1;
+      return ea?(a.n<b.n?-1:1):(a.r<b.r?-1:(a.r>b.r?1:0));
+    });
+    var q=wordQuery.trim();
+    if(q) list=list.filter(function(t){ return (t.n+t.r+t.m.join('')+t.d).indexOf(q)>=0; });
+    var h='<div class="guide-h">用語集</div>'+
+      '<input class="sys-find" id="sFind" type="search" placeholder="言葉で探す" value="'+esc(wordQuery)+'">';
+    var cur='';
+    if(!list.length) h+='<div class="gl-none">見つかりません。</div>';
+    list.forEach(function(t){
+      var r=rowOf(t);
+      if(r!==cur){ h+='<span class="hn">'+r+'</span>'; cur=r; }
+      h+='<div class="gl-item"><div class="gl-name">'+esc(t.n)+'</div><div class="gl-def">'+esc(t.d)+'</div></div>';
+    });
+    return h;
+  }
+  function wireSysDoc(d){
+    var q=d.querySelector('#sFind');
+    if(q){
+      q.addEventListener('input',function(){
+        wordQuery=q.value;
+        var pos=q.selectionStart;
+        paintSys();
+        var q2=el('sFind'); if(q2){ q2.focus(); try{ q2.setSelectionRange(pos,pos); }catch(e){} }
+      });
+    }
+    d.querySelectorAll('[data-type]').forEach(function(b){
+      b.addEventListener('click',function(){ sys.tab='types'; sys.item=b.getAttribute('data-type'); paintSys(); });
+    });
+    d.querySelectorAll('[data-player]').forEach(function(b){
+      b.addEventListener('click',function(){ sys.tab='players'; sys.item=b.getAttribute('data-player'); paintSys(); });
+    });
+    d.querySelectorAll('[data-scn]').forEach(function(b){
+      b.addEventListener('click',function(){ sys.from=b.getAttribute('data-from')||'want'; sys.tab='want'; sys.item=b.getAttribute('data-scn'); paintSys(); });
+    });
+    d.querySelectorAll('[data-back]').forEach(function(b){
+      b.addEventListener('click',function(){ if(sys.tab==='want'&&sys.from==='mine'){ sys.tab='mine'; } sys.from=null; sys.item=null; paintSys(); });
+    });
+    d.querySelectorAll('[data-apply]').forEach(function(b){
+      b.addEventListener('click',function(){ applyType(b.getAttribute('data-apply')); });
+    });
+  }
+  /* 型の並びを板へ写す。並びと入切、必要なら鳴らす側の種類も変える */
+  function applyType(id){
+    var t=typeOf(id); if(!t||!t.preset) return;
+    ensureAudio();
+    LINE=(t.preset.line||DEFAULT_LINE).slice(); fixLine(); keepLine();
+    PEDALS.forEach(function(p){
+      if(p.setOn) p.setOn(t.preset.on.indexOf(p.id)>=0);
+    });
+    if(t.preset.out){ ends.out=t.preset.out; keepEnds(); }
+    closeSys();
+    buildMap();
+    if(AC) rewire();
+  }
+  function openSys(){
+    closeAllPanels();
+    paintSys();
+    el('sys').classList.add('on');
+    el('map').classList.add('dim');
+    document.body.style.overflow='hidden';
+  }
+  function closeSys(){
+    el('sys').classList.remove('on');
+    el('map').classList.remove('dim');
+    document.body.style.overflow='';
+    hideTerm();
+  }
+  function closeAllPanels(){
+    if(current) closePedal();
+    if(el('guide').classList.contains('on')) closeGuide();
+    el('sys').classList.remove('on');
+    el('ends').classList.remove('on');
+    hideTerm();
+  }
+  el('sClose').addEventListener('click',closeSys);
+  el('sPrev').addEventListener('click',function(){ if(sys.page>0){ sys.page--; paintSys(); } });
+  el('sNext').addEventListener('click',function(){ if(sys.page<BASICS.length-1){ sys.page++; paintSys(); } });
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape') return;
+    if(pop&&pop.style.display==='block') return;
+    if(el('sys').classList.contains('on')){ closeSys(); e.preventDefault(); }
+    else if(el('ends').classList.contains('on')){ closeEnds(); e.preventDefault(); }
+  });
+  /* 解説の札の隣に置く、繋ぎ方の札 */
+  function sysSlot(){
+    var d=document.createElement('div');
+    d.className='guide-slot';
+    var b=document.createElement('button');
+    b.className='guide-btn'; b.type='button';
+    b.setAttribute('aria-label','機材の繋ぎ方を読む');
+    b.innerHTML='<svg viewBox="0 0 34 26" width="34" height="26">'+
+        '<rect x="2" y="9" width="8" height="8"/><rect x="24" y="9" width="8" height="8"/>'+
+        '<path d="M10 13h4c2 0 2-6 4-6s2 12 4 12 2-6 2-6"/>'+
+        '<line class="thin" x1="6" y1="3" x2="6" y2="9"/><line class="thin" x1="28" y1="17" x2="28" y2="23"/>'+
+      '</svg><span>繋ぎ方</span>';
+    b.addEventListener('click',openSys);
+    var c=document.createElement('div');
+    c.className='cap'; c.textContent='機材と端子';
+    d.appendChild(b); d.appendChild(c);
+    return d;
+  }
 
   buildMap();
   paintSwitches(); updateOnCount();
